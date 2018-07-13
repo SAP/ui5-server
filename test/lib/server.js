@@ -455,3 +455,24 @@ test("Get index of resources", (t) => {
 		})
 	]);
 });
+
+test("the built-in proxy", (t) => {
+	let port = 3351;
+	let request = supertest(`http://localhost:${port}`);
+	return normalizer.generateProjectTree({
+		cwd: "./test/fixtures/application.proxy"
+	}).then((tree) => {
+		return server.serve(tree, {
+			port: port
+		});
+	}).then((serveResult) => {
+		return request.get("/api/v1/whatever.json").set("set-cookie", "true").then((res) => {
+			if (res.error) {
+				t.fail(res.error.text);
+			}
+			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
+			t.deepEqual(res.text, "{\"all\": \"OK\"}\n", "API response correct");
+			t.pass("Server was closed properly.");
+		});
+	});
+});

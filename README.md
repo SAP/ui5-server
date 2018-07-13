@@ -35,6 +35,21 @@ If there is none, a new certificate is created and used.
 
 **Hint:** If Chrome unintentionally redirects a HTTP-URL to HTTPS, you need to delete the HSTS mapping in [chrome://net-internals/#hsts](chrome://net-internals/#hsts) by entering the domain name (e.g. localhost) and pressing "delete".
 
+## Proxy
+
+You can proxy existing (OData) backend services to get around Access-Control-Allow-Origin (CORS) errors.
+To do so, you can add a hash of proxied paths in your `ui5.yml`. Example:
+```
+# ui5.yml
+specVersion: '0.1'
+metadata:
+  name: my-awesome-app
+type: application
+resources:
+  proxyies:
+    /api/v1: "http://api.of.external.service/v1"
+```
+
 ## Contributing
 Please check our [Contribution Guidelines](https://github.com/SAP/ui5-tooling/blob/master/CONTRIBUTING.md).
 

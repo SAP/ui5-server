@@ -1,0 +1,6 @@
+{
+  "name": "application.proxy",
+  "version": "1.0.0",
+  "description": "Simple SAPUI5 based application - test for ui5-proxy configuration",
+  "main": "index.html"
+}
