@@ -6,3 +6,4 @@ metadata:
 resources:
   proxies:
     /api/v1: "http://localhost:3351"
+    /404: "http://localhost:3351/proxy/nothing" # non existent
