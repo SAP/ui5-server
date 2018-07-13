@@ -466,13 +466,31 @@ test("the built-in proxy", (t) => {
 			port: port
 		});
 	}).then((serveResult) => {
-		return request.get("/api/v1/whatever.json").set("set-cookie", "true").then((res) => {
+		return request.get("/api/v1/whatever.json").then((res) => {
 			if (res.error) {
 				t.fail(res.error.text);
 			}
 			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
 			t.deepEqual(res.text, "{\"all\": \"OK\"}\n", "API response correct");
-			t.pass("Server was closed properly.");
+			t.pass("Server answered properly.");
+		});
+	}).then((serveResult) => { // direct access; bypassing the proxy
+		return request.get("/whatever.json").then((res) => {
+			if (res.error) {
+				t.fail(res.error.text);
+			}
+			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
+			t.deepEqual(res.text, "{\"all\": \"OK\"}\n", "API response correct");
+			t.pass("Server answered properly.");
+		});
+	}).then((serveResult) => { // proxy invalid file
+		return request.get("/404/not.found.json").then((res) => {
+			if (res.error) {
+				t.fail(res.error.text);
+			}
+			t.is(res.headers["content-type"], "text/html", "Correct content type");
+			t.is(/<title>(.*)<\/title>/i.exec(res.text)[1], "Index of /proxy/nothing/not.found.json", "Found correct title");
+			t.pass("Server answered properly.");
 		});
 	});
 });
