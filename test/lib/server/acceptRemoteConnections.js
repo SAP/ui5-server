@@ -8,7 +8,7 @@ let request;
 let serve;
 
 // Start server before running tests
-test.before((t) => {
+test.before(() => {
 	return normalizer.generateProjectTree({
 		cwd: "./test/fixtures/application.a"
 	}).then((tree) => {
@@ -16,7 +16,7 @@ test.before((t) => {
 			port: 3334,
 			acceptRemoteConnections: true
 		}).then((serveResult) => {
-			request = supertest("http://127.0.0.1:3333");
+			request = supertest("http://127.0.0.1:3334");
 			serve = serveResult;
 		});
 	});
