@@ -34,12 +34,14 @@ test.after(() => {
 	});
 });
 
-test("Start server - Port is already taken and an error occurs", (t) => {
+test("Start server - Port is already taken and an error occurs", async (t) => {
+	t.plan(2);
 	const port = 3360;
 	const nodeServer = http.createServer((req, res) => {
 		res.end();
 	});
-	return new Promise((resolve) => {
+
+	const startServer = new Promise((resolve) => {
 		nodeServer.on("listening", () => {
 			resolve();
 		});
@@ -51,18 +53,19 @@ test("Start server - Port is already taken and an error occurs", (t) => {
 			return server.serve(tree, {
 				port: port
 			});
-		}).catch((error) => {
-			nodeServer.close();
-			t.is(
-				error,
-				"Port 3360 already in use.",
-				"Server could not start, port is already taken and no other port is used."
-			);
 		});
+	});
+
+	return t.throws(startServer).then((error) => {
+		t.deepEqual(
+			error,
+			"Port 3360 already in use.", "Server could not start, port is already taken and no other port is used."
+		);
 	});
 });
 
 test("Start server together with node server - Port is already taken and the next one is used", (t) => {
+	t.plan(2);
 	const port = 3370;
 	const nextFoundPort = 3371;
 	const nodeServer = http.createServer((req, res) => {
@@ -93,12 +96,11 @@ test("Start server together with node server - Port is already taken and the nex
 				});
 			});
 		});
-	}).catch((error) => {
-		t.fail(error);
 	});
 });
 
 test.serial("Start server - Port can not be determined and an error occurs", (t) => {
+	t.plan(2);
 	const portscannerFake = function(port, portMax, host, callback) {
 		return new Promise((resolve) => {
 			callback("testError", false);
@@ -107,28 +109,24 @@ test.serial("Start server - Port can not be determined and an error occurs", (t)
 	};
 	const portScannerStub = sinon.stub(portscanner, "findAPortNotInUse").callsFake(portscannerFake);
 
-	return new Promise((resolve) => {
-		return normalizer.generateProjectTree({
-			cwd: "./test/fixtures/application.a"
-		}).then((tree) => {
-			return server.serve(tree, {
-				port: 3990,
-				changePortIfInUse: true
-			});
-		}).catch((error) => {
-			t.is(
-				error,
-				"testError",
-				"Server could not start, port is already taken and no other port is used."
-			);
-			portScannerStub.restore();
-			resolve();
+	const startServer = normalizer.generateProjectTree({
+		cwd: "./test/fixtures/application.a"
+	}).then((tree) => {
+		return server.serve(tree, {
+			port: 3990,
+			changePortIfInUse: true
 		});
+	});
+
+	return t.throws(startServer).then((error) => {
+		t.deepEqual(error, "testError", "Server could not start, port is already taken and no other port is used.");
+		portScannerStub.restore();
 	});
 });
 
 
 test("Start server - Port is already taken and an error occurs because no other port can be determined", (t) => {
+	t.plan(2);
 	const portStart = 4000;
 	const portRange = 31;
 	const servers = [];
@@ -149,7 +147,7 @@ test("Start server - Port is already taken and an error occurs because no other 
 		}));
 	}
 
-	return Promise.all(serversStart).then(() => {
+	const startServer = Promise.all(serversStart).then(() => {
 		return normalizer.generateProjectTree({
 			cwd: "./test/fixtures/application.a"
 		}).then((tree) => {
@@ -157,20 +155,22 @@ test("Start server - Port is already taken and an error occurs because no other 
 				port: portStart,
 				changePortIfInUse: true
 			});
-		}).catch((error) => {
-			for (let i = 0; i < servers.length; i++) {
-				servers[i].close();
-			}
-			t.is(
-				error,
-				"Could not find available ports between 4000 and 4030.",
-				"Server could not start, port is already taken and no other port is used."
-			);
 		});
+	});
+	return t.throws(startServer).then((error) => {
+		for (let i = 0; i < servers.length; i++) {
+			servers[i].close();
+		}
+		t.deepEqual(
+			error,
+			"Could not find available ports between 4000 and 4030.",
+			"Server could not start, port is already taken and no other port is used."
+		);
 	});
 });
 
 test("Start server twice - Port is already taken and the next one is used", (t) => {
+	t.plan(3);
 	const port = 3380;
 	const nextFoundPort = 3381;
 	return normalizer.generateProjectTree({
@@ -201,7 +201,5 @@ test("Start server twice - Port is already taken and the next one is used", (t) 
 				});
 			});
 		});
-	}).catch((error) => {
-		t.fail(error);
 	});
 });
