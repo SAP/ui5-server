@@ -24,7 +24,7 @@ The development server has already a set of middlewares which supports the devel
 * List project files with URL (needed exclusively by the OpenUI5 testsuite): `/discovery/app_pages`, `/discovery/all_libs`, `/discovery/all_tests`
 
 ### Proxy requests
-A neo-app.json and neo-dest.json file can be added to the project and used to proxy requests to an SAP gateway server for example.
+A neo-app.json and neo-dest.json file can be added to the project and used to proxy requests to an SAP gateway server for example. When you create your UI5 serve you need to add the path to the neo files.
 The neo-app.json file can be reused from a WebIDE template, the neo-dest.json file is a json object that has the target name and the following attributes is available
 * target : Target url
 * Authentication : Authentication method, currently only basic is supported
