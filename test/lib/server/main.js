@@ -3,7 +3,8 @@ const supertest = require("supertest");
 const ui5Server = require("../../../");
 const server = ui5Server.server;
 const normalizer = require("@ui5/project").normalizer;
-
+const neoApp = require("./neo-app.json");
+const destinations = require("./neo-dest.json");
 let request;
 let serve;
 
@@ -13,7 +14,9 @@ test.before((t) => {
 		cwd: "./test/fixtures/application.a"
 	}).then((tree) => {
 		return server.serve(tree, {
-			port: 3333
+			port: 3333,
+			neoApp: neoApp,
+			destinations: destinations
 		}).then((serveResult) => {
 			request = supertest("http://localhost:3333");
 			serve = serveResult;
@@ -366,3 +369,25 @@ test("Get index of resources", (t) => {
 		})
 	]);
 });
+
+test("Get odata from Northwind destination",
+	(t) => {
+		return request.get("/z_northwind/V2/Northwind/Northwind.svc/$metadata").then((res) => {
+			if (res.error) {
+				t.fail(res.error.text);
+			}
+			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
+			t.regex(res.headers["content-type"], /xml/, "Correct content type");
+		});
+	});
+
+test("Get odata from SAPDevCenter destination",
+	(t) => {
+		return request.get("/sap/opu/odata/IWBEP/GWSAMPLE_BASIC/$metadata").then((res) => {
+			if (res.error) {
+				t.fail(res.error.text);
+			}
+			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
+			t.regex(res.headers["content-type"], /xml/, "Correct content type");
+		});
+	});
