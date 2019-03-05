@@ -1,12 +1,10 @@
 {
     "northwind": {
-      "target": "https://services.odata.org",
-      "useProxy": true
+      "target": "https://services.odata.org"
     },
 
     "sapdevcenter": {
       "target": "https://sapes5.sapdevcenter.com",
-      "useProxy": true,
       "Authentication": "Basic",
       "User": "P1940500295",
       "Password": "Fernando1.",
