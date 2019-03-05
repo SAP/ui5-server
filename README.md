@@ -23,6 +23,15 @@ The development server has already a set of middlewares which supports the devel
 * Version info is created automatically (`/resources/sap-ui-version.json`).
 * List project files with URL (needed exclusively by the OpenUI5 testsuite): `/discovery/app_pages`, `/discovery/all_libs`, `/discovery/all_tests`
 
+### Proxy requests
+A neo-app.json and neo-dest.json file can be added to the project and used to proxy requests to an SAP gateway server for example.
+The neo-app.json file can be reused from a WebIDE template, the neo-dest.json file is a json object that has the target name and the following attributes is available
+* target : Target url
+* Authentication : Authentication method, currently only basic is supported
+* User : Username
+* Password : Password for the proxy request
+* sapclient : SAP Client
+
 ## Certificates for HTTPS or HTTP/2
 The UI5 Server can automatically generate an SSL certificate for HTTPS and HTTP/2 configurations.
 
