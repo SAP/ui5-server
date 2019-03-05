@@ -5,9 +5,6 @@
 
     "sapdevcenter": {
       "target": "https://sapes5.sapdevcenter.com",
-      "Authentication": "Basic",
-      "User": "P1940500295",
-      "Password": "Fernando1.",
       "sapclient": "002"
     }
   }
