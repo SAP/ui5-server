@@ -291,7 +291,7 @@ test("Stop server", (t) => {
 	});
 });
 
-test("CSP", (t) => {
+test("CSP (defaults)", (t) => {
 	return Promise.all([
 		request.get("/index.html").then((res) => {
 			t.is(res.headers["content-security-policy"], undefined,
@@ -356,11 +356,11 @@ test("CSP", (t) => {
 });
 
 /*
- * Note: the '--csp-defaults' configuration sends two 'content-security-policy-report-only' headers.
+ * Note: the 'sendSapPolicies' configuration sends two 'content-security-policy-report-only' headers.
  * The response object of supertest joins the values of the two headers in a single string, which makes
  * assertions below a bit harder to understand (two checks with different regex on the same header)
  */
-test("CSP Defaults", (t) => {
+test("CSP (sap policies)", (t) => {
 	const port = 3400;
 	const request = supertest(`http://localhost:${port}`);
 	let localServeResult;
@@ -369,7 +369,7 @@ test("CSP Defaults", (t) => {
 	}).then((tree) => {
 		return server.serve(tree, {
 			port,
-			cspDefaults: true
+			sendSapPolicies: true
 		});
 	}).then((serveResult) => {
 		localServeResult = serveResult;
