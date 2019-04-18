@@ -369,7 +369,7 @@ test("CSP (sap policies)", (t) => {
 	}).then((tree) => {
 		return server.serve(tree, {
 			port,
-			sendSapPolicies: true
+			sendSAPTargetCSP: true
 		});
 	}).then((serveResult) => {
 		localServeResult = serveResult;
