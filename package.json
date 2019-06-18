@@ -112,7 +112,7 @@
 		"portscanner": "^2.1.1",
 		"prompt": "^1.0.0",
 		"replacestream": "^4.0.3",
-		"spdy": "^3.4.7",
+		"spdy": "^4.0.0",
 		"treeify": "^1.0.1"
 	},
 	"devDependencies": {
