@@ -229,3 +229,266 @@ test("addMiddleware: Add middleware with async wrapperCallback", async (t) => {
 	t.deepEqual(middlewareManager.middleware["serveIndex"].middleware, "🍅",
 		"Middleware module is given");
 });
+
+test("addStandardMiddleware: Adds standard middleware in correct order", async (t) => {
+	const middlewareManager = new MiddlewareManager({
+		tree: {},
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
+	await middlewareManager.addStandardMiddleware();
+
+	t.deepEqual(addMiddlewareStub.callCount, 10, "Expected count of middleware got added");
+	const addedMiddlewareNames = [];
+	for (let i = 0; i < addMiddlewareStub.callCount; i++) {
+		addedMiddlewareNames.push(addMiddlewareStub.getCall(i).args[0]);
+	}
+	t.deepEqual(addedMiddlewareNames, [
+		"csp",
+		"compression",
+		"cors",
+		"discovery",
+		"serveResources",
+		"serveThemes",
+		"versionInfo",
+		"connectUi5Proxy",
+		"nonReadRequests",
+		"serveIndex"
+	], "Correct order of standard middlewares");
+});
+
+test("addCustomMiddleware: No custom middleware defined", async (t) => {
+	const project = {
+		server: {
+			customMiddleware: []
+		}
+	};
+	const middlewareManager = new MiddlewareManager({
+		tree: project,
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
+	await middlewareManager.addCustomMiddleware();
+
+	t.deepEqual(addMiddlewareStub.callCount, 0, "addMiddleware was not called");
+});
+
+test("addCustomMiddleware: Custom middleware got added", async (t) => {
+	const project = {
+		metadata: {
+			name: "my project"
+		},
+		server: {
+			customMiddleware: [{
+				name: "my custom middleware A",
+				beforeMiddleware: "cors",
+				mountPath: "/pony"
+			}, {
+				name: "my custom middleware B",
+				afterMiddleware: "my custom middleware A"
+			}]
+		}
+	};
+	const middlewareManager = new MiddlewareManager({
+		tree: project,
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
+	await middlewareManager.addCustomMiddleware();
+
+	t.deepEqual(addMiddlewareStub.callCount, 2, "addMiddleware was called twice");
+	t.deepEqual(addMiddlewareStub.getCall(0).args[0], "my custom middleware A",
+		"addMiddleware was called with correct middleware name");
+	const middlewareOptionsA = addMiddlewareStub.getCall(0).args[1];
+	t.deepEqual(middlewareOptionsA.mountPath, "/pony",
+		"addMiddleware was called with correct mountPath option");
+	t.deepEqual(middlewareOptionsA.beforeMiddleware, "cors",
+		"addMiddleware was called with correct beforeMiddleware option");
+	t.deepEqual(middlewareOptionsA.afterMiddleware, undefined,
+		"addMiddleware was called with correct afterMiddleware option");
+
+	t.deepEqual(addMiddlewareStub.getCall(1).args[0], "my custom middleware B",
+		"addMiddleware was called with correct middleware name");
+	const middlewareOptionsB = addMiddlewareStub.getCall(1).args[1];
+	t.deepEqual(middlewareOptionsB.mountPath, undefined,
+		"addMiddleware was called with correct mountPath option");
+	t.deepEqual(middlewareOptionsB.beforeMiddleware, undefined,
+		"addMiddleware was called with correct beforeMiddleware option");
+	t.deepEqual(middlewareOptionsB.afterMiddleware, "my custom middleware A",
+		"addMiddleware was called with correct afterMiddleware option");
+});
+
+test("addCustomMiddleware: Custom middleware with duplicate name", async (t) => {
+	const project = {
+		metadata: {
+			name: "my project"
+		},
+		server: {
+			customMiddleware: [{
+				name: "my custom middleware A",
+				afterMiddleware: "my custom middleware A"
+			}]
+		}
+	};
+	const middlewareManager = new MiddlewareManager({
+		tree: project,
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	middlewareManager.middleware["my custom middleware A"] = true;
+	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
+	const err = await t.throwsAsync(() => {
+		return middlewareManager.addCustomMiddleware();
+	});
+
+	t.deepEqual(err.message, "Failed to add custom middleware my custom middleware A. " +
+		"A middleware with the same name is already known.",
+	"Rejected with correct error message");
+	t.deepEqual(addMiddlewareStub.callCount, 0, "Add middleware did not get called");
+});
+
+test("addCustomMiddleware: Missing name configuration", async (t) => {
+	const project = {
+		metadata: {
+			name: "my project"
+		},
+		server: {
+			customMiddleware: [{
+				afterMiddleware: "my custom middleware A"
+			}]
+		}
+	};
+	const middlewareManager = new MiddlewareManager({
+		tree: project,
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	const err = await t.throwsAsync(() => {
+		return middlewareManager.addCustomMiddleware();
+	});
+
+	t.deepEqual(err.message, "Missing name for custom middleware definition of project my project at index 0",
+		"Rejected with correct error message");
+});
+
+test("addCustomMiddleware: Both before- and afterMiddleware configuration", async (t) => {
+	const project = {
+		metadata: {
+			name: "🐧"
+		},
+		server: {
+			customMiddleware: [{
+				name: "🦆",
+				beforeMiddleware: "🐝",
+				afterMiddleware: "🐒"
+			}]
+		}
+	};
+	const middlewareManager = new MiddlewareManager({
+		tree: project,
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	const err = await t.throwsAsync(() => {
+		return middlewareManager.addCustomMiddleware();
+	});
+
+	t.deepEqual(err.message, `Custom middleware definition 🦆 of project 🐧 ` +
+		`defines both "beforeMiddleware" and "afterMiddleware" parameters. Only one must be defined.`,
+	"Rejected with correct error message");
+});
+
+test("addCustomMiddleware: Missing before- or afterMiddleware configuration", async (t) => {
+	const project = {
+		metadata: {
+			name: "🐧"
+		},
+		server: {
+			customMiddleware: [{
+				name: "🦆"
+			}]
+		}
+	};
+	const middlewareManager = new MiddlewareManager({
+		tree: project,
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	const err = await t.throwsAsync(() => {
+		return middlewareManager.addCustomMiddleware();
+	});
+
+	t.deepEqual(err.message, `Custom middleware definition 🦆 of project 🐧 ` +
+		`defines neither a "beforeMiddleware" nor an "afterMiddleware" parameter. One must be defined.`,
+	"Rejected with correct error message");
+});
+
+test("addCustomMiddleware: wrapperCallback", async (t) => {
+	const project = {
+		metadata: {
+			name: "my project"
+		},
+		server: {
+			customMiddleware: [{
+				name: "my custom middleware A",
+				beforeMiddleware: "cors",
+				configuration: {
+					"🦊": "🐰"
+				}
+			}]
+		}
+	};
+	const middlewareManager = new MiddlewareManager({
+		tree: project,
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
+	await middlewareManager.addCustomMiddleware();
+
+	t.deepEqual(addMiddlewareStub.callCount, 1, "addMiddleware was called once");
+
+	const wrapperCallback = addMiddlewareStub.getCall(0).args[1].wrapperCallback;
+	const middlewareModuleStub = sinon.stub().returns("ok");
+	const middlewareWrapper = wrapperCallback(middlewareModuleStub);
+	const res = middlewareWrapper({
+		resources: "resources"
+	});
+	t.deepEqual(res, "ok", "Wrapper callback returned expected value");
+	t.deepEqual(middlewareModuleStub.callCount, 1, "Middleware module got called once");
+	t.deepEqual(middlewareModuleStub.getCall(0).args[0], {
+		resources: "resources",
+		options: {
+			configuration: {
+				"🦊": "🐰"
+			}
+		}
+	}, "Middleware module got called with correct arguments");
+});
