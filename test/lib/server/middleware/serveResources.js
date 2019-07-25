@@ -2,7 +2,7 @@ const test = require("ava");
 const sinon = require("sinon");
 const resourceFactory = require("@ui5/fs").resourceFactory;
 const serveResourcesMiddleware = require("../../../../lib/middleware/serveResources");
-const writeResource = function(writer, path, size = 0, stringContent = "abc") {
+const writeResource = function(writer, path, size, stringContent) {
 	const resource = resourceFactory.createResource({path, buffer: Buffer.from(stringContent, "latin1")});
 	resource.getStatInfo = function() {
 		return {
