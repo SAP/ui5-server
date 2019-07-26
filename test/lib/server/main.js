@@ -73,8 +73,8 @@ test("Get resource from application.a (/i18n/i18n.properties) with correct chars
 			t.fail(res.error.text);
 		}
 		t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
-		t.deepEqual(res.headers["content-type"], "text/plain; charset=UTF-8", "Correct content type and charset");
-		t.deepEqual(Buffer.from(res.text, "latin1").toString(), "showHelloButtonText=Say Hello!", "Correct response");
+		t.deepEqual(res.headers["content-type"], "application/octet-stream", "Correct content type and charset");
+		t.deepEqual(res.body.toString("latin1"), "showHelloButtonText=Say Hello!", "Correct response");
 	});
 });
 
@@ -86,7 +86,7 @@ test("Get resource from application.a (/i18n/i18n_de.properties) with correct en
 				t.fail(res.error.text);
 			}
 			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
-			t.deepEqual(res.headers["content-type"], "text/plain; charset=UTF-8",
+			t.deepEqual(res.headers["content-type"], "application/octet-stream",
 				"Correct content type and charset");
 
 			t.deepEqual(res.body.toString("utf8"), "showHelloButtonText=Say \\u00e4!", "Correct response");

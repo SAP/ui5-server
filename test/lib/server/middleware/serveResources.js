@@ -72,7 +72,7 @@ test.serial("Check if properties file is served properly", (t) => {
 fame=stra\\u00dfe`);
 			t.is(setHeaderSpy.callCount, 2);
 			t.is(setStringSpy.callCount, 1);
-			t.is(setHeaderSpy.getCall(0).lastArg, "text/plain; charset=UTF-8");
+			t.is(setHeaderSpy.getCall(0).lastArg, "application/octet-stream");
 		});
 	});
 });
@@ -117,7 +117,7 @@ test.serial("Check if properties file is served properly with UTF-8", (t) => {
 fame=stra\\ufffde`);
 			t.is(setHeaderSpy.callCount, 2);
 			t.is(setStringSpy.callCount, 1);
-			t.is(setHeaderSpy.getCall(0).lastArg, "text/plain; charset=UTF-8");
+			t.is(setHeaderSpy.getCall(0).lastArg, "application/octet-stream");
 		});
 	});
 });
@@ -155,7 +155,7 @@ test.serial("Check if properties file is served properly without property settin
 fame=stra\\u00dfe`);
 			t.is(setHeaderSpy.callCount, 2);
 			t.is(setStringSpy.callCount, 1);
-			t.is(setHeaderSpy.getCall(0).lastArg, "text/plain; charset=UTF-8");
+			t.is(setHeaderSpy.getCall(0).lastArg, "application/octet-stream");
 		});
 	});
 });
