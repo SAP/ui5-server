@@ -45,7 +45,9 @@ test.serial("Check if properties file is served properly", (t) => {
 			},
 			tree: {
 				resources: {
-					propertiesFileEncoding: "ISO-8859-1"
+					configuration: {
+						propertiesFileEncoding: "ISO-8859-1"
+					}
 				}
 			}
 		});
@@ -88,7 +90,9 @@ test.serial("Check if properties file is served properly with UTF-8", (t) => {
 			},
 			tree: {
 				resources: {
-					propertiesFileEncoding: "UTF-8"
+					configuration: {
+						propertiesFileEncoding: "UTF-8"
+					}
 				}
 			}
 		});
