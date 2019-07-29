@@ -13,7 +13,7 @@ const writeResource = function(writer, path, size, stringContent) {
 		}
 	};
 	const resource = resourceFactory.createResource({path, buffer: Buffer.from(stringContent, "latin1"), statInfo});
-	// stub resource native functionality to make serveResources (middleware) run to the end
+	// stub resource functionality in order to be able to get the Resource's content. Otherwise it would be drained.
 	sinon.stub(resource, "getStream").returns({
 		pipe: function() {
 		}
@@ -27,6 +27,11 @@ const fakeResponse = {
 	getHeader: function(string) {},
 	setHeader: function(string, header) {}
 };
+
+test.afterEach.always((t) => {
+	sinon.restore();
+});
+
 
 test.serial("Check if properties file is served properly", (t) => {
 	t.plan(4);
@@ -48,7 +53,7 @@ test.serial("Check if properties file is served properly", (t) => {
 			}
 		});
 
-		const response = Object.assign({}, fakeResponse);
+		const response = fakeResponse;
 
 		const setHeaderSpy = sinon.spy(response, "setHeader");
 		const req = {
@@ -90,7 +95,7 @@ test.serial("Check if properties file is served properly with UTF-8", (t) => {
 			}
 		});
 
-		const response = Object.assign({}, fakeResponse);
+		const response = fakeResponse;
 
 		const setHeaderSpy = sinon.spy(response, "setHeader");
 		const req = {
@@ -125,7 +130,7 @@ test.serial("Check if properties file is served properly without property settin
 			}
 		});
 
-		const response = Object.assign({}, fakeResponse);
+		const response = fakeResponse;
 
 		const setHeaderSpy = sinon.spy(response, "setHeader");
 		const req = {
@@ -133,7 +138,7 @@ test.serial("Check if properties file is served properly without property settin
 			headers: {}
 		};
 		const next = function(err) {
-			throw new Error(`Next callback called with error: ${err.message}`);
+			throw new Error(`Next callback called with error: ${err.stack}`);
 		};
 		return middleware(req, response, next).then((o) => {
 			return resource.getString();
