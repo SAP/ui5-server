@@ -3,25 +3,21 @@ const sinon = require("sinon");
 const resourceFactory = require("@ui5/fs").resourceFactory;
 const serveResourcesMiddleware = require("../../../../lib/middleware/serveResources");
 const writeResource = function(writer, path, size, stringContent) {
-	const resource = resourceFactory.createResource({path, buffer: Buffer.from(stringContent, "latin1")});
-	resource.getStatInfo = function() {
-		return {
-			ino: 0,
-			ctime: new Date(),
-			mtime: new Date(),
-			size: size,
-			isDirectory: function() {
-				return false;
-			}
-		};
+	const statInfo = {
+		ino: 0,
+		ctime: new Date(),
+		mtime: new Date(),
+		size: size,
+		isDirectory: function() {
+			return false;
+		}
 	};
-	resource.getStream = function() {
-		return {
-			pipe: function(res) {
-				res.end(resource.getString());
-			}
-		};
-	};
+	const resource = resourceFactory.createResource({path, buffer: Buffer.from(stringContent, "latin1"), statInfo});
+	// stub resource native functionality to make serveResources (middleware) run to the end
+	sinon.stub(resource, "getStream").returns({
+		pipe: function() {
+		}
+	});
 	return writer.write(resource).then(() => {
 		return resource;
 	});
@@ -55,18 +51,15 @@ test.serial("Check if properties file is served properly", (t) => {
 		const response = Object.assign({}, fakeResponse);
 
 		const setHeaderSpy = sinon.spy(response, "setHeader");
-		return new Promise((resolve, reject) => {
-			const req = {
-				url: "/myFile3.properties",
-				headers: {}
-			};
-			response.end = function(content) {
-				content.then(resolve);
-			};
-			const next = function(err) {
-				reject(new Error(`Next callback called with error: ${err.message}`));
-			};
-			middleware(req, response, next);
+		const req = {
+			url: "/myFile3.properties",
+			headers: {}
+		};
+		const next = function(err) {
+			throw new Error(`Next callback called with error: ${err.message}`);
+		};
+		return middleware(req, response, next).then((o) => {
+			return resource.getString();
 		}).then((content) => {
 			t.is(content, `key=titel
 fame=stra\\u00dfe`);
@@ -100,18 +93,15 @@ test.serial("Check if properties file is served properly with UTF-8", (t) => {
 		const response = Object.assign({}, fakeResponse);
 
 		const setHeaderSpy = sinon.spy(response, "setHeader");
-		return new Promise((resolve, reject) => {
-			const req = {
-				url: "/myFile3.properties",
-				headers: {}
-			};
-			response.end = function(content) {
-				content.then(resolve);
-			};
-			const next = function(err) {
-				reject(new Error(`Next callback called with error: ${err.message}`));
-			};
-			middleware(req, response, next);
+		const req = {
+			url: "/myFile3.properties",
+			headers: {}
+		};
+		const next = function(err) {
+			throw new Error(`Next callback called with error: ${err.message}`);
+		};
+		return middleware(req, response, next).then((o) => {
+			return resource.getString();
 		}).then((content) => {
 			t.is(content, `key=titel
 fame=stra\\ufffde`);
@@ -138,18 +128,15 @@ test.serial("Check if properties file is served properly without property settin
 		const response = Object.assign({}, fakeResponse);
 
 		const setHeaderSpy = sinon.spy(response, "setHeader");
-		return new Promise((resolve, reject) => {
-			const req = {
-				url: "/myFile3.properties",
-				headers: {}
-			};
-			response.end = function(content) {
-				content.then(resolve);
-			};
-			const next = function(err) {
-				reject(new Error(`Next callback called with error: ${err.message}`));
-			};
-			middleware(req, response, next);
+		const req = {
+			url: "/myFile3.properties",
+			headers: {}
+		};
+		const next = function(err) {
+			throw new Error(`Next callback called with error: ${err.message}`);
+		};
+		return middleware(req, response, next).then((o) => {
+			return resource.getString();
 		}).then((content) => {
 			t.is(content, `key=titel
 fame=stra\\u00dfe`);
