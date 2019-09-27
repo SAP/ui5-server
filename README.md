@@ -46,7 +46,7 @@ metadata:
   name: my-awesome-app
 type: application
 resources:
-  proxyies:
+  proxies:
     /api/v1: "http://api.of.external.service/v1"
 ```
 
