@@ -38,7 +38,7 @@ If there is none, a new certificate is created and used.
 ## Proxy
 
 You can proxy existing (OData) backend services to get around Access-Control-Allow-Origin (CORS) errors.
-To do so, you can add a hash of proxied paths in your `ui5.yml`. Example:
+To do so, you can add a hash of proxied paths in your `ui5.yml`. Example (auth is optional):
 ```
 # ui5.yml
 specVersion: '0.1'
@@ -48,6 +48,7 @@ type: application
 resources:
   proxies:
     /api/v1: "http://api.of.external.service/v1"
+	auth: "myproxyusername:myproxypassword"
 ```
 
 ## Contributing
