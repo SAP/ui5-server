@@ -338,7 +338,7 @@ test("addCustomMiddleware: Custom middleware with duplicate name", async (t) => 
 		server: {
 			customMiddleware: [{
 				name: "my custom middleware A",
-				afterMiddleware: "my custom middleware A"
+				afterMiddleware: "serveIndex"
 			}]
 		}
 	};
@@ -351,15 +351,13 @@ test("addCustomMiddleware: Custom middleware with duplicate name", async (t) => 
 		}
 	});
 	middlewareManager.middleware["my custom middleware A"] = true;
+	middlewareManager.middleware["my custom middleware A--1"] = true;
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
-	const err = await t.throwsAsync(() => {
-		return middlewareManager.addCustomMiddleware();
-	});
+	await middlewareManager.addCustomMiddleware();
 
-	t.deepEqual(err.message, "Failed to add custom middleware my custom middleware A. " +
-		"A middleware with the same name is already known.",
-	"Rejected with correct error message");
-	t.deepEqual(addMiddlewareStub.callCount, 0, "Add middleware did not get called");
+	t.deepEqual(addMiddlewareStub.callCount, 1, "addMiddleware was called once");
+	t.deepEqual(addMiddlewareStub.getCall(0).args[0], "my custom middleware A--2",
+		"addMiddleware was called with correct middleware name");
 });
 
 test("addCustomMiddleware: Missing name configuration", async (t) => {
