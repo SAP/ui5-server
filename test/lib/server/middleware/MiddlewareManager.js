@@ -86,6 +86,32 @@ test("addMiddleware: Adding already added middleware produces unique middleware 
 	t.truthy(middlewareManager.middleware["serveIndex--2"], "Middleware got added to internal map with unique name");
 	t.deepEqual(middlewareManager.middleware["serveIndex--2"].mountPath, "/goose",
 		"Middleware got added correct mount path");
+
+	t.deepEqual(middlewareManager.middlewareExecutionOrder, [
+		"serveIndex",
+		"serveIndex--1",
+		"serveIndex--2"
+	], "Middlewares got added to middlewareExecutionOrder in correct order and with correct unique names");
+});
+
+test("addMiddleware: Adding middleware already added to middlewareExecutionOrder", async (t) => {
+	const middlewareManager = new MiddlewareManager({
+		tree: {},
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+
+	middlewareManager.middlewareExecutionOrder.push("serveIndex");
+
+	const err = await t.throwsAsync(() => {
+		return middlewareManager.addMiddleware("serveIndex");
+	});
+	t.deepEqual(err.message,
+		"Middleware serveIndex already added to execution order. This should not happen.",
+		"Rejected with correct error message");
 });
 
 test("addMiddleware: Add middleware", async (t) => {
