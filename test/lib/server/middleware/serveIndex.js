@@ -39,9 +39,9 @@ test.serial("Check if index for files is created", (t) => {
 				writeHead: function(status, contentType) {
 				},
 				end: function(content) {
-					t.regex(content, RegExp("<li><a href=\"/myFile1.meh\" class=\"icon icon icon-meh icon-default\" title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span><span class=\"size\">1.00 KB</span><span class=\"date\">1970-1-1 1:00:00 AM</span></a></li>"));
-					t.regex(content, RegExp("<li><a href=\"/myFile2.js\" class=\"icon icon icon-js icon-application-javascript\" title=\"myFile2.js\"><span class=\"name\">myFile2.js</span><span class=\"size\">1.00 MB</span><span class=\"date\">1970-1-1 1:00:00 AM</span></a></li>"));
-					t.regex(content, RegExp("<li><a href=\"/myFile3.properties\" class=\"icon icon icon-properties icon-default\" title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span><span class=\"size\">1.00 GB</span><span class=\"date\">1970-1-1 1:00:00 AM</span></a></li></ul>"));
+					t.regex(content, RegExp("<li><a href=\"/myFile1.meh\" class=\"icon icon icon-meh icon-default\" title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span><span class=\"size\">1.00 KB</span>"));
+					t.regex(content, RegExp("<li><a href=\"/myFile2.js\" class=\"icon icon icon-js icon-application-javascript\" title=\"myFile2.js\"><span class=\"name\">myFile2.js</span><span class=\"size\">1.00 MB</span>"));
+					t.regex(content, RegExp("<li><a href=\"/myFile3.properties\" class=\"icon icon icon-properties icon-default\" title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span><span class=\"size\">1.00 GB</span>"));
 					resolve();
 				},
 			};
