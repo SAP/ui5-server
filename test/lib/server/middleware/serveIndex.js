@@ -28,7 +28,9 @@ test.serial("Check if index for files is created", (t) => {
 		const middleware = serveIndexMiddleware({
 			resources: {
 				all: readerWriter
-			}
+			},
+			showDetails: true,
+			showHidden: false
 		});
 
 		return new Promise((resolve, reject) => {
