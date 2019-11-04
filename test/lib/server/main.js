@@ -507,19 +507,19 @@ test("Get index of resources", (t) => {
 			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
 			t.is(res.headers["content-type"], "text/html; charset=utf-8", "Correct content type");
 			t.is(/<title>(.*)<\/title>/i.exec(res.text)[1], "Index of /", "Found correct title");
-			t.deepEqual(res.text.match(/<li/g).length, 7, "Found correct amount of <li> elements");
+			t.deepEqual(res.text.match(/<li/g).length, 8, "Found correct amount of <li> elements");
 		}),
 		request.get("/resources").then((res) => {
 			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
 			t.is(res.headers["content-type"], "text/html; charset=utf-8", "Correct content type");
 			t.is(/<title>(.*)<\/title>/i.exec(res.text)[1], "Index of /resources", "Found correct title");
-			t.deepEqual(res.text.match(/<li/g).length, 1, "Found correct amount of <li> elements");
+			t.deepEqual(res.text.match(/<li/g).length, 2, "Found correct amount of <li> elements");
 		}),
 		request.get("/resources/").then((res) => {
 			t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
 			t.is(res.headers["content-type"], "text/html; charset=utf-8", "Correct content type");
 			t.is(/<title>(.*)<\/title>/i.exec(res.text)[1], "Index of /resources/", "Found correct title");
-			t.deepEqual(res.text.match(/<li/g).length, 1, "Found correct amount of <li> elements");
+			t.deepEqual(res.text.match(/<li/g).length, 2, "Found correct amount of <li> elements");
 		}),
 		request.get("/not-existing-folder").then((res) => {
 			t.deepEqual(res.statusCode, 404, "Correct HTTP status code");
