@@ -22,24 +22,34 @@ const createResources = function() {
 
 		// Default result
 		"library.css": {
-			getBuffer: sinon.stub().resolves("/* library.css */")
+			getBuffer: sinon.stub().resolves("/* library.css */"),
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library.css")
 		},
 		"library-RTL.css": {
-			getBuffer: sinon.stub().resolves("/* library-RTL.css */")
+			getBuffer: sinon.stub().resolves("/* library-RTL.css */"),
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-RTL.css")
 		},
 		"library-parameters.json": {
-			getBuffer: sinon.stub().resolves(`{ "parameters":"json" }`)
+			getBuffer: sinon.stub().resolves("/* library-parameters.json */"),
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-parameters.json")
 		},
 
 		// CSS Variables result
-		"library-skeleton.css": {
-			getBuffer: sinon.stub().resolves(`/* library-skeleton.css */`)
-		},
-		"library-skeleton-RTL.css": {
-			getBuffer: sinon.stub().resolves(`/* library-skeleton-RTL.css */`)
+		"css-variables.source.less": {
+			getBuffer: sinon.stub().resolves(`/* css-variables.source.less */`),
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/css-variables.source.less")
 		},
 		"css-variables.css": {
-			getBuffer: sinon.stub().resolves(`/* css-variables.css */`)
+			getBuffer: sinon.stub().resolves(`/* css-variables.css */`),
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/css-variables.css")
+		},
+		"library-skeleton.css": {
+			getBuffer: sinon.stub().resolves(`/* library-skeleton.css */`),
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-skeleton.css")
+		},
+		"library-skeleton-RTL.css": {
+			getBuffer: sinon.stub().resolves(`/* library-skeleton-RTL.css */`),
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-skeleton-RTL.css")
 		}
 	};
 };
@@ -50,7 +60,11 @@ const stubThemeBuild = function(resources) {
 	build.withArgs([resources["library.source.less"]]).resolves([
 		resources["library.css"],
 		resources["library-RTL.css"],
-		resources["library-parameters.json"]
+		resources["library-parameters.json"],
+		resources["css-variables.source.less"],
+		resources["css-variables.css"],
+		resources["library-skeleton.css"],
+		resources["library-skeleton-RTL.css"]
 	]);
 };
 
@@ -68,6 +82,41 @@ const createMiddleware = function() {
 	};
 };
 
+const verifyThemeRequest = function(t, filename) {
+	const resources = createResources();
+
+	stubThemeBuild(resources);
+
+	const {middleware, byPath} = createMiddleware();
+	byPath.withArgs("/resources/sap/ui/test/themes/base/library.source.less")
+		.resolves(resources["library.source.less"]);
+
+	const req = {
+		url: "/resources/sap/ui/test/themes/base/" + filename,
+		headers: {}
+	};
+
+	const res = {
+		setHeader: sinon.stub(),
+		getHeader: sinon.stub(),
+		end: function(responseText) {
+			t.is(responseText, `/* ${filename} */`);
+			if (filename.endsWith(".css")) {
+				t.deepEqual(res.setHeader.getCall(0).args, ["Content-Type", "text/css; charset=UTF-8"]);
+			} else if (filename.endsWith(".less")) {
+				t.deepEqual(res.setHeader.getCall(0).args, ["Content-Type", "text/less; charset=UTF-8"]);
+			} else if (filename.endsWith(".json")) {
+				t.deepEqual(res.setHeader.getCall(0).args, ["Content-Type", "application/json; charset=UTF-8"]);
+			} else {
+				t.fail("Invalid file extension provided to 'verifyThemeRequest'");
+			}
+			t.end();
+		}
+	};
+
+	middleware(req, res, failOnNext(t));
+};
+
 test.afterEach.always((t) => {
 	sinon.restore();
 	mock.stopAll();
@@ -75,84 +124,31 @@ test.afterEach.always((t) => {
 });
 
 test.serial.cb("Serving library.css", (t) => {
-	const resources = createResources();
-
-	stubThemeBuild(resources);
-
-	const {middleware, byPath} = createMiddleware();
-	byPath.withArgs("/resources/sap/ui/test/themes/base/library.source.less")
-		.resolves(resources["library.source.less"]);
-
-	const req = {
-		url: "/resources/sap/ui/test/themes/base/library.css",
-		headers: {}
-	};
-
-	const res = {
-		setHeader: sinon.stub(),
-		getHeader: sinon.stub(),
-		end: function(responseText) {
-			t.is(responseText, "/* library.css */");
-			t.true(res.setHeader.calledWith("Content-Type", "text/css"));
-			t.end();
-		}
-	};
-
-	middleware(req, res, failOnNext(t));
+	verifyThemeRequest(t, "library.css");
 });
 
 test.serial.cb("Serving library-RTL.css", (t) => {
-	const resources = createResources();
-
-	stubThemeBuild(resources);
-
-	const {middleware, byPath} = createMiddleware();
-	byPath.withArgs("/resources/sap/ui/test/themes/base/library.source.less")
-		.resolves(resources["library.source.less"]);
-
-	const req = {
-		url: "/resources/sap/ui/test/themes/base/library-RTL.css",
-		headers: {}
-	};
-
-	const res = {
-		setHeader: sinon.stub(),
-		getHeader: sinon.stub(),
-		end: function(responseText) {
-			t.is(responseText, "/* library-RTL.css */");
-			t.true(res.setHeader.calledWith("Content-Type", "text/css"));
-			t.end();
-		}
-	};
-
-	middleware(req, res, failOnNext(t));
+	verifyThemeRequest(t, "library-RTL.css");
 });
 
 test.serial.cb("Serving library-parameters.json", (t) => {
-	const resources = createResources();
+	verifyThemeRequest(t, "library-parameters.json");
+});
 
-	stubThemeBuild(resources);
+test.serial.cb("Serving css-variables.source.less", (t) => {
+	verifyThemeRequest(t, "css-variables.source.less");
+});
 
-	const {middleware, byPath} = createMiddleware();
-	byPath.withArgs("/resources/sap/ui/test/themes/base/library.source.less")
-		.resolves(resources["library.source.less"]);
+test.serial.cb("Serving css-variables.css", (t) => {
+	verifyThemeRequest(t, "css-variables.css");
+});
 
-	const req = {
-		url: "/resources/sap/ui/test/themes/base/library-parameters.json",
-		headers: {}
-	};
+test.serial.cb("Serving library-skeleton.css", (t) => {
+	verifyThemeRequest(t, "library-skeleton.css");
+});
 
-	const res = {
-		setHeader: sinon.stub(),
-		getHeader: sinon.stub(),
-		end: function(responseText) {
-			t.is(responseText, `{ "parameters":"json" }`);
-			t.true(res.setHeader.calledWith("Content-Type", "application/json"));
-			t.end();
-		}
-	};
-
-	middleware(req, res, failOnNext(t));
+test.serial.cb("Serving library-skeleton-RTL.css", (t) => {
+	verifyThemeRequest(t, "library-skeleton-RTL.css");
 });
 
 test.serial.cb("Do not handle non-theme requests", (t) => {
@@ -235,4 +231,30 @@ test.serial.cb("Only send 304 response in case the client has cached the respons
 	};
 
 	middleware(req, res, failOnNext(t));
+});
+
+// This could only happen when the theme build processor does not return an expected resource
+test.serial.cb("Error handling: Request resource that ThemeBuild doesn't return", (t) => {
+	const resources = createResources();
+
+	// Adopt path of library.css so that it can't be found from the theme build results
+	resources["library.css"].getPath.returns("/foo.js");
+
+	stubThemeBuild(resources);
+
+	const {middleware, byPath} = createMiddleware();
+	byPath.withArgs("/resources/sap/ui/test/themes/base/library.source.less")
+		.resolves(resources["library.source.less"]);
+
+	const req = {
+		url: "/resources/sap/ui/test/themes/base/library.css",
+		headers: {}
+	};
+
+	const res = {};
+
+	middleware(req, res, function(err) {
+		t.is(err.message, `Theme Build did not return request file "/resources/sap/ui/test/themes/base/library.css"`);
+		t.end();
+	});
 });
