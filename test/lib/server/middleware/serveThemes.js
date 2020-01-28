@@ -258,3 +258,22 @@ test.serial.cb("Error handling: Request resource that ThemeBuild doesn't return"
 		t.end();
 	});
 });
+
+test.serial.cb("Error handling: Unexpected exception within middleware should call next with error", (t) => {
+	const error = new Error("Unexpected Error");
+
+	const {middleware, byPath} = createMiddleware();
+	byPath.rejects(error);
+
+	const req = {
+		url: "/resources/sap/ui/test/themes/base/library.css",
+		headers: {}
+	};
+
+	const res = {};
+
+	middleware(req, res, function(err) {
+		t.is(err, error);
+		t.end();
+	});
+});
