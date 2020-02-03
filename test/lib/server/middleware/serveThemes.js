@@ -254,7 +254,7 @@ test.serial.cb("Error handling: Request resource that ThemeBuild doesn't return"
 	const res = {};
 
 	middleware(req, res, function(err) {
-		t.is(err.message, `Theme Build did not return request file "/resources/sap/ui/test/themes/base/library.css"`);
+		t.is(err.message, `Theme Build did not return requested file "/resources/sap/ui/test/themes/base/library.css"`);
 		t.end();
 	});
 });
