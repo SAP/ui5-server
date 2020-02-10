@@ -224,7 +224,10 @@ test.serial.cb("Check if version replacement is done", (t) => {
 	});
 });
 
-test.serial.cb("Check if utf8 characters are correctly processed in version replacement", (t) => {
+// Skip test in Node v8 as unicode handling of streams seems to be broken
+test.serial[
+	process.version.startsWith("v8.") ? "skip" : "cb"
+]("Check if utf8 characters are correctly processed in version replacement", (t) => {
 	const utf8string = "Κυ";
 	const expected = utf8string;
 
