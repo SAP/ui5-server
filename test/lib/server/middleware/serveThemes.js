@@ -57,7 +57,12 @@ const createResources = function() {
 const stubThemeBuild = function(resources) {
 	const build = sinon.stub(ThemeBuilder.prototype, "build");
 	build.rejects(new Error("File not found!"));
-	build.withArgs([resources["library.source.less"]]).resolves([
+	build.withArgs([resources["library.source.less"]], {}).resolves([
+		resources["library.css"],
+		resources["library-RTL.css"],
+		resources["library-parameters.json"]
+	]);
+	build.withArgs([resources["library.source.less"]], {cssVariables: true}).resolves([
 		resources["library.css"],
 		resources["library-RTL.css"],
 		resources["library-parameters.json"],
@@ -66,6 +71,7 @@ const stubThemeBuild = function(resources) {
 		resources["library-skeleton.css"],
 		resources["library-skeleton-RTL.css"]
 	]);
+	return build;
 };
 
 const createMiddleware = function() {
@@ -149,6 +155,64 @@ test.serial.cb("Serving library-skeleton.css", (t) => {
 
 test.serial.cb("Serving library-skeleton-RTL.css", (t) => {
 	verifyThemeRequest(t, "library-skeleton-RTL.css");
+});
+
+test.serial.cb("Clear cache to rebuild themes when CSS Variables file is requested", (t) => {
+	const resources = createResources();
+
+	const build = stubThemeBuild(resources);
+	const clearCache = sinon.stub(ThemeBuilder.prototype, "clearCache");
+
+	const {middleware, byPath} = createMiddleware();
+	byPath.withArgs("/resources/sap/ui/test/themes/base/library.source.less")
+		.resolves(resources["library.source.less"]);
+
+	function firstRequest() {
+		const req = {
+			url: "/resources/sap/ui/test/themes/base/library.css",
+			headers: {}
+		};
+
+		const res = {
+			setHeader: sinon.stub(),
+			getHeader: sinon.stub(),
+			end: function() {
+				t.deepEqual(build.getCall(0).args, [[resources["library.source.less"]], {}],
+					"Build should be called without options");
+
+				t.false(clearCache.called, "Clear cache should not be called");
+
+				// Trigger next request
+				secondRequest();
+			}
+		};
+
+		middleware(req, res, failOnNext(t));
+	}
+
+	function secondRequest() {
+		const req = {
+			url: "/resources/sap/ui/test/themes/base/css-variables.css",
+			headers: {}
+		};
+
+		const res = {
+			setHeader: sinon.stub(),
+			getHeader: sinon.stub(),
+			end: function() {
+				t.deepEqual(build.getCall(1).args, [[resources["library.source.less"]], {cssVariables: true}],
+					"Build should be called with cssVariables option");
+
+				t.true(clearCache.called, "Clear cache should be called");
+
+				t.end();
+			}
+		};
+
+		middleware(req, res, failOnNext(t));
+	}
+
+	firstRequest();
 });
 
 test.serial.cb("Do not handle non-theme requests", (t) => {
