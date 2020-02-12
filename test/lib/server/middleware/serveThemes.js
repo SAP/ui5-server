@@ -215,6 +215,64 @@ test.serial.cb("Clear cache to rebuild themes when CSS Variables file is request
 	firstRequest();
 });
 
+test.serial.cb("Clear cache only once after enabling CSS Variables", (t) => {
+	const resources = createResources();
+
+	const build = stubThemeBuild(resources);
+	const clearCache = sinon.stub(ThemeBuilder.prototype, "clearCache");
+
+	const {middleware, byPath} = createMiddleware();
+	byPath.withArgs("/resources/sap/ui/test/themes/base/library.source.less")
+		.resolves(resources["library.source.less"]);
+
+	function firstRequest() {
+		const req = {
+			url: "/resources/sap/ui/test/themes/base/css-variables.css",
+			headers: {}
+		};
+
+		const res = {
+			setHeader: sinon.stub(),
+			getHeader: sinon.stub(),
+			end: function() {
+				t.deepEqual(build.getCall(0).args, [[resources["library.source.less"]], {cssVariables: true}],
+					"Build should be called with cssVariables option");
+
+				t.true(clearCache.calledOnce, "Clear cache should be called once");
+
+				// Trigger next request
+				secondRequest();
+			}
+		};
+
+		middleware(req, res, failOnNext(t));
+	}
+
+	function secondRequest() {
+		const req = {
+			url: "/resources/sap/ui/test/themes/base/library-skeleton.css",
+			headers: {}
+		};
+
+		const res = {
+			setHeader: sinon.stub(),
+			getHeader: sinon.stub(),
+			end: function() {
+				t.deepEqual(build.getCall(1).args, [[resources["library.source.less"]], {cssVariables: true}],
+					"Build should be called with cssVariables option");
+
+				t.true(clearCache.calledOnce, "Clear cache should still only be called once");
+
+				t.end();
+			}
+		};
+
+		middleware(req, res, failOnNext(t));
+	}
+
+	firstRequest();
+});
+
 test.serial.cb("Do not handle non-theme requests", (t) => {
 	const {middleware} = createMiddleware();
 
