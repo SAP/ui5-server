@@ -120,7 +120,7 @@
 	},
 	"devDependencies": {
 		"@ui5/project": "^1.2.0",
-		"ava": "^2.4.0",
+		"ava": "^3.5.0",
 		"coveralls": "^3.0.11",
 		"cross-env": "^7.0.2",
 		"docdash": "^1.2.0",
