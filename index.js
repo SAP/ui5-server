@@ -5,6 +5,7 @@
 const modules = {
 	server: "./lib/server",
 	sslUtil: "./lib/sslUtil",
+	proxyConfiguration: "./lib/proxyConfiguration",
 	middlewareRepository: "./lib/middleware/middlewareRepository"
 };
 
