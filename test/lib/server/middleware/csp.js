@@ -83,22 +83,8 @@ test("Default Settings", (t) => {
 });
 
 test("Default Settings CSP violation", async (t) => {
-	t.plan(3 + 15); // fourth request should end in middleware and not call next!
+	t.plan(8);
 	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {}, "my-report.json");
-	const res = {
-		getHeader: function() {
-			return undefined;
-		},
-		setHeader: function(header, value) {
-			t.fail(`should not be called with header ${header} and value ${value}`);
-		}
-	};
-	const next = function() {
-		t.pass("Next was called.");
-	};
-	const noNext = function() {
-		t.fail("Next should not be called");
-	};
 
 	const cspReport = {
 		"document-uri": "https://otherserver:8080/index.html",
@@ -114,13 +100,6 @@ test("Default Settings CSP violation", async (t) => {
 		"script-sample": ""
 	};
 
-	middleware({method: "GET", url: "/test.html", headers: {}}, res, next);
-	middleware({
-		method: "GET",
-		url: "/test.html?sap-ui-xx-csp-policy=sap-target-level-2",
-		headers: {}
-	}, res, next);
-	middleware({method: "POST", url: "somePath", headers: {}}, res, next);
 	middleware({
 		method: "POST",
 		url: "/dummy.csplog",
@@ -128,12 +107,7 @@ test("Default Settings CSP violation", async (t) => {
 		body: {
 			"csp-report": cspReport
 		}
-	}, res, noNext);
-
-	// check that unsupported methods result in a call to next()
-	["CONNECT", "DELETE", "HEAD", "OPTIONS", "PATCH", "PUT", "TRACE"].forEach(
-		(method) => middleware({method, url: "/dummy.csplog", headers: {}}, res, next)
-	);
+	}, {}, undefined);
 
 	await t.context.logVerboseStubCalled;
 
