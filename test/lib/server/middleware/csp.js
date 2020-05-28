@@ -1,5 +1,6 @@
 const test = require("ava");
 let cspMiddleware = require("../../../../lib/middleware/csp");
+const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
 const mock = require("mock-require");
 
 const sinon = require("sinon");
@@ -18,18 +19,12 @@ test.before((t) => {
 
 	t.context.logVerboseStub = sinon.stub();
 
-	let callCount = 0;
 	mock("@ui5/logger", {
 		getLogger: () => {
 			return {
 				verbose: (message) => {
 					t.context.logVerboseStub(message);
-					// 2 calls:
-					// * initially creating the file
-					// * adding a csp-violation
-					if (++callCount === 2) {
-						wasResolved();
-					}
+					wasResolved();
 				}
 			};
 		}
@@ -83,8 +78,11 @@ test("Default Settings", (t) => {
 });
 
 test("Default Settings CSP violation", async (t) => {
-	t.plan(8);
-	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {}, "my-report.json");
+	t.plan(5);
+	const oMiddlewareUtil = new MiddlewareUtil();
+	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
+		cspReportPath: "my-report.json"
+	}, oMiddlewareUtil);
 
 	const cspReport = {
 		"document-uri": "https://otherserver:8080/index.html",
@@ -109,17 +107,15 @@ test("Default Settings CSP violation", async (t) => {
 		}
 	}, {}, undefined);
 
+	await oMiddlewareUtil.executeExitFunctions();
 	await t.context.logVerboseStubCalled;
 
 
-	t.is(t.context.logVerboseStub.callCount, 2, "should be called 2 times");
+	t.is(t.context.logVerboseStub.callCount, 1, "should be called 1 times");
 	t.deepEqual(t.context.logVerboseStub.getCall(0).args, ["Wrote csp reports initially to my-report.json"], "first log verbose");
-	t.deepEqual(t.context.logVerboseStub.getCall(1).args, ["Wrote csp reports, length: 1"], "second log verbose");
-	t.is(t.context.writeFileStub.callCount, 2, "should be called 2 times");
+	t.is(t.context.writeFileStub.callCount, 1, "should be called 2 times");
 	t.is(t.context.writeFileStub.getCall(0).args[0], "my-report.json", "filename");
-	t.is(t.context.writeFileStub.getCall(0).args[1], "{\"csp-reports\":[]}", "initial content");
-	t.is(t.context.writeFileStub.getCall(1).args[0], "my-report.json", "filename");
-	t.is(t.context.writeFileStub.getCall(1).args[1], "{\"csp-reports\":[" + JSON.stringify(cspReport) + "]}", "content with reports");
+	t.is(t.context.writeFileStub.getCall(0).args[1], "{\"csp-reports\":[" + JSON.stringify(cspReport) + "]}", "content with reports");
 });
 
 test("Custom Settings", (t) => {
