@@ -150,6 +150,27 @@ test("Default Settings two CSP violations", async (t) => {
 	}, res, undefined);
 });
 
+test("Default Settings no CSP violations", async (t) => {
+	t.plan(1);
+	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
+		serveCSPReports: true
+	});
+
+	const res = {
+		writeHead: function(status, contentType) {
+		},
+		end: function(content) {
+			t.is(content, JSON.stringify({"csp-reports": []}), "content matches");
+		},
+	};
+
+	middleware({
+		method: "GET",
+		url: "/.ui5/csp/csp-reports.json",
+		headers: {"content-type": "application/json"}
+	}, res, undefined);
+});
+
 test("Custom Settings", (t) => {
 	const middleware = cspMiddleware("csp", {
 		definedPolicies: {
