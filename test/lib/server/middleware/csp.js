@@ -1,44 +1,6 @@
 const test = require("ava");
-let cspMiddleware = require("../../../../lib/middleware/csp");
-const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
-const mock = require("mock-require");
+const cspMiddleware = require("../../../../lib/middleware/csp");
 
-const sinon = require("sinon");
-const fs = require("graceful-fs");
-
-
-test.before((t) => {
-	// csp-reports file is written async and afterwards a verbose log is done.
-	// wait until the file was written initially and until the first entry was made
-	// using t.context.logVerboseStubCalled promise being called
-	let wasResolved = () => {};
-	t.context.logVerboseStubCalled = new Promise((resolve) => {
-		wasResolved = resolve;
-	});
-
-
-	t.context.logVerboseStub = sinon.stub();
-
-	mock("@ui5/logger", {
-		getLogger: () => {
-			return {
-				verbose: (message) => {
-					t.context.logVerboseStub(message);
-					wasResolved();
-				}
-			};
-		}
-	});
-	mock.reRequire("@ui5/logger");
-	t.context.writeFileStub = sinon.stub(fs, "writeFile").callsArg(2);
-
-	// Re-require to ensure that mocked modules are used
-	cspMiddleware = mock.reRequire("../../../../lib/middleware/csp");
-});
-
-test.after.always(() => {
-	sinon.restore();
-});
 
 test("Default Settings", (t) => {
 	t.plan(3 + 7); // fourth request should end in middleware and not call next!
@@ -67,22 +29,21 @@ test("Default Settings", (t) => {
 	middleware({method: "POST", url: "somePath", headers: {}}, res, next);
 	middleware({
 		method: "POST",
-		url: "/dummy.csplog",
+		url: "/.ui5/csp/report.csplog",
 		headers: {"content-type": "application/csp-report"}
 	}, res, noNext);
 
 	// check that unsupported methods result in a call to next()
 	["CONNECT", "DELETE", "HEAD", "OPTIONS", "PATCH", "PUT", "TRACE"].forEach(
-		(method) => middleware({method, url: "/dummy.csplog", headers: {}}, res, next)
+		(method) => middleware({method, url: "/.ui5/csp/report.csplog", headers: {}}, res, next)
 	);
 });
 
 test("Default Settings CSP violation", async (t) => {
-	t.plan(5);
-	const oMiddlewareUtil = new MiddlewareUtil();
+	t.plan(1);
 	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
-		cspReportPath: "my-report.json"
-	}, oMiddlewareUtil);
+		serveCSPReports: true
+	});
 
 	const cspReport = {
 		"document-uri": "https://otherserver:8080/index.html",
@@ -98,24 +59,95 @@ test("Default Settings CSP violation", async (t) => {
 		"script-sample": ""
 	};
 
+	const res = {
+		writeHead: function(status, contentType) {
+		},
+		end: function(content) {
+			t.is(content, JSON.stringify({"csp-reports": [cspReport]}), "content matches");
+		},
+	};
+
 	middleware({
 		method: "POST",
-		url: "/dummy.csplog",
+		url: "/.ui5/csp/report.csplog",
 		headers: {"content-type": "application/csp-report"},
 		body: {
 			"csp-report": cspReport
 		}
 	}, {}, undefined);
 
-	await oMiddlewareUtil.executeExitFunctions();
-	await t.context.logVerboseStubCalled;
+	middleware({
+		method: "GET",
+		url: "/.ui5/csp/csp-reports.json",
+		headers: {"content-type": "application/json"}
+	}, res, undefined);
+});
 
+test("Default Settings two CSP violations", async (t) => {
+	t.plan(1);
+	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
+		serveCSPReports: true
+	});
 
-	t.is(t.context.logVerboseStub.callCount, 1, "should be called 1 times");
-	t.deepEqual(t.context.logVerboseStub.getCall(0).args, ["Wrote csp reports initially to my-report.json"], "first log verbose");
-	t.is(t.context.writeFileStub.callCount, 1, "should be called 2 times");
-	t.is(t.context.writeFileStub.getCall(0).args[0], "my-report.json", "filename");
-	t.is(t.context.writeFileStub.getCall(0).args[1], "{\"csp-reports\":[" + JSON.stringify(cspReport) + "]}", "content with reports");
+	const cspReport1 = {
+		"document-uri": "https://otherserver:8080/index.html",
+		"referrer": "",
+		"violated-directive": "script-src-elem",
+		"effective-directive": "script-src-elem",
+		"original-policy": "default-src 'self' myserver:443; report-uri /report-csp-violation",
+		"disposition": "report",
+		"blocked-uri": "inline",
+		"line-number": 17,
+		"source-file": "https://otherserver:8080/index.html",
+		"status-code": 0,
+		"script-sample": ""
+	};
+
+	const cspReport2 = {
+		"document-uri": "https://otherserver:8080/imprint.html",
+		"referrer": "",
+		"violated-directive": "script-src-elem",
+		"effective-directive": "script-src-elem",
+		"original-policy": "default-src 'self' myserver:443; report-uri /report-csp-violation",
+		"disposition": "report",
+		"blocked-uri": "inline",
+		"line-number": 15,
+		"source-file": "https://otherserver:8080/imprint.html",
+		"status-code": 0,
+		"script-sample": ""
+	};
+
+	const res = {
+		writeHead: function(status, contentType) {
+		},
+		end: function(content) {
+			t.is(content, JSON.stringify({"csp-reports": [cspReport1, cspReport2]}), "content matches");
+		},
+	};
+
+	middleware({
+		method: "POST",
+		url: "/.ui5/csp/report.csplog",
+		headers: {"content-type": "application/csp-report"},
+		body: {
+			"csp-report": cspReport1
+		}
+	}, {}, undefined);
+
+	middleware({
+		method: "POST",
+		url: "/.ui5/csp/report.csplog",
+		headers: {"content-type": "application/csp-report"},
+		body: {
+			"csp-report": cspReport2
+		}
+	}, {}, undefined);
+
+	middleware({
+		method: "GET",
+		url: "/.ui5/csp/csp-reports.json",
+		headers: {"content-type": "application/json"}
+	}, res, undefined);
 });
 
 test("Custom Settings", (t) => {
