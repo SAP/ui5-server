@@ -63,7 +63,7 @@ test("Default Settings CSP violation", async (t) => {
 		writeHead: function(status, contentType) {
 		},
 		end: function(content) {
-			t.is(content, JSON.stringify({"csp-reports": [cspReport]}), "content matches");
+			t.is(content, JSON.stringify({"csp-reports": [cspReport]}, null, "\t"), "content matches");
 		},
 	};
 
@@ -82,6 +82,93 @@ test("Default Settings CSP violation", async (t) => {
 		headers: {"content-type": "application/json"}
 	}, res, undefined);
 });
+
+test("Default Settings CSP violation without body parser", async (t) => {
+	t.plan(1);
+	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
+		serveCSPReports: true
+	});
+
+	const cspReport = {
+		"document-uri": "https://otherserver:8080/index.html",
+		"referrer": "",
+		"violated-directive": "script-src-elem",
+		"effective-directive": "script-src-elem",
+		"original-policy": "default-src 'self' myserver:443; report-uri /report-csp-violation",
+		"disposition": "report",
+		"blocked-uri": "inline",
+		"line-number": 17,
+		"source-file": "https://otherserver:8080/index.html",
+		"status-code": 0,
+		"script-sample": ""
+	};
+
+	const res = {
+		writeHead: function(status, contentType) {
+		},
+		end: function(content) {
+			t.is(content, JSON.stringify({"csp-reports": [cspReport]}, null, "\t"), "content matches");
+		},
+	};
+
+	middleware({
+		method: "POST",
+		url: "/.ui5/csp/report.csplog",
+		headers: {"content-type": "application/csp-report"},
+		body: JSON.stringify({
+			"csp-report": cspReport
+		})
+	}, {}, undefined);
+
+	middleware({
+		method: "GET",
+		url: "/.ui5/csp/csp-reports.json",
+		headers: {"content-type": "application/json"}
+	}, res, undefined);
+});
+
+test("Default Settings CSP violation without body parser, failure", async (t) => {
+	t.plan(1);
+	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
+		serveCSPReports: true
+	});
+
+	const cspReport = {
+		"document-uri": "https://otherserver:8080/index.html",
+		"referrer": "",
+		"violated-directive": "script-src-elem",
+		"effective-directive": "script-src-elem",
+		"original-policy": "default-src 'self' myserver:443; report-uri /report-csp-violation",
+		"disposition": "report",
+		"blocked-uri": "inline",
+		"line-number": 17,
+		"source-file": "https://otherserver:8080/index.html",
+		"status-code": 0,
+		"script-sample": ""
+	};
+
+	const res = {
+		writeHead: function(status, contentType) {
+		},
+		end: function(content) {
+			t.is(content, JSON.stringify({"csp-reports": [cspReport]}, null, "\t"), "content matches");
+		},
+	};
+
+	middleware({
+		method: "POST",
+		url: "/.ui5/csp/report.csplog",
+		headers: {"content-type": "application/csp-report"},
+		body: "test"
+	}, {}, undefined);
+
+	middleware({
+		method: "GET",
+		url: "/.ui5/csp/csp-reports.json",
+		headers: {"content-type": "application/json"}
+	}, res, undefined);
+});
+
 
 test("Default Settings two CSP violations", async (t) => {
 	t.plan(1);
@@ -121,7 +208,7 @@ test("Default Settings two CSP violations", async (t) => {
 		writeHead: function(status, contentType) {
 		},
 		end: function(content) {
-			t.is(content, JSON.stringify({"csp-reports": [cspReport1, cspReport2]}), "content matches");
+			t.is(content, JSON.stringify({"csp-reports": [cspReport1, cspReport2]}, null, "\t"), "content matches");
 		},
 	};
 
@@ -160,7 +247,7 @@ test("Default Settings no CSP violations", async (t) => {
 		writeHead: function(status, contentType) {
 		},
 		end: function(content) {
-			t.is(content, JSON.stringify({"csp-reports": []}), "content matches");
+			t.is(content, JSON.stringify({"csp-reports": []}, null, "\t"), "content matches");
 		},
 	};
 
