@@ -282,12 +282,13 @@ test("addStandardMiddleware: Adds standard middleware in correct order", async (
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addStandardMiddleware();
 
-	t.deepEqual(addMiddlewareStub.callCount, 11, "Expected count of middleware got added");
+	t.deepEqual(addMiddlewareStub.callCount, 12, "Expected count of middleware got added");
 	const addedMiddlewareNames = [];
 	for (let i = 0; i < addMiddlewareStub.callCount; i++) {
 		addedMiddlewareNames.push(addMiddlewareStub.getCall(i).args[0]);
 	}
 	t.deepEqual(addedMiddlewareNames, [
+		"bodyParser",
 		"csp",
 		"compression",
 		"cors",

@@ -3,11 +3,14 @@ const cspMiddleware = require("../../../../lib/middleware/csp");
 
 
 test("Default Settings", (t) => {
-	t.plan(3 + 7); // fourth request should end in middleware and not call next!
+	t.plan(3 + 8); // fourth request should end in middleware and not call next!
 	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {});
 	const res = {
 		getHeader: function() {
 			return undefined;
+		},
+		end: function() {
+			t.true(true, "end is called");
 		},
 		setHeader: function(header, value) {
 			t.fail(`should not be called with header ${header} and value ${value}`);
@@ -74,85 +77,28 @@ test("Default Settings CSP violation", async (t) => {
 		body: {
 			"csp-report": cspReport
 		}
-	}, {}, undefined);
-
-	middleware({
-		method: "GET",
-		url: "/.ui5/csp/csp-reports.json",
-		headers: {"content-type": "application/json"}
-	}, res, undefined);
+	}, {
+		end: () => {
+			middleware({
+				method: "GET",
+				url: "/.ui5/csp/csp-reports.json",
+				headers: {"content-type": "application/json"}
+			}, res, undefined);
+		}
+	}, undefined);
 });
 
-test("Default Settings CSP violation without body parser", async (t) => {
-	t.plan(1);
+
+test("Default Settings CSP violation without body parser, invalid body content", async (t) => {
+	t.plan(2);
 	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
 		serveCSPReports: true
 	});
 
-	const cspReport = {
-		"document-uri": "https://otherserver:8080/index.html",
-		"referrer": "",
-		"violated-directive": "script-src-elem",
-		"effective-directive": "script-src-elem",
-		"original-policy": "default-src 'self' myserver:443; report-uri /report-csp-violation",
-		"disposition": "report",
-		"blocked-uri": "inline",
-		"line-number": 17,
-		"source-file": "https://otherserver:8080/index.html",
-		"status-code": 0,
-		"script-sample": ""
-	};
 
-	const res = {
-		writeHead: function(status, contentType) {
-		},
-		end: function(content) {
-			t.is(content, JSON.stringify({"csp-reports": [cspReport]}, null, "\t"), "content matches");
-		},
-	};
-
-	middleware({
-		method: "POST",
-		url: "/.ui5/csp/report.csplog",
-		headers: {"content-type": "application/csp-report"},
-		body: JSON.stringify({
-			"csp-report": cspReport
-		})
-	}, {}, undefined);
-
-	middleware({
-		method: "GET",
-		url: "/.ui5/csp/csp-reports.json",
-		headers: {"content-type": "application/json"}
-	}, res, undefined);
-});
-
-test("Default Settings CSP violation without body parser, failure", async (t) => {
-	t.plan(1);
-	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
-		serveCSPReports: true
-	});
-
-	const cspReport = {
-		"document-uri": "https://otherserver:8080/index.html",
-		"referrer": "",
-		"violated-directive": "script-src-elem",
-		"effective-directive": "script-src-elem",
-		"original-policy": "default-src 'self' myserver:443; report-uri /report-csp-violation",
-		"disposition": "report",
-		"blocked-uri": "inline",
-		"line-number": 17,
-		"source-file": "https://otherserver:8080/index.html",
-		"status-code": 0,
-		"script-sample": ""
-	};
-
-	const res = {
-		writeHead: function(status, contentType) {
-		},
-		end: function(content) {
-			t.is(content, JSON.stringify({"csp-reports": [cspReport]}, null, "\t"), "content matches");
-		},
+	const nextFunction = function(error) {
+		t.true(error instanceof Error);
+		t.is(error.message, "No body content available: /.ui5/csp/report.csplog", "error message matches");
 	};
 
 	middleware({
@@ -160,18 +106,15 @@ test("Default Settings CSP violation without body parser, failure", async (t) =>
 		url: "/.ui5/csp/report.csplog",
 		headers: {"content-type": "application/csp-report"},
 		body: "test"
-	}, {}, undefined);
-
-	middleware({
-		method: "GET",
-		url: "/.ui5/csp/csp-reports.json",
-		headers: {"content-type": "application/json"}
-	}, res, undefined);
+	}, {
+		end: function() {
+			t.fail("res.end should not be called");
+		}}, nextFunction);
 });
 
 
 test("Default Settings two CSP violations", async (t) => {
-	t.plan(1);
+	t.plan(3);
 	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {
 		serveCSPReports: true
 	});
@@ -219,7 +162,11 @@ test("Default Settings two CSP violations", async (t) => {
 		body: {
 			"csp-report": cspReport1
 		}
-	}, {}, undefined);
+	}, {
+		end: function() {
+			t.true(true, "end is called");
+		}
+	}, undefined);
 
 	middleware({
 		method: "POST",
@@ -228,7 +175,11 @@ test("Default Settings two CSP violations", async (t) => {
 		body: {
 			"csp-report": cspReport2
 		}
-	}, {}, undefined);
+	}, {
+		end: function() {
+			t.true(true, "end is called");
+		}
+	}, undefined);
 
 	middleware({
 		method: "GET",
