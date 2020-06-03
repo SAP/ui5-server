@@ -2,8 +2,8 @@ const test = require("ava");
 const cspMiddleware = require("../../../../lib/middleware/csp");
 
 
-test("Default Settings", (t) => {
-	t.plan(3 + 8); // fourth request should end in middleware and not call next!
+test("OPTIONS request", (t) => {
+	t.plan(2);
 	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {});
 	const res = {
 		getHeader: function() {
@@ -13,33 +13,72 @@ test("Default Settings", (t) => {
 			t.true(true, "end is called");
 		},
 		setHeader: function(header, value) {
-			t.fail(`should not be called with header ${header} and value ${value}`);
+			if (header.startsWith("Content-Security-Policy")) {
+				t.fail(`should not be called with header ${header} and value ${value}`);
+			}
+			if (header === "Allow") {
+				t.is(value, "GET, HEAD, POST", "GET, HEAD, POST are set");
+			}
 		}
 	};
 	const next = function() {
-		t.pass("Next was called.");
+		t.fail("should not be called.");
 	};
+
+	middleware({method: "OPTIONS", url: "/.ui5/csp/report.csplog", headers: {}}, res, next);
+});
+
+test("Default Settings", async (t) => {
+	const middleware = cspMiddleware("sap-ui-xx-csp-policy", {});
+	const res = {
+		getHeader: function() {
+			return undefined;
+		},
+		end: function() {
+			t.fail(`end should not be called`);
+		},
+		setHeader: function(header, value) {
+			t.fail(`should not be called with header ${header} and value ${value}`);
+		}
+	};
+
 	const noNext = function() {
 		t.fail("Next should not be called");
 	};
-
-	middleware({method: "GET", url: "/test.html", headers: {}}, res, next);
-	middleware({
-		method: "GET",
-		url: "/test.html?sap-ui-xx-csp-policy=sap-target-level-2",
-		headers: {}
-	}, res, next);
-	middleware({method: "POST", url: "somePath", headers: {}}, res, next);
-	middleware({
-		method: "POST",
-		url: "/.ui5/csp/report.csplog",
-		headers: {"content-type": "application/csp-report"}
-	}, res, noNext);
+	await new Promise((resolve) => {
+		middleware({method: "GET", url: "/test.html", headers: {}}, res, resolve);
+	});
+	await new Promise((resolve) => {
+		middleware({
+			method: "GET",
+			url: "/test.html?sap-ui-xx-csp-policy=sap-target-level-2",
+			headers: {}
+		}, res, resolve);
+	});
+	await new Promise((resolve) => {
+		middleware({method: "POST", url: "somePath", headers: {}}, res, resolve);
+	});
+	await new Promise((resolve) => {
+		middleware({
+			method: "POST",
+			url: "/.ui5/csp/report.csplog",
+			headers: {"content-type": "application/csp-report"}
+		}, {
+			end: resolve
+		}, noNext);
+	});
 
 	// check that unsupported methods result in a call to next()
-	["CONNECT", "DELETE", "HEAD", "OPTIONS", "PATCH", "PUT", "TRACE"].forEach(
-		(method) => middleware({method, url: "/.ui5/csp/report.csplog", headers: {}}, res, next)
+	const otherMethods = ["CONNECT", "DELETE", "HEAD", "PATCH", "PUT", "TRACE"].map(
+		(method) => {
+			return new Promise((resolve) => {
+				middleware({method, url: "/.ui5/csp/report.csplog", headers: {}}, res, resolve);
+			});
+		}
 	);
+
+	await Promise.all(otherMethods);
+	t.true(true, "no failure");
 });
 
 test("Default Settings CSP violation", async (t) => {
@@ -70,6 +109,10 @@ test("Default Settings CSP violation", async (t) => {
 		},
 	};
 
+	const noNext = function() {
+		t.fail("Next should not be called");
+	};
+
 	middleware({
 		method: "POST",
 		url: "/.ui5/csp/report.csplog",
@@ -83,9 +126,9 @@ test("Default Settings CSP violation", async (t) => {
 				method: "GET",
 				url: "/.ui5/csp/csp-reports.json",
 				headers: {"content-type": "application/json"}
-			}, res, undefined);
+			}, res, noNext);
 		}
-	}, undefined);
+	}, noNext);
 });
 
 
@@ -155,6 +198,10 @@ test("Default Settings two CSP violations", async (t) => {
 		},
 	};
 
+	const noNext = function() {
+		t.fail("Next should not be called");
+	};
+
 	middleware({
 		method: "POST",
 		url: "/.ui5/csp/report.csplog",
@@ -166,7 +213,7 @@ test("Default Settings two CSP violations", async (t) => {
 		end: function() {
 			t.true(true, "end is called");
 		}
-	}, undefined);
+	}, noNext);
 
 	middleware({
 		method: "POST",
@@ -179,13 +226,13 @@ test("Default Settings two CSP violations", async (t) => {
 		end: function() {
 			t.true(true, "end is called");
 		}
-	}, undefined);
+	}, noNext);
 
 	middleware({
 		method: "GET",
 		url: "/.ui5/csp/csp-reports.json",
 		headers: {"content-type": "application/json"}
-	}, res, undefined);
+	}, res, noNext);
 });
 
 test("Default Settings no CSP violations", async (t) => {
@@ -202,11 +249,15 @@ test("Default Settings no CSP violations", async (t) => {
 		},
 	};
 
+	const noNext = function() {
+		t.fail("Next should not be called");
+	};
+
 	middleware({
 		method: "GET",
 		url: "/.ui5/csp/csp-reports.json",
 		headers: {"content-type": "application/json"}
-	}, res, undefined);
+	}, res, noNext);
 });
 
 test("Custom Settings", (t) => {
@@ -282,7 +333,8 @@ test("No Dynamic Policy Definition", (t) => {
 	middleware({method: "GET", url: "/test.html?csp=default-src%20ftp:;", headers: {}}, res, next);
 });
 
-test("Header Manipulation", (t) => {
+test("Header Manipulation, add headers to existing header", (t) => {
+	t.plan(3);
 	const middleware = cspMiddleware("csp", {
 		definedPolicies: {
 			policy1: "default-src 'self';",
@@ -301,6 +353,7 @@ test("Header Manipulation", (t) => {
 		setHeader: function(header, value) {
 			if ( header.toLowerCase() === "content-security-policy" ) {
 				cspHeader = value;
+				t.true(true, "header is manipulated");
 			} else {
 				t.fail(`should not be called with header ${header} and value ${value}`);
 			}
