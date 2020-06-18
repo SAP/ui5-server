@@ -411,3 +411,51 @@ test("Header Manipulation, add headers to existing header", async (t) => {
 		});
 	});
 });
+
+test("TestRunner Settings", async (t) => {
+	t.plan(3);
+	const middleware = cspMiddleware("csp", {
+		definedPolicies: {
+			policy1: "default-src 'self';",
+			policy2: "default-src http:;"
+		},
+		defaultPolicy: "policy1",
+		defaultPolicyIsReportOnly: false,
+		defaultPolicy2: "policy2",
+		defaultPolicy2IsReportOnly: false,
+		ignoredPathFragments: ["my/pony.html"]
+	});
+	const res = {
+		getHeader: function() {
+			return undefined;
+		},
+		end: function() {
+			t.fail(`end should not be called`);
+		},
+		setHeader: function(header, value) {
+			t.fail(`should not be called with header ${header} and value ${value}`);
+		}
+	};
+
+	// matches the pathName
+	await new Promise((resolve) => {
+		middleware({method: "GET", url: "/my/pony.html", headers: {}}, res, resolve);
+	});
+	// matches the referer
+	await new Promise((resolve) => {
+		middleware({method: "GET", url: "/my/app.html", headers: {
+			referer: "http://localhost:8080/my/pony.html"
+		}}, res, resolve);
+	});
+
+	res.setHeader = function(header, value) {
+		t.true(true, `should be called`);
+	};
+
+	// normal call which does not match the ignoredPathFragments
+	await new Promise((resolve) => {
+		middleware({method: "GET", url: "/my/nothin.html", headers: {}}, res, resolve);
+	});
+
+	t.true(true, "no failure");
+});

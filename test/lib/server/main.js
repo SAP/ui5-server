@@ -619,6 +619,47 @@ test("CSP serveCSPReports", (t) => {
 	});
 });
 
+test("CSP with ignored path fragment", (t) => {
+	const port = 3450;
+	const request = supertest(`http://localhost:${port}`);
+	let localServeResult;
+	return normalizer.generateProjectTree({
+		cwd: "./test/fixtures/csp"
+	}).then((tree) => {
+		return server.serve(tree, {
+			port,
+			serveCSPReports: true,
+			sendSAPTargetCSP: true,
+			simpleIndex: false
+		});
+	}).then((serveResult) => {
+		localServeResult = serveResult;
+		const testrunnerRequest1 = request.get("/test-resources/sap/ui/qunit/testrunner.html")
+			.expect(200);
+		const testrunnerRequest2 = request.get("/test-resources/sap/ui/qunit/testsuite.html")
+			.set("Referer", `http://localhost:${port}/test-resources/sap/ui/qunit/testrunner.html`)
+			.expect(200);
+		const testrunnerRequest3 = request.get("/test-resources/sap/ui/qunit/app.html")
+			.expect(200);
+		return Promise.all([testrunnerRequest1, testrunnerRequest2, testrunnerRequest3]);
+	}).then((responses) => {
+		t.falsy(responses[0].headers["content-security-policy-report-only"], "url match");
+		t.falsy(responses[1].headers["content-security-policy-report-only"], "referer match");
+		t.truthy(responses[2].headers["content-security-policy-report-only"], "no match");
+	}).then(() => {
+		return new Promise((resolve, reject) => {
+			localServeResult.close((error) => {
+				if (error) {
+					reject(error);
+				} else {
+					t.pass("Server closing");
+					resolve();
+				}
+			});
+		});
+	});
+});
+
 test("Get index of resources", (t) => {
 	return Promise.all([
 		request.get("").then((res) => {
