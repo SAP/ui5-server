@@ -32,7 +32,12 @@ const writeResource = function(writer, path, size, stringContent, stringEncoding
 const fakeResponse = {
 	writeHead: function(status, contentType) {},
 	getHeader: function(string) {},
-	setHeader: function(string, header) {}
+	setHeader: function(string, header) {},
+	on: function() {},
+	write: function() {},
+	end: function() {},
+	once: function() {},
+	emit: function() {}
 };
 
 test.afterEach.always((t) => {
@@ -293,7 +298,7 @@ test.serial.cb("Check if version replacement is done", (t) => {
 	res.end = function() {
 		t.is(Buffer.concat(buffers).toString(), expected);
 		t.end();
-	},
+	};
 
 	middleware(req, res, function(err) {
 		if (err) {
