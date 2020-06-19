@@ -620,15 +620,15 @@ test("CSP serveCSPReports", (t) => {
 });
 
 test("CSP with ignore paths", (t) => {
-	const port = 3450;
+	const port = 3500;
 	const request = supertest(`http://localhost:${port}`);
 	let localServeResult;
 	return normalizer.generateProjectTree({
-		cwd: "./test/fixtures/csp"
+		cwd: "./test/fixtures/application.a"
 	}).then((tree) => {
 		return server.serve(tree, {
 			port,
-			serveCSPReports: true,
+			serveCSPReportÅs: true,
 			sendSAPTargetCSP: true,
 			simpleIndex: false
 		});
@@ -636,10 +636,10 @@ test("CSP with ignore paths", (t) => {
 		localServeResult = serveResult;
 		const testrunnerRequest1 = request.get("/test-resources/sap/ui/qunit/testrunner.html")
 			.expect(200);
-		const testrunnerRequest2 = request.get("/test-resources/sap/ui/qunit/testsuite.html")
+		const testrunnerRequest2 = request.get("/index.html")
 			.set("Referer", `http://localhost:${port}/test-resources/sap/ui/qunit/testrunner.html`)
 			.expect(200);
-		const testrunnerRequest3 = request.get("/test-resources/sap/ui/qunit/app.html")
+		const testrunnerRequest3 = request.get("/index.html")
 			.expect(200);
 		return Promise.all([testrunnerRequest1, testrunnerRequest2, testrunnerRequest3]);
 	}).then((responses) => {

@@ -1,9 +1,0 @@
-{
-  "name": "csp",
-  "version": "1.0.0",
-  "description": "Simple csp SAPUI5 based application",
-  "main": "index.html",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
-}
