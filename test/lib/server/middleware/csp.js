@@ -412,7 +412,7 @@ test("Header Manipulation, add headers to existing header", async (t) => {
 	});
 });
 
-test("TestRunner Settings", async (t) => {
+test("TestRunner Settings ignorePaths", async (t) => {
 	t.plan(3);
 	const middleware = cspMiddleware("csp", {
 		definedPolicies: {
@@ -423,7 +423,7 @@ test("TestRunner Settings", async (t) => {
 		defaultPolicyIsReportOnly: false,
 		defaultPolicy2: "policy2",
 		defaultPolicy2IsReportOnly: false,
-		ignoredPathFragments: ["my/pony.html"]
+		ignorePaths: ["my/pony.html"]
 	});
 	const res = {
 		getHeader: function() {
@@ -452,7 +452,7 @@ test("TestRunner Settings", async (t) => {
 		t.true(true, `should be called`);
 	};
 
-	// normal call which does not match the ignoredPathFragments
+	// normal call which does not match the ignorePaths
 	await new Promise((resolve) => {
 		middleware({method: "GET", url: "/my/nothin.html", headers: {}}, res, resolve);
 	});

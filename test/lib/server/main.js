@@ -619,7 +619,7 @@ test("CSP serveCSPReports", (t) => {
 	});
 });
 
-test("CSP with ignored path fragment", (t) => {
+test("CSP with ignore paths", (t) => {
 	const port = 3450;
 	const request = supertest(`http://localhost:${port}`);
 	let localServeResult;
