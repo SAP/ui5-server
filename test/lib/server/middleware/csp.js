@@ -413,7 +413,7 @@ test("Header Manipulation, add headers to existing header", async (t) => {
 });
 
 test("TestRunner Settings ignorePaths", async (t) => {
-	t.plan(3);
+	t.plan(2);
 	const middleware = cspMiddleware("csp", {
 		definedPolicies: {
 			policy1: "default-src 'self';",
@@ -456,6 +456,4 @@ test("TestRunner Settings ignorePaths", async (t) => {
 	await new Promise((resolve) => {
 		middleware({method: "GET", url: "/my/nothin.html", headers: {}}, res, resolve);
 	});
-
-	t.true(true, "no failure");
 });
