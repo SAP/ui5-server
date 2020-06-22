@@ -4,6 +4,17 @@ const {Readable, Writable} = require("stream");
 const resourceFactory = require("@ui5/fs").resourceFactory;
 const serveResourcesMiddleware = require("../../../../lib/middleware/serveResources");
 const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
+
+const modifyClone = (resource, fnModifyClone) => {
+	const origClone = resource.clone;
+	resource.clone = function(...args) {
+		return origClone.apply(resource, args).then((clonedResource) => {
+			fnModifyClone(clonedResource);
+			return clonedResource;
+		});
+	};
+};
+
 const writeResource = function(writer, path, size, stringContent, stringEncoding, project) {
 	const statInfo = {
 		ino: 0,
@@ -20,12 +31,15 @@ const writeResource = function(writer, path, size, stringContent, stringEncoding
 		statInfo,
 		project
 	});
-	// stub resource functionality in order to be able to get the Resource's content. Otherwise it would be drained.
-	sinon.stub(resource, "getStream").returns({
-		pipe: function() {
-		}
-	});
+
 	return writer.write(resource).then(() => {
+		modifyClone(resource, (clonedResource) => {
+			// stub resource functionality in order to be able to get the Resource's content. Otherwise it would be drained.
+			sinon.stub(clonedResource, "getStream").returns({
+				pipe: function() {
+				}
+			});
+		});
 		return resource;
 	});
 };
@@ -38,6 +52,7 @@ const fakeResponse = {
 test.afterEach.always((t) => {
 	sinon.restore();
 });
+
 
 test.serial("Check if properties file is served properly", (t) => {
 	t.plan(4);
@@ -53,7 +68,12 @@ test.serial("Check if properties file is served properly", (t) => {
 
 	return writeResource(readerWriter, "/myFile3.properties", 1024 * 1024, "key=titel\nfame=straße", "latin1", project)
 		.then((resource) => {
-			const setStringSpy = sinon.spy(resource, "setString");
+			let setStringSpy;
+			let clonedResource;
+			modifyClone(resource, (clonedResourceInternal) => {
+				setStringSpy = sinon.spy(clonedResourceInternal, "setString");
+				clonedResource = clonedResourceInternal;
+			});
 			const middleware = serveResourcesMiddleware({
 				middlewareUtil: new MiddlewareUtil(),
 				resources: {
@@ -72,7 +92,7 @@ test.serial("Check if properties file is served properly", (t) => {
 				throw new Error(`Next callback called with error: ${err.message}`);
 			};
 			return middleware(req, response, next).then((o) => {
-				return resource.getString();
+				return clonedResource.getString();
 			}).then((content) => {
 				t.is(content, `key=titel
 fame=stra\\u00dfe`);
@@ -97,7 +117,12 @@ test.serial("Check if properties file is served properly with UTF-8", (t) => {
 
 	return writeResource(readerWriter, "/myFile3.properties", 1024 * 1024, "key=titel\nfame=straße", "utf8", project)
 		.then((resource) => {
-			const setStringSpy = sinon.spy(resource, "setString");
+			let setStringSpy;
+			let clonedResource;
+			modifyClone(resource, (clonedResourceInternal) => {
+				setStringSpy = sinon.spy(clonedResourceInternal, "setString");
+				clonedResource = clonedResourceInternal;
+			});
 			const middleware = serveResourcesMiddleware({
 				middlewareUtil: new MiddlewareUtil(),
 				resources: {
@@ -116,7 +141,7 @@ test.serial("Check if properties file is served properly with UTF-8", (t) => {
 				throw new Error(`Next callback called with error: ${err.message}`);
 			};
 			return middleware(req, response, next).then((o) => {
-				return resource.getString();
+				return clonedResource.getString();
 			}).then((content) => {
 				t.is(content, `key=titel
 fame=stra\\u00dfe`);
@@ -133,7 +158,12 @@ test.serial("Check if properties file is served properly without property settin
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
 
 	return writeResource(readerWriter, "/myFile3.properties", 1024 * 1024, "key=titel\nfame=straße", "utf8").then((resource) => {
-		const setStringSpy = sinon.spy(resource, "setString");
+		let setStringSpy;
+		let clonedResource;
+		modifyClone(resource, (clonedResourceInternal) => {
+			setStringSpy = sinon.spy(clonedResourceInternal, "setString");
+			clonedResource = clonedResourceInternal;
+		});
 		const middleware = serveResourcesMiddleware({
 			middlewareUtil: new MiddlewareUtil(),
 			resources: {
@@ -152,7 +182,7 @@ test.serial("Check if properties file is served properly without property settin
 			throw new Error(`Next callback called with error: ${err.stack}`);
 		};
 		return middleware(req, response, next).then((o) => {
-			return resource.getString();
+			return clonedResource.getString();
 		}).then((content) => {
 			t.is(content, `key=titel
 fame=stra\\u00dfe`);
@@ -171,7 +201,12 @@ test.serial("Check if properties file is served properly without property settin
 		specVersion: "1.1"
 	};
 	return writeResource(readerWriter, "/myFile3.properties", 1024 * 1024, "key=titel\nfame=straße", "latin1", project).then((resource) => {
-		const setStringSpy = sinon.spy(resource, "setString");
+		let setStringSpy;
+		let clonedResource;
+		modifyClone(resource, (clonedResourceInternal) => {
+			setStringSpy = sinon.spy(clonedResourceInternal, "setString");
+			clonedResource = clonedResourceInternal;
+		});
 		const middleware = serveResourcesMiddleware({
 			middlewareUtil: new MiddlewareUtil(),
 			resources: {
@@ -190,7 +225,7 @@ test.serial("Check if properties file is served properly without property settin
 			throw new Error(`Next callback called with error: ${err.stack}`);
 		};
 		return middleware(req, response, next).then((o) => {
-			return resource.getString();
+			return clonedResource.getString();
 		}).then((content) => {
 			t.is(content, `key=titel
 fame=stra\\u00dfe`);
@@ -209,7 +244,12 @@ test.serial("Check if properties file is served properly without property settin
 		specVersion: "2.0"
 	};
 	return writeResource(readerWriter, "/myFile3.properties", 1024 * 1024, "key=titel\nfame=straße", "utf8", project).then((resource) => {
-		const setStringSpy = sinon.spy(resource, "setString");
+		let setStringSpy;
+		let clonedResource;
+		modifyClone(resource, (clonedResourceInternal) => {
+			setStringSpy = sinon.spy(clonedResourceInternal, "setString");
+			clonedResource = clonedResourceInternal;
+		});
 		const middleware = serveResourcesMiddleware({
 			middlewareUtil: new MiddlewareUtil(),
 			resources: {
@@ -228,7 +268,7 @@ test.serial("Check if properties file is served properly without property settin
 			throw new Error(`Next callback called with error: ${err.stack}`);
 		};
 		return middleware(req, response, next).then((o) => {
-			return resource.getString();
+			return clonedResource.getString();
 		}).then((content) => {
 			t.is(content, `key=titel
 fame=stra\\u00dfe`);

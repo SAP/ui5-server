@@ -2,20 +2,32 @@ const test = require("ava");
 const resourceFactory = require("@ui5/fs").resourceFactory;
 const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
 
+const modifyClone = (resource, fnModifyClone) => {
+	const origClone = resource.clone;
+	resource.clone = function(...args) {
+		return origClone.apply(resource, args).then((clonedResource) => {
+			fnModifyClone(clonedResource);
+			return clonedResource;
+		});
+	};
+};
+
 test.serial("serveIndex default", (t) => {
 	t.plan(4);
 	const serveIndexMiddleware = require("../../../../lib/middleware/serveIndex");
 	const writeResource = function(writer, path, size = 0, stringContent = "abc") {
 		const resource = resourceFactory.createResource({path, string: stringContent});
-		resource.getStatInfo = function() {
-			return {
-				mtime: 0,
-				size: size,
-				isDirectory: function() {
-					return false;
-				}
+		modifyClone(resource, (clonedResource) => {
+			clonedResource.getStatInfo = function() {
+				return {
+					mtime: 0,
+					size: size,
+					isDirectory: function() {
+						return false;
+					}
+				};
 			};
-		};
+		});
 		return writer.write(resource);
 	};
 
@@ -62,15 +74,17 @@ test.serial("serveIndex no hidden", (t) => {
 	const serveIndexMiddleware = require("../../../../lib/middleware/serveIndex");
 	const writeResource = function(writer, path, size = 0, stringContent = "abc") {
 		const resource = resourceFactory.createResource({path, string: stringContent});
-		resource.getStatInfo = function() {
-			return {
-				mtime: 0,
-				size: size,
-				isDirectory: function() {
-					return false;
-				}
+		modifyClone(resource, (clonedResource) => {
+			clonedResource.getStatInfo = function() {
+				return {
+					mtime: 0,
+					size: size,
+					isDirectory: function() {
+						return false;
+					}
+				};
 			};
-		};
+		});
 		return writer.write(resource);
 	};
 
@@ -119,15 +133,17 @@ test.serial("serveIndex no details", (t) => {
 	const serveIndexMiddleware = require("../../../../lib/middleware/serveIndex");
 	const writeResource = function(writer, path, size = 0, stringContent = "abc") {
 		const resource = resourceFactory.createResource({path, string: stringContent});
-		resource.getStatInfo = function() {
-			return {
-				mtime: 0,
-				size: size,
-				isDirectory: function() {
-					return false;
-				}
+		modifyClone(resource, (clonedResource) => {
+			clonedResource.getStatInfo = function() {
+				return {
+					mtime: 0,
+					size: size,
+					isDirectory: function() {
+						return false;
+					}
+				};
 			};
-		};
+		});
 		return writer.write(resource);
 	};
 
