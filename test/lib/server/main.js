@@ -628,7 +628,7 @@ test("CSP with ignore paths", (t) => {
 	}).then((tree) => {
 		return server.serve(tree, {
 			port,
-			serveCSPReportÅs: true,
+			serveCSPReports: true,
 			sendSAPTargetCSP: true,
 			simpleIndex: false
 		});
