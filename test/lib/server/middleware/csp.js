@@ -1,4 +1,6 @@
 const test = require("ava");
+const sinon = require("sinon");
+
 const cspMiddleware = require("../../../../lib/middleware/csp");
 
 
@@ -413,7 +415,6 @@ test("Header Manipulation, add headers to existing header", async (t) => {
 });
 
 test("TestRunner Settings ignorePaths", async (t) => {
-	t.plan(2);
 	const middleware = cspMiddleware("csp", {
 		definedPolicies: {
 			policy1: "default-src 'self';",
@@ -425,35 +426,47 @@ test("TestRunner Settings ignorePaths", async (t) => {
 		defaultPolicy2IsReportOnly: false,
 		ignorePaths: ["my/pony.html"]
 	});
-	const res = {
-		getHeader: function() {
-			return undefined;
-		},
-		end: function() {
-			t.fail(`end should not be called`);
-		},
-		setHeader: function(header, value) {
-			t.fail(`should not be called with header ${header} and value ${value}`);
-		}
-	};
+
+	function fakeRes() {
+		return {
+			getHeader: sinon.stub(),
+			end: sinon.stub(),
+			setHeader: sinon.stub()
+		};
+	}
 
 	// matches the pathName
 	await new Promise((resolve) => {
-		middleware({method: "GET", url: "/my/pony.html", headers: {}}, res, resolve);
-	});
-	// matches the referer
-	await new Promise((resolve) => {
-		middleware({method: "GET", url: "/my/app.html", headers: {
-			referer: "http://localhost:8080/my/pony.html"
-		}}, res, resolve);
+		const res = fakeRes();
+		middleware({method: "GET", url: "/my/pony.html", headers: {}}, res, function(err) {
+			t.falsy(err, "Next should not be called with an error");
+			t.is(res.setHeader.callCount, 0, "res.setHeader should not be called");
+			t.is(res.end.callCount, 0, "res.end should not be called");
+			resolve();
+		});
 	});
 
-	res.setHeader = function(header, value) {
-		t.true(true, `should be called`);
-	};
+	// matches the referer
+	await new Promise((resolve) => {
+		const res = fakeRes();
+		middleware({method: "GET", url: "/my/app.html", headers: {
+			referer: "http://localhost:8080/my/pony.html"
+		}}, res, function(err) {
+			t.falsy(err, "Next should not be called with an error");
+			t.is(res.setHeader.callCount, 0, "res.setHeader should not be called");
+			t.is(res.end.callCount, 0, "res.end should not be called");
+			resolve();
+		});
+	});
 
 	// normal call which does not match the ignorePaths
 	await new Promise((resolve) => {
-		middleware({method: "GET", url: "/my/nothin.html", headers: {}}, res, resolve);
+		const res = fakeRes();
+		middleware({method: "GET", url: "/my/nothin.html", headers: {}}, res, function(err) {
+			t.falsy(err, "Next should not be called with an error");
+			t.is(res.setHeader.callCount, 2, "setHeader should be called twice");
+			t.is(res.end.callCount, 0, "res.end should not be called");
+			resolve();
+		});
 	});
 });
