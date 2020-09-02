@@ -265,7 +265,8 @@ test.serial.cb("Check if version replacement is done", (t) => {
 		},
 		_project: {
 			version: "1.0.0"
-		}
+		},
+		getPathTree: () => ""
 	};
 
 	const resources = {
@@ -296,7 +297,7 @@ test.serial.cb("Check if version replacement is done", (t) => {
 	res.end = function() {
 		t.is(Buffer.concat(buffers).toString(), expected);
 		t.end();
-	},
+	};
 
 	middleware(req, res, function(err) {
 		if (err) {
@@ -341,7 +342,8 @@ test.serial[
 		},
 		_project: {
 			version: "1.0.0"
-		}
+		},
+		getPathTree: () => ""
 	};
 
 	const resources = {
@@ -372,7 +374,7 @@ test.serial[
 	res.end = function() {
 		t.is(Buffer.concat(buffers).toString(), expected);
 		t.end();
-	},
+	};
 
 	middleware(req, res, function(err) {
 		if (err) {
