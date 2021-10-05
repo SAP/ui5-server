@@ -1,14 +1,23 @@
 const test = require("ava");
+const sinon = require("sinon");
 const supertest = require("supertest");
 const ui5Server = require("../../../");
 const server = ui5Server.server;
 const normalizer = require("@ui5/project").normalizer;
+const logger = require("@ui5/logger");
 
 let request;
 let serve;
 
 // Start server before running tests
 test.before((t) => {
+	t.context.versionInfoLogger = {
+		warn: sinon.stub()
+	};
+	sinon.stub(logger, "getLogger")
+		.callThrough()
+		.withArgs("server:middleware:versionInfo").returns(t.context.versionInfoLogger);
+
 	return normalizer.generateProjectTree({
 		cwd: "./test/fixtures/application.a"
 	}).then((tree) => {
@@ -22,6 +31,7 @@ test.before((t) => {
 });
 
 test.after.always(() => {
+	sinon.restore();
 	return new Promise((resolve, reject) => {
 		serve.close((error) => {
 			if (error) {
@@ -211,6 +221,17 @@ test("Get sap-ui-version.json from versionInfo middleware (/resources/sap-ui-ver
 			t.fail(res.error.text);
 		}
 		t.deepEqual(res.statusCode, 200, "Correct HTTP status code");
+
+		const {versionInfoLogger} = t.context;
+		t.is(versionInfoLogger.warn.callCount, 4);
+		t.is(versionInfoLogger.warn.getCall(0).args[0],
+			"Couldn't find version for library 'sap.ui.core', project dependency missing?");
+		t.is(versionInfoLogger.warn.getCall(1).args[0],
+			"Couldn't find version for library 'sap.ui.core', project dependency missing?");
+		t.is(versionInfoLogger.warn.getCall(2).args[0],
+			"Couldn't find version for library 'sap.ui.core', project dependency missing?");
+		t.is(versionInfoLogger.warn.getCall(3).args[0],
+			"Couldn't find version for library 'sap.ui.core', project dependency missing?");
 
 		const buildTimestamp = res.body.buildTimestamp;
 		t.deepEqual(res.body, {
