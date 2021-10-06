@@ -1,5 +1,4 @@
 const test = require("ava");
-const path = require("path");
 const ui5Fs = require("@ui5/fs");
 const resourceFactory = ui5Fs.resourceFactory;
 const versionInfoMiddleware = require("../../../../lib/middleware/versionInfo");
@@ -153,341 +152,7 @@ async function assertCreatedVersionInfo(t, expectedVersionInfo, versionInfoConte
 	t.deepEqual(currentVersionInfo, expectedVersionInfo, "Correct content");
 }
 
-test.serial("integration: sibling eager to lazy", async (t) => {
-	const workspace = createWorkspace();
-	await createDotLibrary(workspace, resourceFactory, ["test", "lib"]);
-
-	// input
-	// lib.a => lib.b, lib.c
-	// lib.b => lib.c (true)
-	// lib.c =>
-
-	// expected outcome
-	// lib.a => lib.b, lib.c
-	// lib.b => lib.c (true)
-	// lib.c =>
-
-	// dependencies
-	const dependencies = createDependencies({virBasePath: "/"});
-
-	// lib.a
-	await createResources(dependencies, resourceFactory, ["lib", "a"], [{name: "lib.b"}, {name: "lib.c"}]);
-
-	// lib.b
-	await createResources(dependencies, resourceFactory, ["lib", "b"], [{name: "lib.c", lazy: true}]);
-
-	// lib.c
-	await createResources(dependencies, resourceFactory, ["lib", "c"], []);
-
-	// create middleware
-	const resources = {dependencies};
-	const tree = {
-		metadata: {
-			name: "myname"
-		},
-		version: "1.33.7"
-	};
-	const middleware = versionInfoMiddleware({resources, tree});
-
-	const res = {
-		writeHead: function() {},
-		end: async function(versionInfoContent) {
-			await assertCreatedVersionInfo(t, {
-				"name": "myname",
-				"scmRevision": "",
-				"version": "1.33.7",
-				"libraries": [{
-					"name": "lib.a",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.b": {},
-								"lib.c": {}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.b",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.c": {
-									"lazy": true
-								}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.c",
-					"scmRevision": ""
-				}],
-			}, versionInfoContent);
-		}
-	};
-	const next = function() {
-		t.fail("should not be called.");
-	};
-
-	await middleware(undefined, res, next);
-});
-
-test.serial("integration: sibling lazy to eager", async (t) => {
-	const workspace = createWorkspace();
-	await createDotLibrary(workspace, resourceFactory, ["test", "lib"]);
-
-	// input
-	// lib.a => lib.b, lib.c (true)
-	// lib.b => lib.c
-	// lib.c =>
-
-	// expected outcome
-	// lib.a => lib.b, lib.c
-	// lib.b => lib.c
-	// lib.c =>
-
-	// dependencies
-	const dependencies = createDependencies({virBasePath: "/"});
-
-	// lib.a
-	await createResources(dependencies, resourceFactory, ["lib", "a"],
-		[{name: "lib.b"}, {name: "lib.c", lazy: true}]);
-
-	// lib.b
-	await createResources(dependencies, resourceFactory, ["lib", "b"], [{name: "lib.c"}]);
-
-	// lib.c
-	await createResources(dependencies, resourceFactory, ["lib", "c"], []);
-
-	// create middleware
-	const resources = {dependencies};
-	const tree = {
-		metadata: {
-			name: "myname"
-		},
-		version: "1.33.7"
-	};
-	const middleware = versionInfoMiddleware({resources, tree});
-
-	const res = {
-		writeHead: function() {},
-		end: async function(versionInfoContent) {
-			await assertCreatedVersionInfo(t, {
-				"name": "myname",
-				"scmRevision": "",
-				"version": "1.33.7",
-				"libraries": [{
-					"name": "lib.a",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.b": {},
-								"lib.c": {}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.b",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.c": {}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.c",
-					"scmRevision": ""
-				}],
-			}, versionInfoContent);
-		}
-	};
-	const next = function() {
-		t.fail("should not be called.");
-	};
-
-	await middleware(undefined, res, next);
-});
-
-test.serial("integration: children eager to lazy", async (t) => {
-	const workspace = createWorkspace();
-	await createDotLibrary(workspace, resourceFactory, ["test", "lib"]);
-
-	// input
-	// lib.a => lib.b
-	// lib.b => lib.c (true)
-	// lib.c =>
-
-	// expected outcome
-	// lib.a => lib.b, lib.c (true)
-	// lib.b => lib.c (true)
-	// lib.c =>
-
-	// dependencies
-	const dependencies = createDependencies({virBasePath: "/"});
-
-	// lib.a
-	await createResources(dependencies, resourceFactory, ["lib", "a"],
-		[{name: "lib.b"}]);
-
-	// lib.b
-	await createResources(dependencies, resourceFactory, ["lib", "b"],
-		[{name: "lib.c", lazy: true}]);
-
-	// lib.c
-	await createResources(dependencies, resourceFactory, ["lib", "c"], []);
-
-	// create middleware
-	const resources = {dependencies};
-	const tree = {
-		metadata: {
-			name: "myname"
-		},
-		version: "1.33.7"
-	};
-	const middleware = versionInfoMiddleware({resources, tree});
-
-	const res = {
-		writeHead: function() {},
-		end: async function(versionInfoContent) {
-			await assertCreatedVersionInfo(t, {
-				"name": "myname",
-				"scmRevision": "",
-				"version": "1.33.7",
-				"libraries": [{
-					"name": "lib.a",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.b": {},
-								"lib.c": {
-									"lazy": true
-								}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.b",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.c": {
-									"lazy": true
-								}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.c",
-					"scmRevision": ""
-				}],
-			}, versionInfoContent);
-		}
-	};
-	const next = function() {
-		t.fail("should not be called.");
-	};
-
-	await middleware(undefined, res, next);
-});
-
-test.serial("integration: children lazy to eager", async (t) => {
-	const workspace = createWorkspace();
-	await createDotLibrary(workspace, resourceFactory, ["test", "lib"]);
-
-	// input
-	// lib.a => lib.b (true)
-	// lib.b => lib.c
-	// lib.c =>
-
-	// expected outcome
-	// lib.a => lib.b (true), lib.c (true)
-	// lib.b => lib.c
-	// lib.c =>
-
-	// dependencies
-	const dependencies = createDependencies({virBasePath: "/"});
-
-	// lib.a
-	await createResources(dependencies, resourceFactory, ["lib", "a"],
-		[{name: "lib.b", lazy: true}]);
-
-	// lib.b
-	await createResources(dependencies, resourceFactory, ["lib", "b"],
-		[{name: "lib.c"}]);
-
-	// lib.c
-	await createResources(dependencies, resourceFactory, ["lib", "c"], []);
-
-	// create middleware
-	const resources = {dependencies};
-	const tree = {
-		metadata: {
-			name: "myname"
-		},
-		version: "1.33.7"
-	};
-	const middleware = versionInfoMiddleware({resources, tree});
-
-	const res = {
-		writeHead: function() {},
-		end: async function(versionInfoContent) {
-			await assertCreatedVersionInfo(t, {
-				"name": "myname",
-				"scmRevision": "",
-				"version": "1.33.7",
-				"libraries": [{
-					"name": "lib.a",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.b": {
-									"lazy": true
-								},
-								"lib.c": {
-									"lazy": true
-								}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.b",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.c": {}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.c",
-					"scmRevision": ""
-				}],
-			}, versionInfoContent);
-		}
-	};
-	const next = function() {
-		t.fail("should not be called.");
-	};
-
-	await middleware(undefined, res, next);
-});
-
+// test case taken from: ui5-builder/test/lib/tasks/generateVersionInfo.js
 test.serial("integration: Library with dependencies and subcomponent complex scenario", async (t) => {
 	const workspace = createWorkspace();
 	await createDotLibrary(workspace, resourceFactory, ["test", "lib"]);
@@ -539,89 +204,91 @@ test.serial("integration: Library with dependencies and subcomponent complex sce
 	};
 	const middleware = versionInfoMiddleware({resources, tree});
 
+	const expectedVersionInfo = {
+		"name": "myname",
+		"scmRevision": "",
+		"version": "1.33.7",
+		"libraries": [{
+			"name": "lib.a",
+			"scmRevision": "",
+			"manifestHints": {
+				"dependencies": {
+					"libs": {
+						"lib.b": {},
+						"lib.c": {},
+						"lib.d": {},
+						"lib.e": {}
+					}
+				}
+			},
+		},
+		{
+			"name": "lib.b",
+			"scmRevision": "",
+			"manifestHints": {
+				"dependencies": {
+					"libs": {
+						"lib.c": {
+							"lazy": true
+						},
+						"lib.d": {
+							"lazy": true
+						},
+						"lib.e": {
+							"lazy": true
+						}
+					}
+				}
+			},
+		},
+		{
+			"name": "lib.c",
+			"scmRevision": "",
+			"manifestHints": {
+				"dependencies": {
+					"libs": {
+						"lib.d": {},
+						"lib.e": {}
+					}
+				}
+			},
+		},
+		{
+			"name": "lib.d",
+			"scmRevision": "",
+			"manifestHints": {
+				"dependencies": {
+					"libs": {
+						"lib.e": {}
+					}
+				}
+			},
+		},
+		{
+			"name": "lib.e",
+			"scmRevision": "",
+		}],
+		"components": {
+			"lib.a.sub.fold": {
+				"hasOwnPreload": true,
+				"library": "lib.a",
+				"manifestHints": {
+					"dependencies": {
+						"libs": {
+							"lib.c": {},
+							"lib.d": {},
+							"lib.e": {}
+						}
+					}
+				}
+			}
+		},
+	};
+
 	const res = {
 		writeHead: function() {},
 		end: async function(versionInfoContent) {
-			await assertCreatedVersionInfo(t, {
-				"name": "myname",
-				"scmRevision": "",
-				"version": "1.33.7",
-				"libraries": [{
-					"name": "lib.a",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.b": {},
-								"lib.c": {},
-								"lib.d": {},
-								"lib.e": {}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.b",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.c": {
-									"lazy": true
-								},
-								"lib.d": {
-									"lazy": true
-								},
-								"lib.e": {
-									"lazy": true
-								}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.c",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.d": {},
-								"lib.e": {}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.d",
-					"scmRevision": "",
-					"manifestHints": {
-						"dependencies": {
-							"libs": {
-								"lib.e": {}
-							}
-						}
-					},
-				},
-				{
-					"name": "lib.e",
-					"scmRevision": "",
-				}],
-				"components": {
-					"lib.a.sub.fold": {
-						"hasOwnPreload": true,
-						"library": "lib.a",
-						"manifestHints": {
-							"dependencies": {
-								"libs": {
-									"lib.c": {},
-									"lib.d": {},
-									"lib.e": {}
-								}
-							}
-						}
-					}
-				},
-			}, versionInfoContent);
+			await assertCreatedVersionInfo(t, expectedVersionInfo, versionInfoContent);
 		}
 	};
 	const next = function() {
