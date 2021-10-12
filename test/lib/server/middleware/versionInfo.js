@@ -1,7 +1,8 @@
 const test = require("ava");
-const ui5Fs = require("@ui5/fs");
-const resourceFactory = ui5Fs.resourceFactory;
-const versionInfoMiddleware = require("../../../../lib/middleware/versionInfo");
+const sinon = require("sinon");
+const mock = require("mock-require");
+const resourceFactory = require("@ui5/fs").resourceFactory;
+let versionInfoMiddleware = require("../../../../lib/middleware/versionInfo");
 
 function createWorkspace() {
 	return resourceFactory.createAdapter({
@@ -151,6 +152,101 @@ async function assertCreatedVersionInfo(t, expectedVersionInfo, versionInfoConte
 
 	t.deepEqual(currentVersionInfo, expectedVersionInfo, "Correct content");
 }
+
+test.beforeEach((t) => {
+	versionInfoMiddleware = mock.reRequire("../../../../lib/middleware/versionInfo");
+});
+
+test.afterEach.always((t) => {
+	sinon.restore();
+	mock.stopAll();
+});
+
+test.serial("todo", async (t) => {
+	let stubCount = 0;
+	const manifestCreatorStub = sinon.stub().callsFake(() => `stubbed manifest ${stubCount++}`);
+	const dummyVersionInfo = resourceFactory.createResource({
+		path: "/dummy/path",
+		string: "stubbed version info"
+	});
+	const versionInfoGeneratorStub = sinon.stub().returns([dummyVersionInfo]);
+	mock("@ui5/builder", {
+		processors: {
+			manifestCreator: manifestCreatorStub,
+			versionInfoGenerator: versionInfoGeneratorStub
+		}
+	});
+	versionInfoMiddleware = mock.reRequire("../../../../lib/middleware/versionInfo");
+
+	const dependencies = createDependencies({virBasePath: "/"});
+	// create lib.a without manifest
+	await createDotLibrary(dependencies, resourceFactory, ["lib", "a"], [{name: "lib.b"}, {name: "lib.c"}]);
+	// create lib.b with manifest: no manifestCreator call expected
+	await createResources(dependencies, resourceFactory, ["lib", "b"], []);
+	// create lib.c without manifest but with dummy files
+	await createDotLibrary(dependencies, resourceFactory, ["lib", "c"]);
+	[
+		// relevant file extensions for manifest creation
+		"js", "json", "less", "css", "theming", "theme", "properties",
+		// other file extensions are irrelevant
+		"html", "txt", "ts"
+	].forEach(async (extension) => {
+		await dependencies.write(resourceFactory.createResource({path: `/resources/lib/c/foo.${extension}`}));
+	});
+
+	const resources = {dependencies};
+	const tree = {
+		metadata: {
+			name: "myname"
+		},
+		version: "1.33.7"
+	};
+	const middleware = versionInfoMiddleware({resources, tree});
+
+	const endStub = sinon.stub();
+	await middleware(
+		/* req */ undefined,
+		/* res */ {writeHead: function() {}, end: endStub},
+		/* next */ function() {});
+
+	t.is(manifestCreatorStub.callCount, 2);
+	t.is(manifestCreatorStub.getCall(0).args[0].libraryResource.getPath(), "/resources/lib/a/.library");
+	t.is(manifestCreatorStub.getCall(1).args[0].libraryResource.getPath(), "/resources/lib/c/.library");
+	t.is(manifestCreatorStub.getCall(0).args[0].namespace, "lib/a");
+	t.is(manifestCreatorStub.getCall(1).args[0].namespace, "lib/c");
+	t.deepEqual(
+		manifestCreatorStub.getCall(0).args[0].resources.map((resource) => resource.getPath()),
+		["/resources/lib/a/.library"]);
+	t.deepEqual(
+		manifestCreatorStub.getCall(1).args[0].resources.map((resource) => resource.getPath()).sort(),
+		[
+			"/resources/lib/c/.library",
+			"/resources/lib/c/foo.css",
+			"/resources/lib/c/foo.js",
+			"/resources/lib/c/foo.json",
+			"/resources/lib/c/foo.less",
+			"/resources/lib/c/foo.properties",
+			"/resources/lib/c/foo.theme",
+			"/resources/lib/c/foo.theming"
+		]);
+	t.deepEqual(manifestCreatorStub.getCall(0).args[0].options, {omitMinVersions: true});
+	t.deepEqual(manifestCreatorStub.getCall(1).args[0].options, {omitMinVersions: true});
+
+	t.is(versionInfoGeneratorStub.callCount, 1);
+	const versionInfoGeneratorOptions = versionInfoGeneratorStub.getCall(0).args[0].options;
+	t.is(versionInfoGeneratorOptions.rootProjectName, "myname");
+	t.is(versionInfoGeneratorOptions.rootProjectVersion, "1.33.7");
+	t.is(versionInfoGeneratorOptions.libraryInfos.length, 3);
+	t.is(versionInfoGeneratorOptions.libraryInfos[0].name, "lib.a");
+	t.is(versionInfoGeneratorOptions.libraryInfos[0].libraryManifest, "stubbed manifest 0");
+	t.is(versionInfoGeneratorOptions.libraryInfos[1].name, "lib.b");
+	t.is(versionInfoGeneratorOptions.libraryInfos[1].libraryManifest.getPath(), "/resources/lib/b/manifest.json");
+	t.is(versionInfoGeneratorOptions.libraryInfos[2].name, "lib.c");
+	t.is(versionInfoGeneratorOptions.libraryInfos[2].libraryManifest, "stubbed manifest 1");
+
+	t.is(endStub.callCount, 1);
+	t.deepEqual(endStub.getCall(0).args[0], "stubbed version info");
+});
 
 // test case taken from: ui5-builder/test/lib/tasks/generateVersionInfo.js
 test.serial("integration: Library with dependencies and subcomponent complex scenario", async (t) => {
