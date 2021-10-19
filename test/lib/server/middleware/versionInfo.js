@@ -162,7 +162,7 @@ test.afterEach.always((t) => {
 	mock.stopAll();
 });
 
-test.serial("todo", async (t) => {
+test.serial("test all inner API calls within middleware", async (t) => {
 	let stubCount = 0;
 	const manifestCreatorStub = sinon.stub().callsFake(() => `stubbed manifest ${stubCount++}`);
 	const dummyVersionInfo = resourceFactory.createResource({
