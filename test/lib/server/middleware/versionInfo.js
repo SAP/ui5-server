@@ -17,7 +17,7 @@ const projectCache = {};
  *
  * @param {string[]} names e.g. ["lib", "a"]
  * @param {string} [version="3.0.0-<library name>"] Project version
- * @returns {{metadata: {name, namespace}}}
+ * @returns {object} Project mock
  */
 const createProjectMetadata = (names, version) => {
 	const key = names.join(".");
