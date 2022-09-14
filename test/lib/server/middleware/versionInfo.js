@@ -1,8 +1,8 @@
 import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
-import {resourceFactory} from "@ui5/fs";
-import versionInfoMiddleware from "../../../../lib/middleware/versionInfo.js";
+import ui5fs from "@ui5/fs";
+const {resourceFactory} = ui5fs;
 
 function createWorkspace() {
 	return resourceFactory.createAdapter({
@@ -147,12 +147,13 @@ async function assertCreatedVersionInfo(t, expectedVersionInfo, versionInfoConte
 }
 
 test.beforeEach((t) => {
-	versionInfoMiddleware = mock.reRequire("../../../../lib/middleware/versionInfo");
+	t.context.createVersionInfoMiddleware = async (mocks = {}) => {
+		return esmock("../../../../lib/middleware/versionInfo.js", mocks);
+	};
 });
 
 test.afterEach.always((t) => {
 	sinon.restore();
-	mock.stopAll();
 });
 
 test.serial("test all inner API calls within middleware", async (t) => {
@@ -163,13 +164,15 @@ test.serial("test all inner API calls within middleware", async (t) => {
 		string: "stubbed version info"
 	});
 	const versionInfoGeneratorStub = sinon.stub().returns([dummyVersionInfo]);
-	mock("@ui5/builder", {
-		processors: {
-			manifestCreator: manifestCreatorStub,
-			versionInfoGenerator: versionInfoGeneratorStub
+
+	const versionInfoMiddleware = await t.context.createVersionInfoMiddleware({
+		"@ui5/builder": {
+			processors: {
+				manifestCreator: manifestCreatorStub,
+				versionInfoGenerator: versionInfoGeneratorStub
+			}
 		}
 	});
-	versionInfoMiddleware = mock.reRequire("../../../../lib/middleware/versionInfo");
 
 	const dependenciesA = createDepWorkspace(["lib", "a"], {virBasePath: "/"});
 	const dependenciesB = createDepWorkspace(["lib", "b"], {virBasePath: "/"});
@@ -316,6 +319,8 @@ test.serial("integration: Library with dependencies and subcomponent complex sce
 	const graph = {
 		getRoot: () => createProjectMetadata(["myname"], "1.33.7")
 	};
+
+	const versionInfoMiddleware = await t.context.createVersionInfoMiddleware();
 	const middleware = versionInfoMiddleware({resources, graph});
 
 	const expectedVersionInfo = {
