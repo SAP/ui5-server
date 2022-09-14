@@ -19,13 +19,19 @@ function fileExists(filePath) {
 test.beforeEach(async (t) => {
 	t.context.yesno = sinon.stub();
 	t.context.devcertSanscache = sinon.stub();
-	t.context.makeDir = sinon.stub();
+	t.context.makeDir = sinon.stub().resolves();
 
-	t.context.sslUtil = await esmock.p("../../../lib/sslUtil.js", {
-		"yesno": t.context.yesno,
-		"devcert-sanscache": t.context.devcertSanscache,
-		"make-dir": t.context.makeDir
-	});
+	t.context.createSslUtilMock = async (mockMakeDir = false) => {
+		const mocks = {
+			"yesno": t.context.yesno,
+			"devcert-sanscache": t.context.devcertSanscache
+		};
+		if (mockMakeDir) {
+			mocks["make-dir"] = t.context.makeDir;
+		}
+		t.context.sslUtil = await esmock.p("../../../lib/sslUtil.js", mocks);
+		return t.context.sslUtil;
+	};
 });
 
 test.afterEach.always((t) => {
@@ -46,7 +52,8 @@ test("Get existing certificate", async (t) => {
 });
 
 test.serial("Create new certificate and install it", async (t) => {
-	const {sslUtil, yesno, devcertSanscache} = t.context;
+	const {createSslUtilMock, yesno, devcertSanscache} = t.context;
+	const sslUtil = await createSslUtilMock();
 
 	t.plan(6);
 
@@ -87,8 +94,9 @@ test.serial("Create new certificate and install it", async (t) => {
 	t.is(fileExistsResult[1], true, "Cert was created.");
 });
 
-test.serial("Create new certificate and do not install it", (t) => {
-	const {sslUtil, yesno} = t.context;
+test.serial("Create new certificate and do not install it", async (t) => {
+	const {createSslUtilMock, yesno} = t.context;
+	const sslUtil = await createSslUtilMock();
 
 	t.plan(2);
 
@@ -115,8 +123,9 @@ test.serial("Create new certificate and do not install it", (t) => {
 	});
 });
 
-test.serial.only("Create new certificate not succeeded", async (t) => {
-	const {sslUtil, yesno, devcertSanscache, makeDir} = t.context;
+test.serial("Create new certificate not succeeded", async (t) => {
+	const {createSslUtilMock, yesno, devcertSanscache, makeDir} = t.context;
+	const sslUtil = await createSslUtilMock(true);
 
 	t.plan(6);
 

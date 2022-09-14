@@ -1,6 +1,6 @@
 import test from "ava";
 import supertest from "supertest";
-import ui5Server from "../../../";
+import ui5Server from "../../../index.js";
 const server = ui5Server.server;
 import http from "node:http";
 import portscanner from "portscanner";
