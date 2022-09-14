@@ -8,7 +8,7 @@
 		"excludePattern": "(node_modules(\\\\|/))"
 	},
 	"plugins": [
-		"./jsdoc-plugin"
+		"./jsdoc-plugin.cjs"
 	],
 	"opts": {
 		"encoding": "utf8",

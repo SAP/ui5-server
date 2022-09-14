@@ -1,10 +1,10 @@
 import path from "node:path";
 import fs from "node:fs";
 import test from "ava";
-import { promisify } from "node:util";
+import {promisify} from "node:util";
 const stat = promisify(fs.stat);
 import esmock from "esmock";
-import { sslUtil } from "../../../";
+import {sslUtil} from "../../../";
 
 function fileExists(filePath) {
 	return stat(filePath).then(() => true, (err) => {

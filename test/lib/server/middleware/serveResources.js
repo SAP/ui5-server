@@ -6,8 +6,8 @@ import test from "ava";
 
 import sinon from "sinon";
 import esmock from "esmock";
-import { Readable, Writable } from "node:stream";
-import { resourceFactory } from "@ui5/fs";
+import {Readable, Writable} from "node:stream";
+import {resourceFactory} from "@ui5/fs";
 import serveResourcesMiddleware from "../../../../lib/middleware/serveResources.js";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 const writeResource = function(writer, path, size, stringContent, stringEncoding, project) {

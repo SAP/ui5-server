@@ -1,7 +1,7 @@
 import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
-import { resourceFactory } from "@ui5/fs";
+import {resourceFactory} from "@ui5/fs";
 import versionInfoMiddleware from "../../../../lib/middleware/versionInfo.js";
 
 function createWorkspace() {

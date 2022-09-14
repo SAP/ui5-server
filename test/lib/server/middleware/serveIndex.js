@@ -1,5 +1,5 @@
 import test from "ava";
-import { resourceFactory } from "@ui5/fs";
+import {resourceFactory} from "@ui5/fs";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
 test.serial("serveIndex default", async (t) => {
