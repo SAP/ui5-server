@@ -1,15 +1,13 @@
-/* eslint-disable ava/no-unknown-modifiers */
-/* Test modifier `cb` was deprecated with ava version
-3 and removed with ava version 4. Therefore, tests using `cb` has to be rewritten, when upgrade to ava version 4 */
-
 import test from "ava";
 
 import sinon from "sinon";
 import esmock from "esmock";
 import {Readable, Writable} from "node:stream";
-import {resourceFactory} from "@ui5/fs";
+import ui5fs from "@ui5/fs";
+const {resourceFactory} = ui5fs;
 import serveResourcesMiddleware from "../../../../lib/middleware/serveResources.js";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
+
 const writeResource = function(writer, path, size, stringContent, stringEncoding, project) {
 	const statInfo = {
 		ino: 0,
@@ -45,8 +43,10 @@ const fakeResponse = {
 };
 
 test.afterEach.always((t) => {
-	mock.stopAll();
 	sinon.restore();
+	if (t.context.serveResourcesMiddlewareWithMock) {
+		esmock.purge(t.context.serveResourcesMiddlewareWithMock);
+	}
 });
 
 test.serial("Check if properties file is served properly", async (t) => {
@@ -243,15 +243,19 @@ fame=stra\\u00dfe`);
 	t.is(setHeaderSpy.getCall(0).lastArg, "application/octet-stream");
 });
 
-test.serial("Check verbose logging", (t) => {
-	const logger = require("@ui5/logger");
+test.serial("Check verbose logging", async (t) => {
 	const verboseLogStub = sinon.stub();
-	const myLoggerInstance = {
+	t.context.loggerStub = {
 		verbose: verboseLogStub,
 		isLevelEnabled: () => true
 	};
-	sinon.stub(logger, "getLogger").returns(myLoggerInstance);
-	const serveResourcesMiddlewareWithMock = mock.reRequire("../../../../lib/middleware/serveResources");
+
+	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
+		await esmock.p("../../../../lib/middleware/serveResources", {
+			"@ui5/logger": {
+				getLogger: sinon.stub().returns(t.context.loggerStub)
+			}
+		});
 
 
 	const resource = {
@@ -330,7 +334,7 @@ test.serial("Check verbose logging", (t) => {
 	});
 });
 
-test.serial.cb("Check if version replacement is done", (t) => {
+test.serial("Check if version replacement is done", (t) => {
 	const input = "foo ${version} bar";
 	const expected = "foo 1.0.0 bar";
 
@@ -384,26 +388,25 @@ test.serial.cb("Check if version replacement is done", (t) => {
 		buffers.push(chunk);
 		callback();
 	};
-	res.end = function() {
-		t.is(Buffer.concat(buffers).toString(), expected);
-		t.end();
-	};
 
-	middleware(req, res, function(err) {
-		if (err) {
-			t.fail("Unexpected error passed to next function: " + err);
-		} else {
-			t.fail("Unexpected call of next function");
-		}
-		t.end();
+	return new Promise((resolve) => {
+		res.end = function() {
+			t.is(Buffer.concat(buffers).toString(), expected);
+			resolve();
+		};
+
+		middleware(req, res, function(err) {
+			if (err) {
+				t.fail("Unexpected error passed to next function: " + err);
+			} else {
+				t.fail("Unexpected call of next function");
+			}
+			resolve();
+		});
 	});
 });
 
-// Skip test in Node v8 as unicode handling of streams seems to be broken
-test.serial[
-	// eslint-disable-next-line ava/no-unknown-modifiers
-	process.version.startsWith("v8.") ? "skip" : "cb"
-]("Check if utf8 characters are correctly processed in version replacement", (t) => {
+test.serial("Check if utf8 characters are correctly processed in version replacement", (t) => {
 	const utf8string = "Κυ";
 	const expected = utf8string;
 
@@ -464,17 +467,20 @@ test.serial[
 		buffers.push(chunk);
 		callback();
 	};
-	res.end = function() {
-		t.is(Buffer.concat(buffers).toString(), expected);
-		t.end();
-	};
 
-	middleware(req, res, function(err) {
-		if (err) {
-			t.fail("Unexpected error passed to next function: " + err);
-		} else {
-			t.fail("Unexpected call of next function");
-		}
-		t.end();
+	return new Promise((resolve) => {
+		res.end = function() {
+			t.is(Buffer.concat(buffers).toString(), expected);
+			resolve();
+		};
+
+		middleware(req, res, function(err) {
+			if (err) {
+				t.fail("Unexpected error passed to next function: " + err);
+			} else {
+				t.fail("Unexpected call of next function");
+			}
+			resolve();
+		});
 	});
 });
