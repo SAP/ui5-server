@@ -1,8 +1,9 @@
 import test from "ava";
 import supertest from "supertest";
-import ui5Server from "../../../";
+import ui5Server from "../../../index.js";
 const server = ui5Server.server;
-const generateProjectGraph = require("@ui5/project").generateProjectGraph.usingNodePackageDependencies;
+import ui5project from "@ui5/project";
+const generateProjectGraph = ui5project.generateProjectGraph.usingNodePackageDependencies;
 import path from "node:path";
 
 let request;
