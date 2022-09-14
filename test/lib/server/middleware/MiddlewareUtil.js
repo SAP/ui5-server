@@ -1,11 +1,11 @@
 import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
+import mime from "mime-types";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
 test.afterEach.always((t) => {
 	sinon.restore();
-	mock.stopAll();
 });
 
 test.serial("getPathname", (t) => {
@@ -21,7 +21,6 @@ test.serial("getPathname", (t) => {
 
 test.serial("getMimeInfo", (t) => {
 	const middlewareUtil = new MiddlewareUtil();
-	const mime = require("mime-types");
 	const lookupStub = sinon.stub(mime, "lookup").returns("mytype");
 	const charsetStub = sinon.stub(mime, "charset").returns("mycharset");
 
@@ -40,7 +39,6 @@ test.serial("getMimeInfo", (t) => {
 
 test.serial("getMimeInfo: unknown type", (t) => {
 	const middlewareUtil = new MiddlewareUtil();
-	const mime = require("mime-types");
 	const lookupStub = sinon.stub(mime, "lookup");
 	const charsetStub = sinon.stub(mime, "charset");
 

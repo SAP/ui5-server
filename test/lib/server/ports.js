@@ -5,7 +5,8 @@ const server = ui5Server.server;
 import http from "node:http";
 import portscanner from "portscanner";
 import sinon from "sinon";
-const generateProjectGraph = require("@ui5/project").generateProjectGraph.usingNodePackageDependencies;
+import ui5project from "@ui5/project";
+const generateProjectGraph = ui5project.generateProjectGraph.usingNodePackageDependencies;
 
 let serve;
 
