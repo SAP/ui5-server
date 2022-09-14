@@ -2,12 +2,13 @@
 /* Test modifier `cb` was deprecated with ava version
 3 and removed with ava version 4. Therefore, tests using `cb` has to be rewritten, when upgrade to ava version 4 */
 
-const test = require("ava");
-const sinon = require("sinon");
-const mock = require("mock-require");
+import test from "ava";
+
+import sinon from "sinon";
+import esmock from "esmock";
 
 const ThemeBuilder = require("@ui5/builder").processors.themeBuilder.ThemeBuilder;
-const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
+import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
 const failOnNext= function(t) {
 	return function(err) {

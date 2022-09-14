@@ -1,6 +1,6 @@
-const test = require("ava");
-const supertest = require("supertest");
-const ui5Server = require("../../../");
+import test from "ava";
+import supertest from "supertest";
+import ui5Server from "../../../";
 const server = ui5Server.server;
 const generateProjectGraph = require("@ui5/project").generateProjectGraph.usingNodePackageDependencies;
 

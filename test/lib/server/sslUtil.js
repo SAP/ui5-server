@@ -1,10 +1,10 @@
-const path = require("path");
-const fs = require("fs");
-const test = require("ava");
-const {promisify} = require("util");
+import path from "node:path";
+import fs from "node:fs";
+import test from "ava";
+import { promisify } from "node:util";
 const stat = promisify(fs.stat);
-const mock = require("mock-require");
-const sslUtil = require("../../../").sslUtil;
+import esmock from "esmock";
+import { sslUtil } from "../../../";
 
 function fileExists(filePath) {
 	return stat(filePath).then(() => true, (err) => {

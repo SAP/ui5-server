@@ -1,5 +1,5 @@
-const test = require("ava");
-const middlewareRepository = require("../../../../lib/middleware/middlewareRepository");
+import test from "ava";
+import middlewareRepository from "../../../../lib/middleware/middlewareRepository.js";
 
 test("getMiddleware", (t) => {
 	const cspModule = require("../../../../lib/middleware/csp");

@@ -1,10 +1,10 @@
-const test = require("ava");
-const supertest = require("supertest");
-const ui5Server = require("../../../");
+import test from "ava";
+import supertest from "supertest";
+import ui5Server from "../../../";
 const server = ui5Server.server;
-const http = require("http");
-const portscanner = require("portscanner");
-const sinon = require("sinon");
+import http from "node:http";
+import portscanner from "portscanner";
+import sinon from "sinon";
 const generateProjectGraph = require("@ui5/project").generateProjectGraph.usingNodePackageDependencies;
 
 let serve;

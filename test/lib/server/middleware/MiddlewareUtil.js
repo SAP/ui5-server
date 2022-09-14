@@ -1,7 +1,7 @@
-const test = require("ava");
-const sinon = require("sinon");
-const mock = require("mock-require");
-const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
+import test from "ava";
+import sinon from "sinon";
+import esmock from "esmock";
+import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
 test.afterEach.always((t) => {
 	sinon.restore();

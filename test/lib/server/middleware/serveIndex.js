@@ -1,6 +1,6 @@
-const test = require("ava");
-const resourceFactory = require("@ui5/fs").resourceFactory;
-const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
+import test from "ava";
+import { resourceFactory } from "@ui5/fs";
+import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
 test.serial("serveIndex default", async (t) => {
 	t.plan(4);

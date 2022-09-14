@@ -2,13 +2,14 @@
 /* Test modifier `cb` was deprecated with ava version
 3 and removed with ava version 4. Therefore, tests using `cb` has to be rewritten, when upgrade to ava version 4 */
 
-const test = require("ava");
-const sinon = require("sinon");
-const mock = require("mock-require");
-const {Readable, Writable} = require("stream");
-const resourceFactory = require("@ui5/fs").resourceFactory;
-const serveResourcesMiddleware = require("../../../../lib/middleware/serveResources");
-const MiddlewareUtil = require("../../../../lib/middleware/MiddlewareUtil");
+import test from "ava";
+
+import sinon from "sinon";
+import esmock from "esmock";
+import { Readable, Writable } from "node:stream";
+import { resourceFactory } from "@ui5/fs";
+import serveResourcesMiddleware from "../../../../lib/middleware/serveResources.js";
+import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 const writeResource = function(writer, path, size, stringContent, stringEncoding, project) {
 	const statInfo = {
 		ino: 0,

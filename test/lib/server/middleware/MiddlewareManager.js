@@ -1,7 +1,7 @@
-const test = require("ava");
-const sinon = require("sinon");
-const MiddlewareManager = require("../../../../lib/middleware/MiddlewareManager");
-const middlewareRepository = require("../../../../lib/middleware/middlewareRepository");
+import test from "ava";
+import sinon from "sinon";
+import MiddlewareManager from "../../../../lib/middleware/MiddlewareManager.js";
+import middlewareRepository from "../../../../lib/middleware/middlewareRepository.js";
 
 test("Missing parameters", (t) => {
 	const err = t.throws(() => {

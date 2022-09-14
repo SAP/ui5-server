@@ -1,8 +1,8 @@
-const test = require("ava");
-const sinon = require("sinon");
-const mock = require("mock-require");
-const resourceFactory = require("@ui5/fs").resourceFactory;
-let versionInfoMiddleware = require("../../../../lib/middleware/versionInfo");
+import test from "ava";
+import sinon from "sinon";
+import esmock from "esmock";
+import { resourceFactory } from "@ui5/fs";
+import versionInfoMiddleware from "../../../../lib/middleware/versionInfo.js";
 
 function createWorkspace() {
 	return resourceFactory.createAdapter({
