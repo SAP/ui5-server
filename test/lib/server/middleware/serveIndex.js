@@ -1,10 +1,11 @@
 import test from "ava";
-import {resourceFactory} from "@ui5/fs";
+import ui5fs from "@ui5/fs";
+const {resourceFactory} = ui5fs;
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
+import serveIndexMiddleware from "../../../../lib/middleware/serveIndex.js";
 
 test.serial("serveIndex default", async (t) => {
 	t.plan(4);
-	const serveIndexMiddleware = require("../../../../lib/middleware/serveIndex");
 	const writeResource = function(writer, path, buffer) {
 		const statInfo = {
 			mtime: 0,
@@ -71,7 +72,6 @@ test.serial("serveIndex default", async (t) => {
 
 test.serial("serveIndex no hidden", async (t) => {
 	t.plan(4);
-	const serveIndexMiddleware = require("../../../../lib/middleware/serveIndex");
 	const writeResource = function(writer, path, buffer) {
 		const statInfo = {
 			mtime: 0,
@@ -141,7 +141,6 @@ test.serial("serveIndex no hidden", async (t) => {
 
 test.serial("serveIndex no details", async (t) => {
 	t.plan(4);
-	const serveIndexMiddleware = require("../../../../lib/middleware/serveIndex");
 	const writeResource = function(writer, path, buffer) {
 		const statInfo = {
 			mtime: 0,
