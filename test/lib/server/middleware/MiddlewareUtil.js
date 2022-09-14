@@ -8,10 +8,12 @@ test.afterEach.always((t) => {
 	sinon.restore();
 });
 
-test.serial("getPathname", (t) => {
-	const middlewareUtil = new MiddlewareUtil();
+test.serial("getPathname", async (t) => {
 	const parseurlStub = sinon.stub().returns({pathname: "path%20name"});
-	mock("parseurl", parseurlStub);
+	const MiddlewareUtil = await esmock("../../../../lib/middleware/MiddlewareUtil.js", {
+		parseurl: parseurlStub
+	});
+	const middlewareUtil = new MiddlewareUtil();
 	const pathname = middlewareUtil.getPathname("req");
 
 	t.is(parseurlStub.callCount, 1, "parseurl got called once");
