@@ -1,21 +1,20 @@
 import test from "ava";
 import supertest from "supertest";
-import server from "../../../lib/server.js";
+import {serve} from "../../../lib/server.js";
 import http from "node:http";
 import portscanner from "portscanner";
 import sinon from "sinon";
-import ui5project from "@ui5/project";
-const generateProjectGraph = ui5project.generateProjectGraph.usingNodePackageDependencies;
+import {graphFromPackageDependencies} from "@ui5/project/graph";
 
-let serve;
+let server;
 
 // Start server before running tests
 test.before(async (t) => {
-	const graph = await generateProjectGraph({
+	const graph = await graphFromPackageDependencies({
 		cwd: "./test/fixtures/application.a"
 	});
 
-	serve = await server.serve(graph, {
+	server = await serve(graph, {
 		port: 3335
 	});
 });
@@ -23,7 +22,7 @@ test.before(async (t) => {
 test.after(() => {
 	sinon.restore();
 	return new Promise((resolve, reject) => {
-		serve.close((error) => {
+		server.close((error) => {
 			if (error) {
 				reject(error);
 			} else {
