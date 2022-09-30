@@ -1,5 +1,5 @@
 import test from "ava";
-import resourceFactory from "@ui5/fs/resourceFactory";
+import * as resourceFactory from "@ui5/fs/resourceFactory";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 import serveIndexMiddleware from "../../../../lib/middleware/serveIndex.js";
 

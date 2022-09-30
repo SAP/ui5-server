@@ -1,7 +1,7 @@
 import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
-import resourceFactory from "@ui5/fs/resourceFactory";
+import * as resourceFactory from "@ui5/fs/resourceFactory";
 
 function createWorkspace() {
 	return resourceFactory.createAdapter({
@@ -165,12 +165,8 @@ test.serial("test all inner API calls within middleware", async (t) => {
 	const versionInfoGeneratorStub = sinon.stub().returns([dummyVersionInfo]);
 
 	const versionInfoMiddleware = await t.context.createVersionInfoMiddleware({
-		"@ui5/builder": {
-			processors: {
-				manifestCreator: manifestCreatorStub,
-				versionInfoGenerator: versionInfoGeneratorStub
-			}
-		}
+		"@ui5/builder/processors/manifestCreator": manifestCreatorStub,
+		"@ui5/builder/processors/versionInfoGenerator": versionInfoGeneratorStub,
 	});
 
 	const dependenciesA = createDepWorkspace(["lib", "a"], {virBasePath: "/"});

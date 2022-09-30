@@ -4,6 +4,8 @@ import test from "ava";
 import sinon from "sinon";
 import {promisify} from "node:util";
 const stat = promisify(fs.stat);
+import _rimraf from "rimraf";
+const rimraf = promisify(_rimraf);
 import esmock from "esmock";
 
 function fileExists(filePath) {
@@ -39,8 +41,7 @@ test.afterEach.always((t) => {
 });
 
 test("Get existing certificate", async (t) => {
-	const {default: ui5server} = await import("../../../index.js");
-	const {sslUtil} = ui5server;
+	const sslUtil = await esmock("../../../lib/sslUtil.js");
 
 	const sslPath = path.join(process.cwd(), "./test/fixtures/ssl/");
 	const result = await sslUtil.getSslCertificate(
@@ -79,6 +80,8 @@ test.serial("Create new certificate and install it", async (t) => {
 	});
 
 	const sslPath = path.join(process.cwd(), "./test/tmp/ssl/");
+	await rimraf(sslPath); // Ensure that tmp directory doesn't exist
+
 	const sslPathKey = path.join(sslPath, "someOtherServer1.key");
 	const sslPathCert = path.join(sslPath, "someOtherServer1.crt");
 	const result = await sslUtil.getSslCertificate(sslPathKey, sslPathCert);

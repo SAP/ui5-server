@@ -2,9 +2,8 @@ import test from "ava";
 
 import sinon from "sinon";
 import esmock from "esmock";
-import ui5builder from "@ui5/builder";
 
-const ThemeBuilder = ui5builder.processors.themeBuilder.ThemeBuilder;
+import {ThemeBuilder} from "@ui5/builder/processors/themeBuilder";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
 const failOnNext = function(t, reject) {

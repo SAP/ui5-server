@@ -3,7 +3,7 @@ import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
 import {Readable, Writable} from "node:stream";
-import resourceFactory from "@ui5/fs/resourceFactory";
+import * as resourceFactory from "@ui5/fs/resourceFactory";
 import serveResourcesMiddleware from "../../../../lib/middleware/serveResources.js";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
