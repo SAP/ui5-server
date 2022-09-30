@@ -17,7 +17,12 @@
 		"tool"
 	],
 	"type": "module",
-	"exports": "./index.js",
+	"exports": {
+		".": "./lib/server.js",
+		"./sslUtil": "./lib/sslUtil.js",
+		"./middlewareRepository": "./lib/middleware/middlewareRepository.js",
+		"./package.json": "./package.json"
+	},
 	"engines": {
 		"node": ">= 16.13.2",
 		"npm": ">= 8"
@@ -44,7 +49,6 @@
 		"depcheck": "depcheck --ignores docdash,compression,cors,@istanbuljs/esm-loader-hook --parsers='**/*.js:es6,**/*.cjs:es6'"
 	},
 	"files": [
-		"index.js",
 		"CHANGELOG.md",
 		"CONTRIBUTING.md",
 		"jsdoc.json",

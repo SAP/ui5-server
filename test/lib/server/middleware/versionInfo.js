@@ -1,8 +1,7 @@
 import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
-import ui5fs from "@ui5/fs";
-const {resourceFactory} = ui5fs;
+import resourceFactory from "@ui5/fs/resourceFactory";
 
 function createWorkspace() {
 	return resourceFactory.createAdapter({
