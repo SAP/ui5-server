@@ -19,8 +19,8 @@
 	"type": "module",
 	"exports": {
 		".": "./lib/server.js",
-		"./sslUtil": "./lib/sslUtil.js",
-		"./middlewareRepository": "./lib/middleware/middlewareRepository.js",
+		"./internal/sslUtil": "./lib/sslUtil.js",
+		"./internal/middlewareRepository": "./lib/middleware/middlewareRepository.js",
 		"./package.json": "./package.json"
 	},
 	"engines": {

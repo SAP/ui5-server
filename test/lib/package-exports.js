@@ -16,9 +16,10 @@ test("@ui5/project", async (t) => {
 	t.is(actual, expected, "Correct module exported");
 });
 
+// Internal modules (only to be used by @ui5/* packages)
 [
-	"sslUtil",
-	{exportedSpecifier: "middlewareRepository", mappedModule: "../../lib/middleware/middlewareRepository.js"},
+	{exportedSpecifier: "internal/sslUtil", mappedModule: "../../lib/sslUtil.js"},
+	{exportedSpecifier: "internal/middlewareRepository", mappedModule: "../../lib/middleware/middlewareRepository.js"},
 ].forEach((v) => {
 	let exportedSpecifier; let mappedModule;
 	if (typeof v === "string") {
