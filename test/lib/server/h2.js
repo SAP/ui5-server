@@ -1,7 +1,7 @@
 import test from "ava";
 import supertest from "supertest";
 import {serve} from "../../../lib/server.js";
-import sslUtil from "../../../lib/sslUtil.js";
+import {getSslCertificate} from "../../../lib/sslUtil.js";
 import {graphFromPackageDependencies} from "@ui5/project/graph";
 import path from "node:path";
 
@@ -16,7 +16,7 @@ test.before(async (t) => {
 		cwd: "./test/fixtures/application.a"
 	});
 	const sslPath = path.join(process.cwd(), "./test/fixtures/ssl/");
-	const {key, cert} = await sslUtil.getSslCertificate(
+	const {key, cert} = await getSslCertificate(
 		path.join(sslPath, "server.key"),
 		path.join(sslPath, "server.crt"),
 	);
