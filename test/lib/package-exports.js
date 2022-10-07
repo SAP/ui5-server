@@ -10,16 +10,22 @@ test("export of package.json", (t) => {
 });
 
 // Public API contract (exported modules)
-test("@ui5/project", async (t) => {
+test("@ui5/server", async (t) => {
 	const actual = await import("@ui5/server");
 	const expected = await import("../../lib/server.js");
 	t.is(actual, expected, "Correct module exported");
 });
 
-// Internal modules (only to be used by @ui5/* packages)
+// Internal modules (only to be used by @ui5/* / SAP owned packages)
 [
+	// used by @ui5/cli
 	{exportedSpecifier: "internal/sslUtil", mappedModule: "../../lib/sslUtil.js"},
+
+	// used by SAP/openui5 (csp middleware)
 	{exportedSpecifier: "internal/middlewareRepository", mappedModule: "../../lib/middleware/middlewareRepository.js"},
+
+	// used by karma-ui5
+	{exportedSpecifier: "internal/MiddlewareManager", mappedModule: "../../lib/middleware/MiddlewareManager.js"},
 ].forEach((v) => {
 	let exportedSpecifier; let mappedModule;
 	if (typeof v === "string") {

@@ -21,6 +21,7 @@
 		".": "./lib/server.js",
 		"./internal/sslUtil": "./lib/sslUtil.js",
 		"./internal/middlewareRepository": "./lib/middleware/middlewareRepository.js",
+		"./internal/MiddlewareManager": "./lib/middleware/MiddlewareManager.js",
 		"./package.json": "./package.json"
 	},
 	"engines": {
