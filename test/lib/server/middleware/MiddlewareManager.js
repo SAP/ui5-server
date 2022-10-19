@@ -527,7 +527,7 @@ test("addCustomMiddleware", async (t) => {
 	const middlewareUtil = {
 		getInterface: sinon.stub().returns("interfacedMiddlewareUtil")
 	};
-	const res = customMiddleware({
+	const res = await customMiddleware({
 		resources: "resources",
 		middlewareUtil
 	});
