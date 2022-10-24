@@ -115,9 +115,9 @@
 		"url": "git@github.com:SAP/ui5-server.git"
 	},
 	"dependencies": {
-		"@ui5/builder": "^3.0.0-alpha.11",
-		"@ui5/fs": "^3.0.0-alpha.6",
-		"@ui5/logger": "^3.0.1-alpha.2",
+		"@ui5/builder": "^3.0.0-alpha.12",
+		"@ui5/fs": "^3.0.0-alpha.7",
+		"@ui5/logger": "^3.0.1-alpha.3",
 		"body-parser": "^1.19.1",
 		"compression": "^1.7.4",
 		"connect-openui5": "^0.10.2",
@@ -140,7 +140,7 @@
 	},
 	"devDependencies": {
 		"@istanbuljs/esm-loader-hook": "^0.2.0",
-		"@ui5/project": "^3.0.0-alpha.9",
+		"@ui5/project": "^3.0.0-alpha.10",
 		"ava": "^4.3.3",
 		"chokidar-cli": "^3.0.0",
 		"cross-env": "^7.0.3",
