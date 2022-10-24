@@ -35,8 +35,8 @@ const createProjectMetadata = (names, version) => {
 };
 
 /**
- * @param {module:@ui5/fs.DuplexCollection} dependencies
- * @param {module:@ui5/fs.resourceFactory} resourceFactory
+ * @param {module:@ui5/fs/DuplexCollection} dependencies
+ * @param {module:@ui5/fs/resourceFactory} resourceFactory
  * @param {string[]} names e.g. ["lib", "a"]
  * @param {string} version Project version to write into to the .library
  * @returns {Promise<void>}
@@ -61,8 +61,8 @@ async function createDotLibrary(dependencies, resourceFactory, names, version) {
 
 /**
  *
- * @param {module:@ui5/fs.DuplexCollection} dependencies
- * @param {module:@ui5/fs.resourceFactory} resourceFactory
+ * @param {module:@ui5/fs/DuplexCollection} dependencies
+ * @param {module:@ui5/fs/resourceFactory} resourceFactory
  * @param {string[]} names e.g. ["lib", "a"]
  * @param {object[]} deps
  * @param {string[]} [embeds]
@@ -107,8 +107,8 @@ const createManifestResource = async (dependencies, resourceFactory, names, deps
 
 /**
  *
- * @param {module:@ui5/fs.DuplexCollection} dependencies
- * @param {module:@ui5/fs.resourceFactory} resourceFactory
+ * @param {module:@ui5/fs/DuplexCollection} dependencies
+ * @param {module:@ui5/fs/resourceFactory} resourceFactory
  * @param {string[]} names e.g. ["lib", "a"]
  * @param {object[]} deps
  * @param {string[]} [embeds]
