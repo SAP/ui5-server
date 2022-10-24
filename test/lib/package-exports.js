@@ -9,6 +9,12 @@ test("export of package.json", (t) => {
 	t.truthy(require("@ui5/server/package.json").version);
 });
 
+// Check number of definied exports
+test("check number of exports", (t) => {
+	const packageJson = require("@ui5/server/package.json");
+	t.is(Object.keys(packageJson.exports).length, 5);
+});
+
 // Public API contract (exported modules)
 test("@ui5/server", async (t) => {
 	const actual = await import("@ui5/server");
