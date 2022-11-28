@@ -171,7 +171,12 @@ test.serial("Check if properties file is served properly without property settin
 		const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
 		const project = {
 			getPropertiesFileSourceEncoding: () => "",
-			getSpecVersion: () => "1.1"
+			getSpecVersion: () => {
+				return {
+					toString: () => "1.1",
+					lte: () => true,
+				};
+			}
 		};
 		const resource = await writeResource(readerWriter, "/myFile3.properties",
 			1024 * 1024, "key=titel\nfame=straße", "latin1", project
@@ -209,7 +214,12 @@ test.serial("Check if properties file is served properly without property settin
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
 	const project = {
 		getPropertiesFileSourceEncoding: () => "",
-		getSpecVersion: () => "2.0"
+		getSpecVersion: () => {
+			return {
+				toString: () => "2.0",
+				lte: () => false,
+			};
+		}
 	};
 	const resource = await writeResource(readerWriter, "/myFile3.properties",
 		1024 * 1024, "key=titel\nfame=straße", "utf8", project

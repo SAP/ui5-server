@@ -533,14 +533,13 @@ test("addCustomMiddleware: Missing before- or afterMiddleware configuration", as
 test("addCustomMiddleware", async (t) => {
 	const {sinon} = t.context;
 	const middlewareModuleStub = sinon.stub().returns("ok");
-	const getSpecVersionStub = sinon.stub().returns("2.6");
-	const specVersionComparatorGteStub = sinon.stub().returns(false);
-	const mockSpecVersionComparator = {
-		gte: specVersionComparatorGteStub
+	const specVersionGteStub = sinon.stub().returns(false);
+	const mockSpecificationVersion = {
+		toString: () => "2.6",
+		gte: specVersionGteStub
 	};
 	const getExtensionStub = sinon.stub().returns({
-		getSpecVersion: getSpecVersionStub,
-		getSpecVersionComparator: () => mockSpecVersionComparator,
+		getSpecVersion: () => mockSpecificationVersion,
 		getMiddleware: () => middlewareModuleStub
 	});
 	const graph = {
@@ -582,11 +581,11 @@ test("addCustomMiddleware", async (t) => {
 	});
 
 	t.is(res, "ok", "Wrapper callback returned expected value");
-	t.is(specVersionComparatorGteStub.callCount, 1, "SpecVersionComparator#gte got called once");
-	t.is(specVersionComparatorGteStub.getCall(0).args[0], "3.0",
-		"SpecVersionComparator#gte got called with correct arguments");
+	t.is(specVersionGteStub.callCount, 1, "SpecificationVersion#gte got called once");
+	t.is(specVersionGteStub.getCall(0).args[0], "3.0",
+		"SpecificationVersion#gte got called with correct arguments");
 	t.is(middlewareUtil.getInterface.callCount, 1, "middlewareUtil.getInterface got called once");
-	t.is(middlewareUtil.getInterface.getCall(0).args[0], mockSpecVersionComparator,
+	t.is(middlewareUtil.getInterface.getCall(0).args[0], mockSpecificationVersion,
 		"middlewareUtil.getInterface got called with correct arguments");
 	t.is(middlewareModuleStub.callCount, 1, "Middleware module got called once");
 	t.deepEqual(middlewareModuleStub.getCall(0).args[0], {
@@ -603,14 +602,13 @@ test("addCustomMiddleware", async (t) => {
 test("addCustomMiddleware with specVersion 3.0", async (t) => {
 	const {sinon, MiddlewareManager} = t.context;
 	const middlewareModuleStub = sinon.stub().returns("ok");
-	const getSpecVersionStub = sinon.stub().returns("3.0");
-	const specVersionComparatorGteStub = sinon.stub().returns(true);
-	const mockSpecVersionComparator = {
-		gte: specVersionComparatorGteStub
+	const specVersionGteStub = sinon.stub().returns(true);
+	const mockSpecificationVersion = {
+		toString: () => "3.0",
+		gte: specVersionGteStub
 	};
 	const getExtensionStub = sinon.stub().returns({
-		getSpecVersion: getSpecVersionStub,
-		getSpecVersionComparator: () => mockSpecVersionComparator,
+		getSpecVersion: () => mockSpecificationVersion,
 		getMiddleware: () => middlewareModuleStub
 	});
 	const graph = {
@@ -652,11 +650,11 @@ test("addCustomMiddleware with specVersion 3.0", async (t) => {
 	});
 
 	t.is(res, "ok", "Wrapper callback returned expected value");
-	t.is(specVersionComparatorGteStub.callCount, 1, "SpecVersionComparator#gte got called once");
-	t.is(specVersionComparatorGteStub.getCall(0).args[0], "3.0",
-		"SpecVersionComparator#gte got called with correct arguments");
+	t.is(specVersionGteStub.callCount, 1, "SpecificationVersion#gte got called once");
+	t.is(specVersionGteStub.getCall(0).args[0], "3.0",
+		"SpecificationVersion#gte got called with correct arguments");
 	t.is(middlewareUtil.getInterface.callCount, 1, "middlewareUtil.getInterface got called once");
-	t.is(middlewareUtil.getInterface.getCall(0).args[0], mockSpecVersionComparator,
+	t.is(middlewareUtil.getInterface.getCall(0).args[0], mockSpecificationVersion,
 		"middlewareUtil.getInterface got called with correct arguments");
 	t.is(middlewareModuleStub.callCount, 1, "Middleware module got called once");
 	t.deepEqual(middlewareModuleStub.getCall(0).args[0], {

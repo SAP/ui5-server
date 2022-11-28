@@ -3,14 +3,14 @@ import sinon from "sinon";
 import esmock from "esmock";
 import mime from "mime-types";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
-import SpecVersionComparator from "@ui5/project/specifications/utils/SpecVersionComparator";
+import SpecificationVersion from "@ui5/project/specifications/SpecificationVersion";
 
 test.afterEach.always((t) => {
 	sinon.restore();
 });
 
-function getSpecVersionComparator(specVersion) {
-	return new SpecVersionComparator(specVersion);
+function getSpecificationVersion(specVersion) {
+	return new SpecificationVersion(specVersion);
 }
 
 test.serial("getPathname", async (t) => {
@@ -157,7 +157,7 @@ test.serial("resourceFactory", (t) => {
 test("getInterface: specVersion 1.0", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("1.0"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("1.0"));
 
 	t.is(interfacedMiddlewareUtil, undefined, "no interface provided");
 });
@@ -165,7 +165,7 @@ test("getInterface: specVersion 1.0", (t) => {
 test("getInterface: specVersion 2.0", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("2.0"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("2.0"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -179,7 +179,7 @@ test("getInterface: specVersion 2.0", (t) => {
 test("getInterface: specVersion 2.1", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("2.1"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("2.1"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -193,7 +193,7 @@ test("getInterface: specVersion 2.1", (t) => {
 test("getInterface: specVersion 2.2", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("2.2"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("2.2"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -207,7 +207,7 @@ test("getInterface: specVersion 2.2", (t) => {
 test("getInterface: specVersion 2.3", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("2.3"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("2.3"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -221,7 +221,7 @@ test("getInterface: specVersion 2.3", (t) => {
 test("getInterface: specVersion 2.4", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("2.4"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("2.4"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -235,7 +235,7 @@ test("getInterface: specVersion 2.4", (t) => {
 test("getInterface: specVersion 2.5", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("2.5"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("2.5"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -249,7 +249,7 @@ test("getInterface: specVersion 2.5", (t) => {
 test("getInterface: specVersion 2.6", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("2.6"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("2.6"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -283,7 +283,7 @@ test("getInterface: specVersion 3.0", (t) => {
 
 	const middlewareUtil = new MiddlewareUtil({graph: mockGraph, project: "project"});
 
-	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecVersionComparator("3.0"));
+	const interfacedMiddlewareUtil = middlewareUtil.getInterface(getSpecificationVersion("3.0"));
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
@@ -301,7 +301,6 @@ test("getInterface: specVersion 3.0", (t) => {
 	// getProject
 	const interfacedProject = interfacedMiddlewareUtil.getProject("pony");
 	t.deepEqual(Object.keys(interfacedProject), [
-		"getSpecVersion",
 		"getType",
 		"getName",
 		"getVersion",
@@ -312,7 +311,6 @@ test("getInterface: specVersion 3.0", (t) => {
 		"isFrameworkProject",
 	], "Correct methods are provided");
 
-	t.is(interfacedProject.getSpecVersion(), "specVersion", "getSpecVersion function is bound correctly");
 	t.is(interfacedProject.getType(), "type", "getType function is bound correctly");
 	t.is(interfacedProject.getName(), "name", "getName function is bound correctly");
 	t.is(interfacedProject.getVersion(), "version", "getVersion function is bound correctly");
@@ -345,7 +343,7 @@ test("getInterface: specVersion 3.0", (t) => {
 test("getInterface: specVersion unknown", (t) => {
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 	const err = t.throws(() => {
-		middlewareUtil.getInterface(getSpecVersionComparator("1.5"));
+		middlewareUtil.getInterface(getSpecificationVersion("1.5"));
 	});
 
 	t.is(err.message,
