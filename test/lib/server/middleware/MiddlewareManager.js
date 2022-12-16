@@ -172,6 +172,45 @@ test("addMiddleware: Add middleware with beforeMiddleware and mountPath paramete
 		"Middleware was inserted at correct position of middleware execution order array");
 });
 
+test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", async (t) => {
+	const {sinon} = t.context;
+	const warnSpy = sinon.spy();
+	const StubbedMiddlewareManager = await esmock("../../../../lib/middleware/MiddlewareManager.js", {
+		"@ui5/logger": {getGroupLogger: sinon.stub().returns({warn: warnSpy})}
+	});
+	const middlewareManager = new StubbedMiddlewareManager({
+		graph: {},
+		rootProject: "root project",
+		resources: {
+			all: "I",
+			rootProject: "like",
+			dependencies: "ponies"
+		}
+	});
+
+	await middlewareManager.addMiddleware("compression"); // Add some middleware
+
+	await middlewareManager.addMiddleware("serveIndex", { // Add middleware to test for
+		beforeMiddleware: "connectUi5Proxy",
+		mountPath: "/pony"
+	});
+	t.truthy(middlewareManager.middleware["serveIndex"], "Middleware got added to internal map");
+	t.truthy(middlewareManager.middleware["serveIndex"].middleware, "Middleware module is given");
+	t.is(middlewareManager.middleware["serveIndex"].mountPath, "/pony", "Correct mount path set");
+
+	t.is(middlewareManager.middlewareExecutionOrder.length, 2,
+		"Two middleware got added to middleware execution order");
+	t.is(middlewareManager.middlewareExecutionOrder[1], "serveIndex",
+		"Middleware was inserted at the end of middleware execution order array");
+
+	t.truthy(
+		warnSpy.calledOnce,
+		"There should be a warning if middleware tries to attach on beforeMiddleware/afterMiddleware 'connectUi5Proxy'"
+	);
+
+	esmock.purge(StubbedMiddlewareManager);
+});
+
 test("addMiddleware: Add middleware with afterMiddleware parameter", async (t) => {
 	const middlewareManager = new MiddlewareManager({
 		graph: {},
