@@ -198,7 +198,7 @@ test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", asyn
 	t.is(
 		middlewareManager.middlewareExecutionOrder.indexOf("customMiddleware"),
 		middlewareManager.middlewareExecutionOrder.indexOf("nonReadRequests") + 1,
-		"customMiddleware was append at the end"
+		"customMiddleware was append after the standard 'nonReadRequests'"
 	);
 
 	t.truthy(
