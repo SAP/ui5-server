@@ -188,21 +188,18 @@ test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", asyn
 		}
 	});
 
-	await middlewareManager.addMiddleware("compression"); // Add some middleware
-	await middlewareManager.addMiddleware("nonReadRequests"); // Add some middleware
-
-	await middlewareManager.addMiddleware("serveIndex", { // Add middleware to test for
-		beforeMiddleware: "connectUi5Proxy",
+	await middlewareManager.addStandardMiddleware(); // Add standard middleware
+	await middlewareManager.addMiddleware("customMiddleware", { // Add middleware to test for
+		customMiddleware: () => {},
+		afterMiddleware: "connectUi5Proxy",
 		mountPath: "/pony"
 	});
-	t.truthy(middlewareManager.middleware["serveIndex"], "Middleware got added to internal map");
-	t.truthy(middlewareManager.middleware["serveIndex"].middleware, "Middleware module is given");
-	t.is(middlewareManager.middleware["serveIndex"].mountPath, "/pony", "Correct mount path set");
 
-	t.is(middlewareManager.middlewareExecutionOrder.length, 3,
-		"Three middleware got added to middleware execution order");
-	t.is(middlewareManager.middlewareExecutionOrder[1], "serveIndex",
-		"Middleware was inserted at the end of middleware execution order array");
+	t.is(
+		middlewareManager.middlewareExecutionOrder.indexOf("customMiddleware"),
+		middlewareManager.middlewareExecutionOrder.indexOf("nonReadRequests") + 1,
+		"customMiddleware was append at the end"
+	);
 
 	t.truthy(
 		warnSpy.calledOnce,
