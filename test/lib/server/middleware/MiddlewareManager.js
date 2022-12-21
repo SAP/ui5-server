@@ -198,13 +198,8 @@ test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", asyn
 		});
 	});
 
-	t.truthy(
-		warnSpy.calledOnce,
-		"There should be a warning if middleware tries to attach on beforeMiddleware/afterMiddleware 'connectUi5Proxy'"
-	);
-
 	t.is(err.message,
-		"Could not find middleware connectUi5Proxy, referenced by custom middleware customMiddleware",
+		"Standard middleware \"connectUi5Proxy\", referenced by middleware \"customMiddleware\" in project root project, has been removed in this version of UI5 Tooling and can't be referenced anymore. Please see the migration guide at https://sap.github.io/ui5-tooling/updates/migrate-v3/",
 		"Trying to bind to a non-existing standard middleware");
 
 
