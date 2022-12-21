@@ -189,22 +189,24 @@ test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", asyn
 	});
 
 	await middlewareManager.addStandardMiddleware(); // Add standard middleware
-	await middlewareManager.addMiddleware("customMiddleware", { // Add middleware to test for
-		customMiddleware: () => {},
-		afterMiddleware: "connectUi5Proxy",
-		mountPath: "/pony"
-	});
 
-	t.is(
-		middlewareManager.middlewareExecutionOrder.indexOf("customMiddleware"),
-		middlewareManager.middlewareExecutionOrder.indexOf("nonReadRequests") + 1,
-		"customMiddleware was append after the standard 'nonReadRequests'"
-	);
+	const err = await t.throwsAsync(() => {
+		return middlewareManager.addMiddleware("customMiddleware", { // Add middleware to test for
+			customMiddleware: () => {},
+			afterMiddleware: "connectUi5Proxy",
+			mountPath: "/pony"
+		});
+	});
 
 	t.truthy(
 		warnSpy.calledOnce,
 		"There should be a warning if middleware tries to attach on beforeMiddleware/afterMiddleware 'connectUi5Proxy'"
 	);
+
+	t.is(err.message,
+		"Could not find middleware connectUi5Proxy, referenced by custom middleware customMiddleware",
+		"Trying to bind to a non-existing standard middleware");
+
 
 	esmock.purge(StubbedMiddlewareManager);
 });
