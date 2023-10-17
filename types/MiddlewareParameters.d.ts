@@ -1,11 +1,13 @@
 declare module "@ui5/server/middleware/MiddlewareParameters" {
-	import { availableSpecVersions } from "@ui5/server";
 	import { MiddlewareUtil } from "@ui5/server/middleware/MiddlewareUtil";
 	import { TaskUtil } from "@ui5/project/build/helpers/TaskUtil";
 	
 	// Mock some of the types, so it would be easier to follow
 	type ui5_logger_Logger = object
 	type ui5_fs_AbstractReader = object
+	
+	// This one should be (eventually) provided globally or as a part of @ui5/project/Specification 
+	type availableSpecVersions = "2.0" | "2.2" | "3.0" | "3.2";
 
 	interface MiddlewareParametersBase {
 		log: ui5_logger_Logger

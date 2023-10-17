@@ -1,5 +1,6 @@
 declare module "@ui5/server/middleware/MiddlewareUtil" {
-	import { availableSpecVersions } from "@ui5/server";
+	// This one should be (eventually) provided globally or as a part of @ui5/project/Specification 
+	type availableSpecVersions = "2.0" | "2.2" | "3.0" | "3.2";
 
 	// Mock some of the types, so it would be easier to follow
 	type ui5_fs_resourceFactory = object
