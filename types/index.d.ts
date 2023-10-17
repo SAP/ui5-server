@@ -1,0 +1,4 @@
+// Reference multiple definitions, so they could act like a bundle
+
+/// <reference path="MiddlewareUtil.d.ts" />
+/// <reference path="ui5_serve.d.ts" />

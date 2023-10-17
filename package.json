@@ -22,7 +22,8 @@
 		"./internal/sslUtil": "./lib/sslUtil.js",
 		"./internal/middlewareRepository": "./lib/middleware/middlewareRepository.js",
 		"./internal/MiddlewareManager": "./lib/middleware/MiddlewareManager.js",
-		"./package.json": "./package.json"
+		"./package.json": "./package.json",
+		"./types": "./types/index.d.ts"
 	},
 	"engines": {
 		"node": "^16.18.0 || >=18.12.0",
