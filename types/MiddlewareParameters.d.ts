@@ -1,3 +1,5 @@
+import "@ui5/server/types";
+import "@ui5/project/types";
 declare module "@ui5/server/middleware/MiddlewareParameters" {
 	import { MiddlewareUtil } from "@ui5/server/middleware/MiddlewareUtil";
 	import { TaskUtil } from "@ui5/project/build/helpers/TaskUtil";

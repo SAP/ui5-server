@@ -1,3 +1,4 @@
+import "@ui5/project/types"
 declare module "@ui5/server" {
 	import { ProjectGraph } from "@ui5/project/graph";
 
