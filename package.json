@@ -18,7 +18,13 @@
 	],
 	"type": "module",
 	"exports": {
-		".": "./lib/server.js",
+		".": {
+			"default": "./lib/server.js",
+			"types": "./types/ui5_serve.d.ts"
+		},
+		"./middleware/*": {
+			"types": "./types/index.d.ts"
+		},
 		"./internal/sslUtil": "./lib/sslUtil.js",
 		"./internal/middlewareRepository": "./lib/middleware/middlewareRepository.js",
 		"./internal/MiddlewareManager": "./lib/middleware/MiddlewareManager.js",
