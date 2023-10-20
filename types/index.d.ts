@@ -1,5 +1,3 @@
-// Reference multiple definitions, so they could act like a bundle
-
-/// <reference path="ui5_serve.d.ts" />
-/// <reference path="MiddlewareUtil.d.ts" />
-/// <reference path="MiddlewareParameters.d.ts" />
+// Re exporting types from other modules
+export type { MiddlewareParameters } from "./MiddlewareParameters.d.ts";
+export type { MiddlewareUtil } from "./MiddlewareUtil.d.ts";
