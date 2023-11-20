@@ -525,3 +525,77 @@ test.serial("Check if utf8 characters are correctly processed in version replace
 		});
 	});
 });
+
+test.serial("Check if manifest.json file is served properly by using manifestTransformer", async (t) => {
+	t.plan(4);
+
+	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
+
+	const input = `
+{
+	"_version": "1.58.0",
+	"sap.app": {
+		"id": "sap.ui.demo.app"
+	},
+	"sap.ui5": {
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "sap.ui.demo.app.i18n.i18n",
+					"fallbackLocale": "de"
+				}
+			}
+		}
+	}
+}`;
+	const expected = `
+{
+	"_version": "1.58.0",
+	"sap.app": {
+		"id": "sap.ui.demo.app"
+	},
+	"sap.ui5": {
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "sap.ui.demo.app.i18n.i18n",
+					"supportedLocales": ["en", "de"],
+					"fallbackLocale": "de"
+				}
+			}
+		}
+	}
+}`;
+
+	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
+		input, "utf8"
+	);
+	const setStringSpy = sinon.spy(resource, "setString");
+	const middleware = serveResourcesMiddleware({
+		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
+		resources: {
+			all: readerWriter
+		}
+	});
+
+	const response = fakeResponse;
+
+	const setHeaderSpy = sinon.spy(response, "setHeader");
+	const req = {
+		url: "/manifest.json",
+		headers: {}
+	};
+	const next = function(err) {
+		throw new Error(`Next callback called with error: ${err.stack}`);
+	};
+
+	await middleware(req, response, next);
+	const content = await resource.getString();
+
+	t.is(content, expected);
+	t.is(setHeaderSpy.callCount, 2);
+	t.is(setStringSpy.callCount, 1);
+	t.is(setHeaderSpy.getCall(0).lastArg, "application/octet-stream");
+});
