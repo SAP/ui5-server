@@ -24,10 +24,13 @@ const writeResource = function(writer, path, size, stringContent, stringEncoding
 		project
 	});
 	// stub resource functionality in order to be able to get the Resource's content. Otherwise it would be drained.
-	sinon.stub(resource, "getStream").returns({
-		pipe: function() {
-		}
-	});
+	const getStreamStub = {
+		pipe() {
+			return this;
+		},
+		setEncoding() {}
+	};
+	sinon.stub(resource, "getStream").returns(getStreamStub);
 
 	writer.byPath = sinon.stub();
 	writer.byPath.withArgs(path).resolves(resource);
@@ -531,49 +534,65 @@ test.serial("Check if manifest.json file is served properly by using manifestTra
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
 
-	const input = `
-{
-	"_version": "1.58.0",
-	"sap.app": {
-		"id": "sap.ui.demo.app"
-	},
-	"sap.ui5": {
-		"models": {
-			"i18n": {
-				"type": "sap.ui.model.resource.ResourceModel",
-				"settings": {
-					"bundleName": "sap.ui.demo.app.i18n.i18n",
-					"fallbackLocale": "de"
-				}
-			}
-		}
-	}
+	const input = `{
+  "_version": "1.58.0",
+  "sap.app": {
+    "id": "sap.ui.demo.app"
+  },
+  "sap.ui5": {
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "sap.ui.demo.app.i18n.i18n",
+          "fallbackLocale": "de"
+        }
+      }
+    }
+  }
 }`;
-	const expected = `
-{
-	"_version": "1.58.0",
-	"sap.app": {
-		"id": "sap.ui.demo.app"
-	},
-	"sap.ui5": {
-		"models": {
-			"i18n": {
-				"type": "sap.ui.model.resource.ResourceModel",
-				"settings": {
-					"bundleName": "sap.ui.demo.app.i18n.i18n",
-					"supportedLocales": ["en", "de"],
-					"fallbackLocale": "de"
-				}
-			}
-		}
-	}
+	const expected = `{
+  "_version": "1.58.0",
+  "sap.app": {
+    "id": "sap.ui.demo.app"
+  },
+  "sap.ui5": {
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "sap.ui.demo.app.i18n.i18n",
+          "fallbackLocale": "de",
+          "supportedLocales": [
+            "",
+            "de",
+            "en"
+          ]
+        }
+      }
+    }
+  }
 }`;
 
+	const project = {
+		getNamespace: () => "sap.ui.demo.app",
+		getVersion: () => "1.0.0"
+	};
+
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
-		input, "utf8"
+		input, "utf8", project
 	);
 	const setStringSpy = sinon.spy(resource, "setString");
-	const middleware = serveResourcesMiddleware({
+
+	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
+		await esmock.p("../../../../lib/middleware/serveResources", {
+			"@ui5/fs/fsInterface": sinon.stub().returns({
+				readdir(fsPath, callback) {
+					callback(null, ["i18n_de.properties", "i18n_en.properties", "i18n.properties"]);
+				}
+			})
+		});
+	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
 			all: readerWriter
@@ -597,5 +616,5 @@ test.serial("Check if manifest.json file is served properly by using manifestTra
 	t.is(content, expected);
 	t.is(setHeaderSpy.callCount, 2);
 	t.is(setStringSpy.callCount, 1);
-	t.is(setHeaderSpy.getCall(0).lastArg, "application/octet-stream");
+	t.is(setHeaderSpy.getCall(0).lastArg, "application/json; charset=UTF-8");
 });
