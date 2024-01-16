@@ -529,7 +529,7 @@ test.serial("Check if utf8 characters are correctly processed in version replace
 	});
 });
 
-test.serial("manifestTransformer: request manifest.json with auto generated supported locales", async (t) => {
+test.serial("manifestEnricher: request manifest.json with auto generated supported locales", async (t) => {
 	t.plan(4);
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
@@ -619,7 +619,7 @@ test.serial("manifestTransformer: request manifest.json with auto generated supp
 	t.is(setHeaderSpy.getCall(0).lastArg, "application/json; charset=UTF-8");
 });
 
-test.serial("manifestTransformer: manifest.json with manual defined supported locales", async (t) => {
+test.serial("manifestEnricher: manifest.json with manual defined supported locales", async (t) => {
 	t.plan(4);
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
@@ -706,7 +706,7 @@ test.serial("manifestTransformer: manifest.json with manual defined supported lo
 	t.is(setHeaderSpy.getCall(0).lastArg, "application/json; charset=UTF-8");
 });
 
-test.serial("manifestTransformer: no generation of supported locales " +
+test.serial("manifestEnricher: no generation of supported locales " +
 	"if manifest.json version is below 1.21.0",
 async (t) => {
 	t.plan(4);
@@ -793,7 +793,7 @@ async (t) => {
 	t.is(setHeaderSpy.getCall(0).lastArg, "application/json; charset=UTF-8");
 });
 
-test.serial("manifestTransformer: no generation of supported locales " +
+test.serial("manifestEnricher: no generation of supported locales " +
 	"if manifest.json version is not defined",
 async (t) => {
 	t.plan(4);
