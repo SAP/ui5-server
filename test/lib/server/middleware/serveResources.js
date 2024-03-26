@@ -537,7 +537,8 @@ test.serial("manifestEnricher: request manifest.json with auto generated support
 	const input = `{
   "_version": "1.58.0",
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application"
   },
   "sap.ui5": {
     "models": {
@@ -554,7 +555,16 @@ test.serial("manifestEnricher: request manifest.json with auto generated support
 	const expected = `{
   "_version": "1.58.0",
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application",
+    "i18n": {
+      "bundleUrl": "i18n/i18n.properties",
+      "supportedLocales": [
+        "",
+        "de",
+        "en"
+      ]
+    }
   },
   "sap.ui5": {
     "models": {
@@ -576,7 +586,8 @@ test.serial("manifestEnricher: request manifest.json with auto generated support
 
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
-		getVersion: () => "1.0.0"
+		getVersion: () => "1.0.0",
+		getReader: () => readerWriter
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -627,7 +638,13 @@ test.serial("manifestEnricher: manifest.json with manual defined supported local
 	const input = `{
   "_version": "1.58.0",
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application",
+    "i18n": {
+      "bundleUrl": "i18n/i18n.properties",
+      "supportedLocales": ["fr", "de"],
+      "fallbackLocale": "de"
+    }
   },
   "sap.ui5": {
     "models": {
@@ -645,7 +662,13 @@ test.serial("manifestEnricher: manifest.json with manual defined supported local
 	const expected = `{
   "_version": "1.58.0",
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application",
+    "i18n": {
+      "bundleUrl": "i18n/i18n.properties",
+      "supportedLocales": ["fr", "de"],
+      "fallbackLocale": "de"
+    }
   },
   "sap.ui5": {
     "models": {
@@ -663,7 +686,8 @@ test.serial("manifestEnricher: manifest.json with manual defined supported local
 
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
-		getVersion: () => "1.0.0"
+		getVersion: () => "1.0.0",
+		getReader: () => readerWriter
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -716,7 +740,8 @@ async (t) => {
 	const input = `{
   "_version": "1.20.0",
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application"
   },
   "sap.ui5": {
     "models": {
@@ -733,7 +758,8 @@ async (t) => {
 	const expected = `{
   "_version": "1.20.0",
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application"
   },
   "sap.ui5": {
     "models": {
@@ -750,7 +776,8 @@ async (t) => {
 
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
-		getVersion: () => "1.0.0"
+		getVersion: () => "1.0.0",
+		getReader: () => readerWriter
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -802,7 +829,8 @@ async (t) => {
 
 	const input = `{
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application"
   },
   "sap.ui5": {
     "models": {
@@ -818,7 +846,8 @@ async (t) => {
 }`;
 	const expected = `{
   "sap.app": {
-    "id": "sap.ui.demo.app"
+    "id": "sap.ui.demo.app",
+    "type": "application"
   },
   "sap.ui5": {
     "models": {
@@ -835,7 +864,8 @@ async (t) => {
 
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
-		getVersion: () => "1.0.0"
+		getVersion: () => "1.0.0",
+		getReader: () => readerWriter
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
