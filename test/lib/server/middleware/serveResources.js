@@ -630,6 +630,109 @@ test.serial("manifestEnricher: request manifest.json with auto generated support
 	t.is(setHeaderSpy.getCall(0).lastArg, "application/json; charset=UTF-8");
 });
 
+test.serial("manifestEnricher: request manifest.json with auto generated supported locales " +
+	"(non-root level manifest.json)",
+async (t) => {
+	t.plan(4);
+
+	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
+
+	const input = `{
+  "_version": "1.58.0",
+  "sap.app": {
+    "id": "sap.ui.demo.app",
+    "type": "application"
+  },
+  "sap.ui5": {
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "sap.ui.demo.app.i18n.i18n",
+          "fallbackLocale": "de"
+        }
+      }
+    }
+  }
+}`;
+	const expected = `{
+  "_version": "1.58.0",
+  "sap.app": {
+    "id": "sap.ui.demo.app",
+    "type": "application",
+    "i18n": {
+      "bundleUrl": "i18n/i18n.properties",
+      "supportedLocales": [
+        "",
+        "de",
+        "en"
+      ]
+    }
+  },
+  "sap.ui5": {
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "sap.ui.demo.app.i18n.i18n",
+          "fallbackLocale": "de",
+          "supportedLocales": [
+            "",
+            "de",
+            "en"
+          ]
+        }
+      }
+    }
+  }
+}`;
+
+	const project = {
+		getNamespace: () => "sap.ui.demo.app",
+		getVersion: () => "1.0.0",
+		getReader: () => readerWriter
+	};
+
+	const resource = await writeResource(readerWriter, "/customfolder/manifest.json", 1024 * 1024,
+		input, "utf8", project
+	);
+	const setStringSpy = sinon.spy(resource, "setString");
+
+	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
+		await esmock.p("../../../../lib/middleware/serveResources", {
+			"@ui5/fs/fsInterface": sinon.stub().returns({
+				readdir(fsPath, callback) {
+					callback(null, ["i18n_de.properties", "i18n_en.properties", "i18n.properties"]);
+				}
+			})
+		});
+	const middleware = serveResourcesMiddlewareWithMock({
+		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
+		resources: {
+			all: readerWriter
+		}
+	});
+
+	const response = fakeResponse;
+
+	const setHeaderSpy = sinon.spy(response, "setHeader");
+	const req = {
+		url: "/customfolder/manifest.json",
+		headers: {}
+	};
+	const next = function(err) {
+		throw new Error(`Next callback called with error: ${err.stack}`);
+	};
+
+	await middleware(req, response, next);
+	const content = await resource.getString();
+
+	t.is(content, expected);
+	t.is(setHeaderSpy.callCount, 2);
+	t.is(setStringSpy.callCount, 1);
+	t.is(setHeaderSpy.getCall(0).lastArg, "application/json; charset=UTF-8");
+});
+
 test.serial("manifestEnricher: manifest.json with manual defined supported locales", async (t) => {
 	t.plan(4);
 
