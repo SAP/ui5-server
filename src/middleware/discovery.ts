@@ -17,7 +17,7 @@ const urlPattern = /\/(app_pages|all_libs|all_tests)(?:[?#].*)?$/;
  * @param {@ui5/server/internal/MiddlewareManager.middlewareResources} parameters.resources Parameters
  * @returns {Function} Returns a server middleware closure.
  */
-function createMiddleware({resources}) {
+function createMiddleware({ resources }: object) {
 	return function discoveryMiddleware(req, res, next) {
 		const parts = urlPattern.exec(req.url);
 		const type = parts && parts[1];

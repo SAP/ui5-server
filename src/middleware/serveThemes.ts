@@ -39,7 +39,7 @@ const themeResources = [
  *                                        [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns {Function} Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}) {
+function createMiddleware({ resources, middlewareUtil }: object) {
 	const builder = new ThemeBuilder({
 		fs: fsInterface(resources.all)
 	});

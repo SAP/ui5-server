@@ -22,8 +22,7 @@ const log = getLogger("server:sslUtil");
  * @returns {Promise<object>} Resolves with an sslObject containing <code>cert</code> and <code>key</code>
  */
 export function getSslCertificate(
-	keyPath = path.join(os.homedir(), ".ui5/server/server.key"),
-	certPath = path.join(os.homedir(), ".ui5/server/server.crt")
+	keyPath: string = path.join(os.homedir(), ".ui5/server/server.key"), certPath: string = path.join(os.homedir(), ".ui5/server/server.crt")
 ) {
 	// checks the certificates if they are present
 	return Promise.all([

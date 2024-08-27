@@ -26,7 +26,7 @@ function isFresh(req, res) {
  * @param {object} parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns {Function} Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}) {
+function createMiddleware({ resources, middlewareUtil }: object) {
 	return async function serveResources(req, res, next) {
 		try {
 			const pathname = middlewareUtil.getPathname(req);

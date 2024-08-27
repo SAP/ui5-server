@@ -23,7 +23,7 @@ function getMimeType(resource) {
  * @param {number} bytes bytes
  * @returns {string} human readable size
  */
-function formatSize(bytes) {
+function formatSize(bytes: number) {
 	let result;
 	if (bytes < KB) {
 		result = bytes + " Bytes";
@@ -94,7 +94,9 @@ function createResourceInfos(resources) {
  * @returns {Function} Returns a server middleware closure.
  */
 
-function createMiddleware({resources, middlewareUtil, simpleIndex = false, showHidden = true}) {
+function createMiddleware({ resources, middlewareUtil, simpleIndex = false, showHidden = true }: {
+    resources: object;
+}) {
 	return function(req, res, next) {
 		const pathname = middlewareUtil.getPathname(req);
 		log.verbose("\n Listing index of " + pathname);

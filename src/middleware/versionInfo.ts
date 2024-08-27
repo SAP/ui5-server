@@ -12,7 +12,7 @@ const MANIFEST_JSON = "manifest.json";
  * @param {object} parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns {Function} Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}) {
+function createMiddleware({ resources, middlewareUtil }: object) {
 	return async function versionInfo(req, res, next) {
 		try {
 			const dependencies = resources.dependencies;

@@ -30,7 +30,9 @@ function serveResource(res, resourcePath, resourceContent) {
  * @param {object} parameters.resources Contains the resource reader or collection to access project related files
  * @returns {Function} Returns a server middleware closure.
  */
-function createMiddleware({resources}) {
+function createMiddleware({ resources }: {
+    resources: object;
+}) {
 	return async function(req, res, next) {
 		try {
 			const pathname = parseurl(req).pathname;

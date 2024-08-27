@@ -19,7 +19,7 @@ import ReaderCollectionPrioritized from "@ui5/fs/ReaderCollectionPrioritized";
  * @returns {Promise<object>} Returns an object containing server related information like (selected port, protocol)
  * @private
  */
-function _listen(app, port, changePortIfInUse, acceptRemoteConnections) {
+function _listen(app: object, port: number, changePortIfInUse: boolean, acceptRemoteConnections: boolean) {
 	return new Promise(function(resolve, reject) {
 		const options = {};
 
@@ -84,7 +84,11 @@ function _listen(app, port, changePortIfInUse, acceptRemoteConnections) {
  * @returns {Promise<object>} The express application with SSL support
  * @private
  */
-async function _addSsl({app, key, cert}) {
+async function _addSsl({ app, key, cert }: {
+    app: object;
+    key: string;
+    cert: string;
+}) {
 	// Using spdy as http2 server as the native http2 implementation
 	// from Node v8.4.0 doesn't seem to work with express
 	const {default: spdy} = await import("spdy");
@@ -130,9 +134,14 @@ async function _addSsl({app, key, cert}) {
  * 							<code>h2</code>-flag and a <code>close</code> function,
  * 							which can be used to stop the server.
  */
-export async function serve(graph, {
-	port: requestedPort, changePortIfInUse = false, h2 = false, key, cert,
-	acceptRemoteConnections = false, sendSAPTargetCSP = false, simpleIndex = false, serveCSPReports = false
+export async function serve(graph, { port: requestedPort, changePortIfInUse = false, h2 = false, key, cert, acceptRemoteConnections = false, sendSAPTargetCSP = false, simpleIndex = false, serveCSPReports = false }: {
+    port: number;
+    changePortIfInUse?: boolean;
+    h2?: boolean;
+    key?: string;
+    cert?: string;
+    simpleIndex?: boolean;
+    acceptRemoteConnections?: boolean;
 }) {
 	const rootProject = graph.getRoot();
 

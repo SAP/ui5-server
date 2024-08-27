@@ -29,7 +29,7 @@ function addHeader(res, header, value) {
  * @param {string} pathName path name of the request
  * @returns {boolean} whether or not path fragment is in pathName or in referer header
  */
-function containsPath(uriPath, req, pathName) {
+function containsPath(uriPath: string, req: http.IncomingMessage, pathName: string) {
 	return pathName.includes(uriPath) ||
 		(req.headers["referer"] && req.headers["referer"].includes(uriPath));
 }
@@ -57,7 +57,7 @@ function containsPath(uriPath, req, pathName) {
  * @param {CspConfig} oConfig
  * @returns {Function} Returns a server middleware closure.
  */
-function createMiddleware(sCspUrlParameterName, oConfig) {
+function createMiddleware(sCspUrlParameterName: string, oConfig: CspConfig) {
 	const {
 		allowDynamicPolicySelection = false,
 		allowDynamicPolicyDefinition = false,

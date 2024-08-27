@@ -31,7 +31,7 @@ class MiddlewareUtil {
 	 * @param {@ui5/project/specifications/Project} parameters.project Project that is being served
 	 * @public
 	 */
-	constructor({graph, project}) {
+	constructor({ graph, project }: object) {
 		if (!graph) {
 			throw new Error(`Missing parameter "graph"`);
 		}
@@ -54,7 +54,7 @@ class MiddlewareUtil {
 	 * of the given request
 	 * @public
 	 */
-	getPathname(req) {
+	public getPathname(req: object) {
 		let {pathname} = parseurl(req);
 		pathname = decodeURIComponent(pathname);
 		return pathname;
@@ -87,7 +87,7 @@ class MiddlewareUtil {
 	 * @returns {@ui5/server/middleware/MiddlewareUtil.MimeInfo}
 	 * @public
 	 */
-	getMimeInfo(resourcePath) {
+	public getMimeInfo(resourcePath: object) {
 		const type = mime.lookup(resourcePath) || "application/octet-stream";
 		const charset = mime.charset(type);
 		return {
@@ -132,7 +132,7 @@ class MiddlewareUtil {
 	 * if the project name is unknown or the provided resource is not associated with any project.
 	 * @public
 	 */
-	getProject(projectNameOrResource) {
+	public getProject(projectNameOrResource) {
 		if (projectNameOrResource) {
 			if (typeof projectNameOrResource === "string" || projectNameOrResource instanceof String) {
 				// A project name has been provided
@@ -160,7 +160,7 @@ class MiddlewareUtil {
 	 * @throws {Error} If the requested project is unknown to the graph
 	 * @public
 	 */
-	getDependencies(projectName) {
+	public getDependencies(projectName?: string) {
 		return this._graph.getDependencies(projectName || this._project.getName());
 	}
 

@@ -39,15 +39,7 @@ class MiddlewareManager {
 		this.middlewareUtil = new MiddlewareUtil({graph, project: rootProject});
 	}
 
-	/**
-	 * Applies the middleware to
-	 *
-	 * @private
-	 * @param {object} app The express application object
-	 * @returns {Promise<Array<undefined>>} Promise resolving to an Array with a length of the number
-	 *      of added middlewares. The entries of the Array have a value of <code>undefined</code>.
-	 */
-	async applyMiddleware(app) {
+	private async applyMiddleware(app: object) {
 		await this.addStandardMiddleware();
 		await this.addCustomMiddleware();
 
@@ -57,22 +49,13 @@ class MiddlewareManager {
 		});
 	}
 
-	/**
-	 * Adds the given middleware configuration
-	 *
-	 * @private
-	 * @param {string} middlewareName The name of the middleware
-	 * @param {object} [options] The Options of the middleware
-	 * @param {object} [options.customMiddleware] The custom middleware
-	 * @param {Function} [options.wrapperCallback] Callback called when middleware is called
-	 * @param {string} [options.mountPath="/"] The path hosting the middleware
-	 * @param {string} [options.beforeMiddleware] The name of the middleware called before the added middleware
-	 * @param {string} [options.afterMiddleware] The name of the middleware called after the added middleware
-	 */
-	async addMiddleware(middlewareName, {
-		customMiddleware, wrapperCallback, mountPath = "/",
-		beforeMiddleware, afterMiddleware
-	} = {}) {
+	private async addMiddleware(middlewareName: string, { customMiddleware, wrapperCallback, mountPath = "/", beforeMiddleware, afterMiddleware }: {
+    customMiddleware?: object;
+    wrapperCallback?: Function;
+    mountPath?: string;
+    beforeMiddleware?: string;
+    afterMiddleware?: string;
+} = {}) {
 		if (this.middleware[middlewareName]) {
 			throw new Error(`A middleware with the name ${middlewareName} has already been added`);
 		}
@@ -126,13 +109,7 @@ class MiddlewareManager {
 		};
 	}
 
-	/**
-	 * Adds all registered standard middlewares
-	 *
-	 * @private
-	 * @returns {Promise} Resolving to <code>undefined</code> once all standard middlewares are added
-	 */
-	async addStandardMiddleware() {
+	private async addStandardMiddleware() {
 		await this.addMiddleware("csp", {
 			wrapperCallback: ({middleware: cspModule}) => {
 				const oCspConfig = {
@@ -236,13 +213,7 @@ class MiddlewareManager {
 		});
 	}
 
-	/**
-	 * Adds all registered custom middlewares
-	 *
-	 * @private
-	 * @returns {Promise} Resolving to <code>undefined</code> once all custom middlewares are added
-	 */
-	async addCustomMiddleware() {
+	private async addCustomMiddleware() {
 		const project = this.graph.getRoot();
 		const projectCustomMiddleware = project.getCustomMiddleware();
 		if (!projectCustomMiddleware.length === 0) {
