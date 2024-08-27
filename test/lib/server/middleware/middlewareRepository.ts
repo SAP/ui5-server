@@ -1,6 +1,6 @@
 import test from "ava";
-import middlewareRepository from "../../../../lib/middleware/middlewareRepository.js";
-import cspModule from "../../../../lib/middleware/csp.js";
+import middlewareRepository from "../../../../src/middleware/middlewareRepository.js";
+import cspModule from "../../../../src/middleware/csp.js";
 
 test("getMiddleware", async (t) => {
 	const res = await middlewareRepository.getMiddleware("csp");

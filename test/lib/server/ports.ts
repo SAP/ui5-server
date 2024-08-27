@@ -1,6 +1,6 @@
 import test from "ava";
 import supertest from "supertest";
-import {serve} from "../../../lib/server.js";
+import {serve} from "../../../src/server.js";
 import http from "node:http";
 import portscanner from "portscanner";
 import sinonGlobal from "sinon";

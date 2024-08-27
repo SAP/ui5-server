@@ -1,7 +1,7 @@
 import test from "ava";
 import * as resourceFactory from "@ui5/fs/resourceFactory";
-import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
-import serveIndexMiddleware from "../../../../lib/middleware/serveIndex.js";
+import MiddlewareUtil from "../../../../src/middleware/MiddlewareUtil.js";
+import serveIndexMiddleware from "../../../../src/middleware/serveIndex.js";
 
 test.serial("serveIndex default", async (t) => {
 	t.plan(4);

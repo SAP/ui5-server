@@ -1,6 +1,6 @@
 import test from "ava";
 import supertest from "supertest";
-import {serve} from "../../../lib/server.js";
+import {serve} from "../../../src/server.js";
 import {graphFromPackageDependencies} from "@ui5/project/graph";
 
 let request;

@@ -153,7 +153,7 @@ async function assertCreatedVersionInfo(t, expectedVersionInfo, versionInfoConte
 
 test.beforeEach((t) => {
 	t.context.createVersionInfoMiddleware = async (mocks = {}) => {
-		return esmock("../../../../lib/middleware/versionInfo.js", mocks);
+		return esmock("../../../../src/middleware/versionInfo.js", mocks);
 	};
 });
 
@@ -168,7 +168,7 @@ test.serial("test all inner API calls within middleware", async (t) => {
 		string: `mocked manifest.json ${++manifestMockCounter}`,
 	}));
 	const generateLibraryManifestHelperMock = await esmock(
-		"../../../../lib/middleware/helper/generateLibraryManifest.js", {
+		"../../../../src/middleware/helper/generateLibraryManifest.js", {
 			"@ui5/builder/processors/manifestCreator": manifestCreatorStub,
 		});
 
@@ -178,7 +178,7 @@ test.serial("test all inner API calls within middleware", async (t) => {
 	});
 	const versionInfoGeneratorStub = sinon.stub().returns([mockedVersionInfo]);
 	const versionInfoMiddleware = await t.context.createVersionInfoMiddleware({
-		"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperMock,
+		"../../../../src/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperMock,
 		"@ui5/builder/processors/versionInfoGenerator": versionInfoGeneratorStub,
 	});
 

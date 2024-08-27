@@ -2,7 +2,7 @@ import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
 import mime from "mime-types";
-import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
+import MiddlewareUtil from "../../../../src/middleware/MiddlewareUtil.js";
 import SpecificationVersion from "@ui5/project/specifications/SpecificationVersion";
 
 test.afterEach.always((t) => {
@@ -15,7 +15,7 @@ function getSpecificationVersion(specVersion) {
 
 test.serial("getPathname", async (t) => {
 	const parseurlStub = sinon.stub().returns({pathname: "path%20name"});
-	const MiddlewareUtil = await esmock("../../../../lib/middleware/MiddlewareUtil.js", {
+	const MiddlewareUtil = await esmock("../../../../src/middleware/MiddlewareUtil.js", {
 		parseurl: parseurlStub,
 	});
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});

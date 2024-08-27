@@ -13,7 +13,7 @@ test.before(async (t) => {
 
 	t.context.manifestEnhancer = sinon.stub();
 
-	const {serve} = await esmock.p("../../../lib/server.js", {}, {
+	const {serve} = await esmock.p("../../../src/server.js", {}, {
 		"@ui5/builder/processors/manifestEnhancer": t.context.manifestEnhancer,
 	});
 

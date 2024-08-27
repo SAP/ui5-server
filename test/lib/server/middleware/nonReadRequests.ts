@@ -1,5 +1,5 @@
 import test from "ava";
-import nonReadRequestsMiddleware from "../../../../lib/middleware/nonReadRequests.js";
+import nonReadRequestsMiddleware from "../../../../src/middleware/nonReadRequests.js";
 
 test("Read requests", (t) => {
 	t.plan(3);

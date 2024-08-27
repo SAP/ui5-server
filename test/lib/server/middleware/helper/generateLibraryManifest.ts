@@ -2,7 +2,7 @@ import test from "ava";
 import sinon from "sinon";
 import esmock from "esmock";
 import {createResource, createAdapter} from "@ui5/fs/resourceFactory";
-import generateLibraryManifest from "../../../../../lib/middleware/helper/generateLibraryManifest.js";
+import generateLibraryManifest from "../../../../../src/middleware/helper/generateLibraryManifest.js";
 
 test("Generate library manifest", async (t) => {
 	const reader = createAdapter({
@@ -80,7 +80,7 @@ test("Expected manifestCreator parameters", async (t) => {
 		setProject: setProjectStub,
 	};
 	const manifestCreatorStub = sinon.stub().resolves(manifest);
-	const generateLibraryManifest = await esmock("../../../../../lib/middleware/helper/generateLibraryManifest.js", {
+	const generateLibraryManifest = await esmock("../../../../../src/middleware/helper/generateLibraryManifest.js", {
 		"@ui5/builder/processors/manifestCreator": manifestCreatorStub,
 	});
 	const adapter = createAdapter({

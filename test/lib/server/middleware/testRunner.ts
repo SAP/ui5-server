@@ -6,13 +6,13 @@ import fs from "graceful-fs";
 import {fileURLToPath} from "node:url";
 
 let testRunnerMiddleware;
-const baseResourcePath = fileURLToPath(new URL("../../../../lib/middleware/testRunner", import.meta.url));
+const baseResourcePath = fileURLToPath(new URL("../../../../src/middleware/testRunner", import.meta.url));
 
 test.beforeEach(async (t) => {
 	t.context.readFileStub = sinon.stub(fs, "readFile").yieldsAsync(null, "👮");
 
 	// Re-require to ensure that mocked modules are used
-	testRunnerMiddleware = await esmock("../../../../lib/middleware/testRunner.js");
+	testRunnerMiddleware = await esmock("../../../../src/middleware/testRunner.js");
 });
 
 test.afterEach.always(() => {

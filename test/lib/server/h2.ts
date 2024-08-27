@@ -1,7 +1,7 @@
 import test from "ava";
 import supertest from "supertest";
-import {serve} from "../../../lib/server.js";
-import {getSslCertificate} from "../../../lib/sslUtil.js";
+import {serve} from "../../../src/server.js";
+import {getSslCertificate} from "../../../src/sslUtil.js";
 import {graphFromPackageDependencies} from "@ui5/project/graph";
 import path from "node:path";
 

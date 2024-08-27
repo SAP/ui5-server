@@ -4,8 +4,8 @@ import sinon from "sinon";
 import esmock from "esmock";
 import {Readable, Writable} from "node:stream";
 import * as resourceFactory from "@ui5/fs/resourceFactory";
-import serveResourcesMiddleware from "../../../../lib/middleware/serveResources.js";
-import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
+import serveResourcesMiddleware from "../../../../src/middleware/serveResources.js";
+import MiddlewareUtil from "../../../../src/middleware/MiddlewareUtil.js";
 
 const writeResource = function (writer, path, size, stringContent, stringEncoding, project) {
 	const statInfo = {
@@ -309,7 +309,7 @@ test.serial("Check verbose logging", async (t) => {
 	};
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/logger": {
 				getLogger: sinon.stub().returns(t.context.loggerStub),
 			},
@@ -561,8 +561,8 @@ test.serial("Missing manifest.json is generated", async (t) => {
 
 	const generateLibraryManifestHelperStub = sinon.stub().resolves(manifestMock);
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
+		await esmock.p("../../../../src/middleware/serveResources", {
+			"../../../../src/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
@@ -624,8 +624,8 @@ test.serial("Missing manifest.json is not generated with missing .library", asyn
 
 	const generateLibraryManifestHelperStub = sinon.stub().resolves();
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
+		await esmock.p("../../../../src/middleware/serveResources", {
+			"../../../../src/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
@@ -680,8 +680,8 @@ test.serial("Missing manifest.json is not generated for request outside /resourc
 
 	const generateLibraryManifestHelperStub = sinon.stub().resolves();
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
+		await esmock.p("../../../../src/middleware/serveResources", {
+			"../../../../src/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
@@ -736,8 +736,8 @@ test.serial("Missing manifest.json is not generated for non-library projects", a
 
 	const generateLibraryManifestHelperStub = sinon.stub().resolves();
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
+		await esmock.p("../../../../src/middleware/serveResources", {
+			"../../../../src/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
@@ -835,7 +835,7 @@ test.serial("manifestEnhancer: request manifest.json with auto generated support
 	const setStringSpy = sinon.spy(resource, "setString");
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					callback(null, ["i18n_de.properties", "i18n_en.properties", "i18n.properties"]);
@@ -938,7 +938,7 @@ async (t) => {
 	const setStringSpy = sinon.spy(resource, "setString");
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					callback(null, ["i18n_de.properties", "i18n_en.properties", "i18n.properties"]);
@@ -1038,7 +1038,7 @@ test.serial("manifestEnhancer: manifest.json with manual defined supported local
 	const setStringSpy = sinon.spy(resource, "setString");
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
@@ -1128,7 +1128,7 @@ async (t) => {
 	const setStringSpy = sinon.spy(resource, "setString");
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
@@ -1216,7 +1216,7 @@ async (t) => {
 	const setStringSpy = sinon.spy(resource, "setString");
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
@@ -1304,7 +1304,7 @@ test.serial("manifestEnhancer: no generation of supported locales for theme libr
 	const setStringSpy = sinon.spy(resource, "setString");
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
@@ -1370,7 +1370,7 @@ test.serial("manifestEnhancer: no processing of files within /test-resources/", 
 	const setStringSpy = sinon.spy(resource, "setString");
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
-		await esmock.p("../../../../lib/middleware/serveResources", {
+		await esmock.p("../../../../src/middleware/serveResources", {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");

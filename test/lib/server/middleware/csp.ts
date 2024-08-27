@@ -1,6 +1,6 @@
 import test from "ava";
 import sinon from "sinon";
-import cspMiddleware from "../../../../lib/middleware/csp.js";
+import cspMiddleware from "../../../../src/middleware/csp.js";
 
 test("OPTIONS request", async (t) => {
 	t.plan(2);

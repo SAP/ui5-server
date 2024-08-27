@@ -32,7 +32,7 @@ test.beforeEach(async (t) => {
 				mkdir: t.context.mkdir,
 			};
 		}
-		t.context.sslUtil = await esmock.p("../../../lib/sslUtil.js", mocks);
+		t.context.sslUtil = await esmock.p("../../../src/sslUtil.js", mocks);
 		return t.context.sslUtil;
 	};
 });
@@ -42,7 +42,7 @@ test.afterEach.always((t) => {
 });
 
 test("Get existing certificate", async (t) => {
-	const sslUtil = await esmock("../../../lib/sslUtil.js");
+	const sslUtil = await esmock("../../../src/sslUtil.js");
 
 	const sslPath = path.join(process.cwd(), "./test/fixtures/ssl/");
 	const result = await sslUtil.getSslCertificate(

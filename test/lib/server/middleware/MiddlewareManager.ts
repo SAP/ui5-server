@@ -1,8 +1,8 @@
 import test from "ava";
 import sinonGlobal from "sinon";
 import esmock from "esmock";
-import MiddlewareManager from "../../../../lib/middleware/MiddlewareManager.js";
-import middlewareRepository from "../../../../lib/middleware/middlewareRepository.js";
+import MiddlewareManager from "../../../../src/middleware/MiddlewareManager.js";
+import middlewareRepository from "../../../../src/middleware/middlewareRepository.js";
 
 test.beforeEach(async (t) => {
 	const sinon = t.context.sinon = sinonGlobal.createSandbox();
@@ -11,7 +11,7 @@ test.beforeEach(async (t) => {
 		getLogger: sinon.stub().returns("group logger"),
 	};
 
-	t.context.MiddlewareManager = await esmock("../../../../lib/middleware/MiddlewareManager.js", {
+	t.context.MiddlewareManager = await esmock("../../../../src/middleware/MiddlewareManager.js", {
 		"@ui5/logger": t.context.logger,
 	});
 });
@@ -175,7 +175,7 @@ test("addMiddleware: Add middleware with beforeMiddleware and mountPath paramete
 test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", async (t) => {
 	const {sinon} = t.context;
 	const warnSpy = sinon.spy();
-	const StubbedMiddlewareManager = await esmock("../../../../lib/middleware/MiddlewareManager.js", {
+	const StubbedMiddlewareManager = await esmock("../../../../src/middleware/MiddlewareManager.js", {
 		"@ui5/logger": {getLogger: sinon.stub().returns({warn: warnSpy})},
 	});
 	const middlewareManager = new StubbedMiddlewareManager({

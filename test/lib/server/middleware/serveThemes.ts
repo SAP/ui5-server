@@ -4,7 +4,7 @@ import sinon from "sinon";
 import esmock from "esmock";
 
 import {ThemeBuilder} from "@ui5/builder/processors/themeBuilder";
-import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
+import MiddlewareUtil from "../../../../src/middleware/MiddlewareUtil.js";
 
 const failOnNext = function (t, reject) {
 	return function (err) {
@@ -117,7 +117,7 @@ test.beforeEach(async (t) => {
 	t.context.etag = sinon.stub();
 	t.context.fresh = sinon.stub();
 
-	t.context.serveThemes = await esmock("../../../../lib/middleware/serveThemes.js", {
+	t.context.serveThemes = await esmock("../../../../src/middleware/serveThemes.js", {
 		etag: t.context.etag,
 		fresh: t.context.fresh,
 	});
