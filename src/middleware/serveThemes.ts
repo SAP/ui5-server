@@ -5,9 +5,14 @@ import etag from "etag";
 import fresh from "fresh";
 import parseurl from "parseurl";
 
+/**
+ *
+ * @param req
+ * @param res
+ */
 function isFresh(req, res) {
 	return fresh(req.headers, {
-		"etag": res.getHeader("ETag")
+		etag: res.getHeader("ETag"),
 	});
 }
 
@@ -16,7 +21,7 @@ const cssVariablesThemeResources = [
 	"css_variables.source.less",
 	"css_variables.css",
 	"library_skeleton.css",
-	"library_skeleton-RTL.css"
+	"library_skeleton-RTL.css",
 ];
 
 // List of resources that should be handled by the middleware
@@ -24,7 +29,7 @@ const themeResources = [
 	"library.css",
 	"library-RTL.css",
 	"library-parameters.json",
-	...cssVariablesThemeResources
+	...cssVariablesThemeResources,
 ];
 
 /**
@@ -32,21 +37,24 @@ const themeResources = [
  *
  * The theme is built in realtime. If a less file was modified, the theme build is triggered to rebuild the theme.
  *
- * @module @ui5/server/middleware/serveThemes
- * @param {object} parameters Parameters
- * @param {@ui5/server/internal/MiddlewareManager.middlewareResources} parameters.resources Parameters
- * @param {object} parameters.middlewareUtil Specification version dependent interface to a
+ * @param parameters Parameters
+ * @param parameters.resources Parameters
+ * @param parameters.middlewareUtil Specification version dependent interface to a
  *                                        [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
- * @returns {Function} Returns a server middleware closure.
+ * @returns Returns a server middleware closure.
  */
-function createMiddleware({ resources, middlewareUtil }: object) {
+function createMiddleware({resources, middlewareUtil}: object) {
 	const builder = new ThemeBuilder({
-		fs: fsInterface(resources.all)
+		fs: fsInterface(resources.all),
 	});
 	const buildOptions = Object.create(null);
 
 	const currentRequests = Object.create(null);
 
+	/**
+	 *
+	 * @param pathname
+	 */
 	async function buildTheme(pathname) {
 		const filename = basename(pathname);
 
@@ -74,6 +82,12 @@ function createMiddleware({ resources, middlewareUtil }: object) {
 		return resource;
 	}
 
+	/**
+	 *
+	 * @param req
+	 * @param res
+	 * @param resource
+	 */
 	async function sendResponse(req, res, resource) {
 		const resourcePath = resource.getPath();
 		const {contentType} = middlewareUtil.getMimeInfo(resourcePath);

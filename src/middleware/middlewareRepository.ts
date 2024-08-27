@@ -8,10 +8,14 @@ const middlewareInfos = {
 	versionInfo: {path: "./versionInfo.js"},
 	serveThemes: {path: "./serveThemes.js"},
 	testRunner: {path: "./testRunner.js"},
-	nonReadRequests: {path: "./nonReadRequests.js"}
+	nonReadRequests: {path: "./nonReadRequests.js"},
 };
 
 // see  @ui5/server/internal/middlewareRepository#getMiddleware
+/**
+ *
+ * @param middlewareName
+ */
 async function getMiddleware(middlewareName) {
 	const middlewareInfo = middlewareInfos[middlewareName];
 
@@ -21,7 +25,7 @@ async function getMiddleware(middlewareName) {
 	try {
 		const {default: middleware} = await import(middlewareInfo.path);
 		return {
-			middleware
+			middleware,
 		};
 	} catch (err) {
 		throw new Error(
@@ -29,14 +33,10 @@ async function getMiddleware(middlewareName) {
 	}
 }
 /**
- * @private
- * @typedef {object} module:@ui5/server/internal/middlewareRepository~Middleware
- * @property {object} middleware The middleware
+ * middleware The middleware
  */
 
 /**
- * @private
- * @module @ui5/server/internal/middlewareRepository
  * @borrows getMiddleware as getMiddleware
  */
 export default {
@@ -44,11 +44,8 @@ export default {
 	/**
 	 * Determines the desired middleware
 	 *
-	 * @private
-	 * @static
-	 * @function
 	 * @param {string} middlewareName The name of the middleware
 	 * @returns {module:@ui5/server/internal/middlewareRepository~Middleware} The middleware
 	 */
-	getMiddleware: getMiddleware
+	getMiddleware: getMiddleware,
 };

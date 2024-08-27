@@ -4,28 +4,26 @@ import {getLogger} from "@ui5/logger";
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
 
 /**
- * @private
- * @typedef {object} MiddlewareResources
- * @property {@ui5/fs/AbstractReader} all Reader or Collection to read resources of the
- *                                        root project and its dependencies
- * @property {@ui5/fs/AbstractReader} rootProject Reader or Collection to read resources of
- *                                        the project the server is started in
+ * all Reader or Collection to read resources of the
+ * root project and its dependencies
+ *
+ * rootProject Reader or Collection to read resources of
+ * the project the server is started in
+ *
  * @memberof @ui5/server/internal/MiddlewareManager
  */
 
 /**
  * The MiddlewareManager
  *
- * @private
- * @class
  * @alias @ui5/server/internal/MiddlewareManager
  */
 class MiddlewareManager {
 	constructor({graph, rootProject, resources, options = {
 		sendSAPTargetCSP: false,
-		serveCSPReports: false
+		serveCSPReports: false,
 	}}) {
-		if (!graph || !rootProject || !resources || !resources.all ||
+		if (!graph || !rootProject || !resources?.all ||
 			!resources.rootProject || !resources.dependencies) {
 			throw new Error("[MiddlewareManager]: One or more mandatory parameters not provided");
 		}
@@ -49,13 +47,13 @@ class MiddlewareManager {
 		});
 	}
 
-	private async addMiddleware(middlewareName: string, { customMiddleware, wrapperCallback, mountPath = "/", beforeMiddleware, afterMiddleware }: {
-    customMiddleware?: object;
-    wrapperCallback?: Function;
-    mountPath?: string;
-    beforeMiddleware?: string;
-    afterMiddleware?: string;
-} = {}) {
+	private async addMiddleware(middlewareName: string, {customMiddleware, wrapperCallback, mountPath = "/", beforeMiddleware, afterMiddleware}: {
+		customMiddleware?: object;
+		wrapperCallback?: Function;
+		mountPath?: string;
+		beforeMiddleware?: string;
+		afterMiddleware?: string;
+	} = {}) {
 		if (this.middleware[middlewareName]) {
 			throw new Error(`A middleware with the name ${middlewareName} has already been added`);
 		}
@@ -103,9 +101,9 @@ class MiddlewareManager {
 		this.middleware[middlewareName] = {
 			middleware: await Promise.resolve(middlewareCallback({
 				resources: this.resources,
-				middlewareUtil: this.middlewareUtil
+				middlewareUtil: this.middlewareUtil,
 			})),
-			mountPath
+			mountPath,
 		};
 	}
 
@@ -154,8 +152,8 @@ class MiddlewareManager {
 							"worker-src  'self'; " +
 							"child-src   'self'; " +
 							"connect-src 'self' https: wss:; " +
-							"base-uri    'self';"
-					}
+							"base-uri    'self';",
+					},
 				};
 				if (this.options.sendSAPTargetCSP) {
 					const defaultSAPTargetConfig = {
@@ -163,7 +161,7 @@ class MiddlewareManager {
 						defaultPolicyIsReportOnly: true,
 						defaultPolicy2: "sap-target-level-3",
 						defaultPolicy2IsReportOnly: true,
-						ignorePaths: ["test-resources/sap/ui/qunit/testrunner.html"]
+						ignorePaths: ["test-resources/sap/ui/qunit/testrunner.html"],
 					};
 					Object.assign(oCspConfig, defaultSAPTargetConfig);
 
@@ -186,18 +184,18 @@ class MiddlewareManager {
 				return () => {
 					return cspModule("sap-ui-xx-csp-policy", oCspConfig);
 				};
-			}
+			},
 		});
 		await this.addMiddleware("compression");
 		await this.addMiddleware("cors");
 		await this.addMiddleware("discovery", {
-			mountPath: "/discovery"
+			mountPath: "/discovery",
 		});
 		await this.addMiddleware("serveResources");
 		await this.addMiddleware("testRunner");
 		await this.addMiddleware("serveThemes");
 		await this.addMiddleware("versionInfo", {
-			mountPath: "/resources/sap-ui-version.json"
+			mountPath: "/resources/sap-ui-version.json",
 		});
 		// Handle anything but read operations *before* the serveIndex middleware
 		//	as it will reject them with a 405 (Method not allowed) instead of 404 like our old tooling
@@ -207,9 +205,9 @@ class MiddlewareManager {
 				return ({resources, middlewareUtil}) => middleware({
 					resources,
 					middlewareUtil,
-					simpleIndex: this.options.simpleIndex
+					simpleIndex: this.options.simpleIndex,
 				});
-			}
+			},
 		});
 	}
 
@@ -259,8 +257,8 @@ class MiddlewareManager {
 					const params = {
 						resources,
 						options: {
-							configuration: middlewareDef.configuration
-						}
+							configuration: middlewareDef.configuration,
+						},
 					};
 
 					const specVersion = customMiddleware.getSpecVersion();
@@ -276,7 +274,7 @@ class MiddlewareManager {
 				},
 				mountPath: middlewareDef.mountPath,
 				beforeMiddleware: middlewareDef.beforeMiddleware,
-				afterMiddleware: middlewareDef.afterMiddleware
+				afterMiddleware: middlewareDef.afterMiddleware,
 			});
 		}
 	}

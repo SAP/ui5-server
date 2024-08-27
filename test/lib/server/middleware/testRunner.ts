@@ -23,16 +23,16 @@ function callMiddleware(reqPath) {
 	const middleware = testRunnerMiddleware({resources: {}});
 	return new Promise((resolve, reject) => {
 		const req = {
-			url: `http://localhost${reqPath}`
+			url: `http://localhost${reqPath}`,
 		};
 		const res = {
-			setHeader: function() {},
-			writeHead: function(status, contentType) {},
-			end: function(content) {
+			setHeader: function () {},
+			writeHead: function (status, contentType) {},
+			end: function (content) {
 				resolve(content);
 			},
 		};
-		const next = function(err) {
+		const next = function (err) {
 			if (err) {
 				reject(err);
 			} else {

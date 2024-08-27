@@ -6,13 +6,12 @@ const MANIFEST_JSON = "manifest.json";
 /**
  * Creates and returns the middleware to create the version info as json object.
  *
- * @module @ui5/server/middleware/versionInfo
- * @param {object} parameters Parameters
- * @param {@ui5/server/internal/MiddlewareManager.middlewareResources} parameters.resources Parameters
- * @param {object} parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
- * @returns {Function} Returns a server middleware closure.
+ * @param parameters Parameters
+ * @param parameters.resources Parameters
+ * @param parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
+ * @returns Returns a server middleware closure.
  */
-function createMiddleware({ resources, middlewareUtil }: object) {
+function createMiddleware({resources, middlewareUtil}: object) {
 	return async function versionInfo(req, res, next) {
 		try {
 			const dependencies = resources.dependencies;
@@ -39,7 +38,7 @@ function createMiddleware({ resources, middlewareUtil }: object) {
 					libraryManifest,
 					embeddedManifests,
 					name: dotLibResource.getProject().getName(),
-					version: dotLibResource.getProject().getVersion()
+					version: dotLibResource.getProject().getVersion(),
 				};
 			});
 			const rootProject = middlewareUtil.getProject();
@@ -48,13 +47,13 @@ function createMiddleware({ resources, middlewareUtil }: object) {
 				options: {
 					rootProjectName: rootProject.getName(),
 					rootProjectVersion: rootProject.getVersion(),
-					libraryInfos
-				}
+					libraryInfos,
+				},
 			});
 			const versionInfoContent = await versionInfoResource.getBuffer();
 
 			res.writeHead(200, {
-				"Content-Type": "application/json"
+				"Content-Type": "application/json",
 			});
 			res.end(versionInfoContent.toString());
 		} catch (err) {

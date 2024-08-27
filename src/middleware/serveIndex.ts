@@ -10,8 +10,8 @@ const GB = KB * KB * KB;
 /**
  * Returns the mime type of the given resource
  *
- * @param {module:@ui5/fs/Resource} resource the resource
- * @returns {string} mime type
+ * @param resource the resource
+ * @returns mime type
  */
 function getMimeType(resource) {
 	return mime.lookup(resource.getPath()) || "application/octet-stream";
@@ -20,8 +20,8 @@ function getMimeType(resource) {
 /**
  * Converts the given bytes into a proper human readable size
  *
- * @param {number} bytes bytes
- * @returns {string} human readable size
+ * @param bytes bytes
+ * @returns human readable size
  */
 function formatSize(bytes: number) {
 	let result;
@@ -41,8 +41,8 @@ function formatSize(bytes: number) {
  * Creates a resource info object which is used to create the HTML
  * content for the resource listing
  *
- * @param {@ui5/fs/Resource} resource the resource to convert
- * @returns {object} resource info object
+ * @param resource the resource to convert
+ * @returns resource info object
  */
 function createResourceInfo(resource) {
 	const stat = resource.getStatInfo();
@@ -56,15 +56,15 @@ function createResourceInfo(resource) {
 		size: formatSize(stat.size),
 		sizeInBytes: stat.size,
 		project: resource.getProject()?.getName() || "<unknown>",
-		projectPath: resource.getProject()?.getRootPath() || "<unknown>"
+		projectPath: resource.getProject()?.getRootPath() || "<unknown>",
 	};
 }
 
 /**
  * Creates a resource info array from the given resource array
  *
- * @param {@ui5/fs/Resource[]} resources an array of resources
- * @returns {object[]} sorted array of resource infos
+ * @param resources an array of resources
+ * @returns sorted array of resource infos
  */
 function createResourceInfos(resources) {
 	return resources.map((item, i) => {
@@ -94,10 +94,15 @@ function createResourceInfos(resources) {
  * @returns {Function} Returns a server middleware closure.
  */
 
-function createMiddleware({ resources, middlewareUtil, simpleIndex = false, showHidden = true }: {
-    resources: object;
+/**
+ *
+ * @param root0
+ * @param root0.resources
+ */
+function createMiddleware({resources, middlewareUtil, simpleIndex = false, showHidden = true}: {
+	resources: object;
 }) {
-	return function(req, res, next) {
+	return function (req, res, next) {
 		const pathname = middlewareUtil.getPathname(req);
 		log.verbose("\n Listing index of " + pathname);
 		const glob = pathname + (pathname.endsWith("/") ? "*" : "/*");
@@ -115,7 +120,7 @@ function createMiddleware({ resources, middlewareUtil, simpleIndex = false, show
 				simpleIndex,
 				showHidden,
 				resourceInfos,
-				pathname
+				pathname,
 			});
 		}).catch((err) => {
 			next(err);

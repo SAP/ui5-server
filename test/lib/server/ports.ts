@@ -29,11 +29,11 @@ test.serial("Start server - Port is already taken and an error occurs", async (t
 	});
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	const startServer = serve(graph, {
-		port
+		port,
 	});
 
 	const error = await t.throwsAsync(startServer);
@@ -81,11 +81,11 @@ test.serial("Start server together with node server - Port is already taken and 
 	});
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 	const server = await serve(graph, {
 		port,
-		changePortIfInUse: true
+		changePortIfInUse: true,
 	});
 
 	t.deepEqual(server.port, nextFoundPort, "Resolves with correct port");
@@ -103,7 +103,7 @@ test.serial("Start server - Port can not be determined and an error occurs", asy
 	const {sinon} = t.context;
 
 	t.plan(2);
-	const portscannerFake = function(port, portMax, host, callback) {
+	const portscannerFake = function (port, portMax, host, callback) {
 		return new Promise((resolve) => {
 			callback(new Error("testError"), false);
 			resolve();
@@ -112,11 +112,11 @@ test.serial("Start server - Port can not be determined and an error occurs", asy
 	const portScannerStub = sinon.stub(portscanner, "findAPortNotInUse").callsFake(portscannerFake);
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 	const startServer = serve(graph, {
 		port: 3990,
-		changePortIfInUse: true
+		changePortIfInUse: true,
 	});
 
 	const error = await t.throwsAsync(startServer);
@@ -124,7 +124,6 @@ test.serial("Start server - Port can not be determined and an error occurs", asy
 		"Server could not start, port is already taken and no other port is used.");
 	portScannerStub.restore();
 });
-
 
 test.serial(
 	"Start server - Port is already taken and an error occurs because no other port can be determined",
@@ -152,12 +151,12 @@ test.serial(
 
 		await Promise.all(serversStart);
 		const graph = await graphFromPackageDependencies({
-			cwd: "./test/fixtures/application.a"
+			cwd: "./test/fixtures/application.a",
 		});
 
 		const startServer = serve(graph, {
 			port: portStart,
-			changePortIfInUse: true
+			changePortIfInUse: true,
 		});
 
 		const error = await t.throwsAsync(startServer);
@@ -196,20 +195,20 @@ test.serial("Start server twice - Port is already taken and the next one is used
 	const port = 3380;
 	const nextFoundPort = 3381;
 	const graph1 = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 	const serveResult1 = await serve(graph1, {
 		port: port,
-		changePortIfInUse: true
+		changePortIfInUse: true,
 	});
 	t.deepEqual(serveResult1.port, port, "Resolves with correct port");
 
 	const graph2 = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 	const serveResult2 = await serve(graph2, {
 		port: port,
-		changePortIfInUse: true
+		changePortIfInUse: true,
 	});
 	t.deepEqual(serveResult2.port, nextFoundPort, "Resolves with correct port");
 

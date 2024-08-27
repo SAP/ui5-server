@@ -5,13 +5,13 @@ import serveIndexMiddleware from "../../../../lib/middleware/serveIndex.js";
 
 test.serial("serveIndex default", async (t) => {
 	t.plan(4);
-	const writeResource = function(writer, path, buffer) {
+	const writeResource = function (writer, path, buffer) {
 		const statInfo = {
 			mtime: 0,
 			size: buffer.byteLength,
-			isDirectory: function() {
+			isDirectory: function () {
 				return false;
-			}
+			},
 		};
 		const resource = resourceFactory.createResource({statInfo, path, buffer});
 		return writer.write(resource);
@@ -28,41 +28,41 @@ test.serial("serveIndex default", async (t) => {
 	const middleware = serveIndexMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	await new Promise((resolve, reject) => {
 		const req = {
-			url: "/"
+			url: "/",
 		};
 		const res = {
-			writeHead: function(status, contentType) {
+			writeHead: function (status, contentType) {
 			},
-			end: function(content) {
+			end: function (content) {
 				t.regex(content,
 					RegExp(
 						"<li><a href=\"/myFile1.meh\" class=\"icon icon icon-meh icon-default\" " +
-							"title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span><span class=\"size\">" +
-							"1.00 KB</span>"));
+						"title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span><span class=\"size\">" +
+						"1.00 KB</span>"));
 				t.regex(content,
 					RegExp(
 						"<li><a href=\"/myFile2.js\" class=\"icon icon icon-js icon-application-javascript\" " +
-							"title=\"myFile2.js\"><span class=\"name\">myFile2.js</span><span class=\"size\">" +
-							"1.00 MB</span>"));
+						"title=\"myFile2.js\"><span class=\"name\">myFile2.js</span><span class=\"size\">" +
+						"1.00 MB</span>"));
 				t.regex(content,
 					RegExp(
 						"<li><a href=\"/myFile3.properties\" class=\"icon icon icon-properties icon-default\" " +
-							"title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span>" +
-							"<span class=\"size\">1.00 GB</span>"));
+						"title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span>" +
+						"<span class=\"size\">1.00 GB</span>"));
 				t.regex(content,
 					RegExp(
 						"<li><a href=\"/.myFile4\" class=\"icon icon icon- icon-default\" title=\".myFile4\">" +
-							"<span class=\"name\">.myFile4</span><span class=\"size\">1.00 KB</span>"));
+						"<span class=\"name\">.myFile4</span><span class=\"size\">1.00 KB</span>"));
 				resolve();
 			},
 		};
-		const next = function(err) {
+		const next = function (err) {
 			reject(new Error(`Next callback called with error: ${err.message}`));
 		};
 		middleware(req, res, next);
@@ -71,13 +71,13 @@ test.serial("serveIndex default", async (t) => {
 
 test.serial("serveIndex no hidden", async (t) => {
 	t.plan(4);
-	const writeResource = function(writer, path, buffer) {
+	const writeResource = function (writer, path, buffer) {
 		const statInfo = {
 			mtime: 0,
 			size: buffer.byteLength,
-			isDirectory: function() {
+			isDirectory: function () {
 				return false;
-			}
+			},
 		};
 		const resource = resourceFactory.createResource({statInfo, path, buffer});
 		return writer.write(resource);
@@ -94,44 +94,44 @@ test.serial("serveIndex no hidden", async (t) => {
 	const middleware = serveIndexMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
+			all: readerWriter,
 		},
 		simpleIndex: false,
-		showHidden: false
+		showHidden: false,
 	});
 
 	await new Promise((resolve, reject) => {
 		const req = {
-			url: "/"
+			url: "/",
 		};
 		const res = {
-			writeHead: function(status, contentType) {
+			writeHead: function (status, contentType) {
 			},
-			end: function(content) {
+			end: function (content) {
 				t.regex(content,
 					RegExp(
 						"<li><a href=\"/myFile1.meh\" class=\"icon icon icon-meh icon-default\" " +
-							"title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span>" +
-							"<span class=\"size\">1.00 KB</span>"));
+						"title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span>" +
+						"<span class=\"size\">1.00 KB</span>"));
 				t.regex(content,
 					RegExp(
 						"<li><a href=\"/myFile2.js\" class=\"icon icon icon-js icon-application-javascript\" " +
-							"title=\"myFile2.js\"><span class=\"name\">myFile2.js</span>" +
-							"<span class=\"size\">1.00 MB</span>"));
+						"title=\"myFile2.js\"><span class=\"name\">myFile2.js</span>" +
+						"<span class=\"size\">1.00 MB</span>"));
 				t.regex(content,
 					RegExp(
 						"<li><a href=\"/myFile3.properties\" class=\"icon icon icon-properties icon-default\" " +
-							"title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span>" +
-							"<span class=\"size\">1.00 GB</span>"));
+						"title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span>" +
+						"<span class=\"size\">1.00 GB</span>"));
 				t.notRegex(content,
 					RegExp(
 						"<li><a href=\"/.myFile4\" class=\"icon icon icon- icon-default\" " +
-							"title=\".myFile4\"><span class=\"name\">.myFile4</span>" +
-							"<span class=\"size\">1.00 KB</span>"));
+						"title=\".myFile4\"><span class=\"name\">.myFile4</span>" +
+						"<span class=\"size\">1.00 KB</span>"));
 				resolve();
 			},
 		};
-		const next = function(err) {
+		const next = function (err) {
 			reject(new Error(`Next callback called with error: ${err.message}`));
 		};
 		middleware(req, res, next);
@@ -140,13 +140,13 @@ test.serial("serveIndex no hidden", async (t) => {
 
 test.serial("serveIndex no details", async (t) => {
 	t.plan(4);
-	const writeResource = function(writer, path, buffer) {
+	const writeResource = function (writer, path, buffer) {
 		const statInfo = {
 			mtime: 0,
 			size: buffer.byteLength,
-			isDirectory: function() {
+			isDirectory: function () {
 				return false;
-			}
+			},
 		};
 		const resource = resourceFactory.createResource({statInfo, path, buffer});
 		return writer.write(resource);
@@ -163,42 +163,41 @@ test.serial("serveIndex no details", async (t) => {
 	const middleware = serveIndexMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
+			all: readerWriter,
 		},
 		simpleIndex: true,
-		showHidden: true
+		showHidden: true,
 	});
 
 	await new Promise((resolve, reject) => {
 		const req = {
-			url: "/"
+			url: "/",
 		};
 		const res = {
-			writeHead: function(status, contentType) {
+			writeHead: function (status, contentType) {
 			},
-			end: function(content) {
+			end: function (content) {
 				t.regex(content, RegExp(
 					"<li><a href=\"/myFile1.meh\" class=\"icon icon icon-meh icon-default\" " +
-						"title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span>" +
-						"<span class=\"size\">1.00 KB</span>"));
+					"title=\"myFile1.meh\"><span class=\"name\">myFile1.meh</span>" +
+					"<span class=\"size\">1.00 KB</span>"));
 				t.regex(content, RegExp(
 					"<li><a href=\"/myFile2.js\" class=\"icon icon icon-js icon-application-javascript\" " +
-						"title=\"myFile2.js\"><span class=\"name\">myFile2.js</span>" +
-						"<span class=\"size\">1.00 MB</span>"));
+					"title=\"myFile2.js\"><span class=\"name\">myFile2.js</span>" +
+					"<span class=\"size\">1.00 MB</span>"));
 				t.regex(content, RegExp(
 					"<li><a href=\"/myFile3.properties\" class=\"icon icon icon-properties icon-default\" " +
-						"title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span>" +
-						"<span class=\"size\">1.00 GB</span>"));
+					"title=\"myFile3.properties\"><span class=\"name\">myFile3.properties</span>" +
+					"<span class=\"size\">1.00 GB</span>"));
 				t.regex(content, RegExp(
 					"<li><a href=\"/.myFile4\" class=\"icon icon icon- icon-default\" " +
-						"title=\".myFile4\"><span class=\"name\">.myFile4</span><span class=\"size\">1.00 KB</span>"));
+					"title=\".myFile4\"><span class=\"name\">.myFile4</span><span class=\"size\">1.00 KB</span>"));
 				resolve();
 			},
 		};
-		const next = function(err) {
+		const next = function (err) {
 			reject(new Error(`Next callback called with error: ${err.message}`));
 		};
 		middleware(req, res, next);
 	});
 });
-

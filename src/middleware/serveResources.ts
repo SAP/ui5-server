@@ -11,22 +11,26 @@ const rManifest = /\/manifest\.json$/i;
 const rResourcesPrefix = /^\/resources\//i;
 const rTestResourcesPrefix = /^\/test-resources\//i;
 
+/**
+ *
+ * @param req
+ * @param res
+ */
 function isFresh(req, res) {
 	return fresh(req.headers, {
-		"etag": res.getHeader("ETag")
+		etag: res.getHeader("ETag"),
 	});
 }
 
 /**
  * Creates and returns the middleware to serve application resources.
  *
- * @module @ui5/server/middleware/serveResources
- * @param {object} parameters Parameters
- * @param {@ui5/server/internal/MiddlewareManager.middlewareResources} parameters.resources Parameters
- * @param {object} parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
- * @returns {Function} Returns a server middleware closure.
+ * @param parameters Parameters
+ * @param parameters.resources Parameters
+ * @param parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
+ * @returns Returns a server middleware closure.
  */
-function createMiddleware({ resources, middlewareUtil }: object) {
+function createMiddleware({resources, middlewareUtil}: object) {
 	return async function serveResources(req, res, next) {
 		try {
 			const pathname = middlewareUtil.getPathname(req);
@@ -37,7 +41,7 @@ function createMiddleware({ resources, middlewareUtil }: object) {
 					return;
 				}
 				log.verbose(`Could not find manifest.json for ${pathname}. ` +
-					`Checking for .library file to generate manifest.json from.`);
+				`Checking for .library file to generate manifest.json from.`);
 				const {default: generateLibraryManifest} = await import("./helper/generateLibraryManifest.js");
 				// Attempt to find a .library file, which is required for generating a manifest.json
 				const dotLibraryPath = pathname.replace(rManifest, "/.library");
@@ -65,7 +69,7 @@ function createMiddleware({ resources, middlewareUtil }: object) {
 					resources: [resource],
 					// Ensure that only files within the manifest's project are accessible
 					// Using the "runtime" style to match the style used by the UI5 server
-					fs: fsInterface(resource.getProject().getReader({style: "runtime"}))
+					fs: fsInterface(resource.getProject().getReader({style: "runtime"})),
 				});
 			}
 
@@ -77,7 +81,7 @@ function createMiddleware({ resources, middlewareUtil }: object) {
 				let propertiesFileSourceEncoding = project?.getPropertiesFileSourceEncoding?.();
 
 				if (!propertiesFileSourceEncoding) {
-					if (project && project.getSpecVersion().lte("1.1")) {
+					if (project?.getSpecVersion().lte("1.1")) {
 						// default encoding to "ISO-8859-1" for old specVersions
 						propertiesFileSourceEncoding = "ISO-8859-1";
 					} else {
@@ -88,8 +92,8 @@ function createMiddleware({ resources, middlewareUtil }: object) {
 				const encoding = nonAsciiEscaper.getEncodingFromAlias(propertiesFileSourceEncoding);
 				await nonAsciiEscaper({
 					resources: [resource], options: {
-						encoding
-					}
+						encoding,
+					},
 				});
 			}
 

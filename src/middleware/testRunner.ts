@@ -10,6 +10,12 @@ const log = getLogger("server:middleware:testRunner");
 const testRunnerResourceRegEx = /\/test-resources\/sap\/ui\/qunit\/(testrunner\.(html|css)|TestRunner.js)$/;
 const resourceCache = Object.create(null);
 
+/**
+ *
+ * @param res
+ * @param resourcePath
+ * @param resourceContent
+ */
 function serveResource(res, resourcePath, resourceContent) {
 	const type = mime.lookup(resourcePath) || "application/octet-stream";
 	const charset = mime.charset(type);
@@ -25,15 +31,14 @@ function serveResource(res, resourcePath, resourceContent) {
 /**
  * Creates and returns the middleware to serve a resource index.
  *
- * @module @ui5/server/middleware/testRunner
- * @param {object} parameters Parameters
- * @param {object} parameters.resources Contains the resource reader or collection to access project related files
- * @returns {Function} Returns a server middleware closure.
+ * @param parameters Parameters
+ * @param parameters.resources Contains the resource reader or collection to access project related files
+ * @returns Returns a server middleware closure.
  */
-function createMiddleware({ resources }: {
-    resources: object;
+function createMiddleware({resources}: {
+	resources: object;
 }) {
-	return async function(req, res, next) {
+	return async function (req, res, next) {
 		try {
 			const pathname = parseurl(req).pathname;
 			const parts = testRunnerResourceRegEx.exec(pathname);

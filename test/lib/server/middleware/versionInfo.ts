@@ -6,7 +6,7 @@ import * as resourceFactory from "@ui5/fs/resourceFactory";
 function createWorkspace() {
 	return resourceFactory.createAdapter({
 		virBasePath: "/",
-		project: createProjectMetadata(["test", "lib"])
+		project: createProjectMetadata(["test", "lib"]),
 	});
 }
 
@@ -32,7 +32,7 @@ const createProjectMetadata = (names, version, type) => {
 		getName: () => key,
 		getNamespace: () => names.join("/"),
 		getVersion: () => version || "3.0.0-" + key,
-		getType: () => type || "library"
+		getType: () => type || "library",
 	};
 };
 
@@ -57,7 +57,7 @@ async function createDotLibrary(dependencies, resourceFactory, names, version) {
 
 				<documentation>Library ${names.slice(1).join(".").toUpperCase()}</documentation>
 			</library>
-		`
+		`,
 	}));
 }
 
@@ -74,36 +74,36 @@ async function createDotLibrary(dependencies, resourceFactory, names, version) {
 const createManifestResource = async (dependencies, resourceFactory, names, deps, embeds, embeddedBy) => {
 	const content = {
 		"sap.app": {
-			"id": names.join("."),
-			"embeds": []
+			id: names.join("."),
+			embeds: [],
 		},
 		"sap.ui5": {
-			"dependencies": {
-				"minUI5Version": "1.84",
-				"libs": {}
-			}
-		}
+			dependencies: {
+				minUI5Version: "1.84",
+				libs: {},
+			},
+		},
 	};
 
 	const libs = {};
 	deps.forEach((dep) => {
 		libs[dep.name] = {
-			"minVersion": "1.84.0"
+			minVersion: "1.84.0",
 		};
 		if (dep.lazy) {
 			libs[dep.name].lazy = true;
 		}
 	});
-	content["sap.ui5"]["dependencies"]["libs"] = libs;
+	content["sap.ui5"].dependencies.libs = libs;
 	if (embeds !== undefined) {
-		content["sap.app"]["embeds"] = embeds;
+		content["sap.app"].embeds = embeds;
 	}
 	if (embeddedBy !== undefined) {
-		content["sap.app"]["embeddedBy"] = embeddedBy;
+		content["sap.app"].embeddedBy = embeddedBy;
 	}
 	await dependencies.write(resourceFactory.createResource({
 		path: `/resources/${names.join("/")}/manifest.json`,
-		string: JSON.stringify(content, null, 2)
+		string: JSON.stringify(content, null, 2),
 	}));
 };
 
@@ -121,11 +121,11 @@ const createResources = async (dependencies, resourceFactory, names, deps, embed
 };
 
 function createDepWorkspace(names, oOptions = {
-	virBasePath: "/resources"
+	virBasePath: "/resources",
 }) {
 	const project = createProjectMetadata(names);
 	oOptions = Object.assign({
-		project
+		project,
 	}, oOptions);
 	const workspace = resourceFactory.createAdapter(oOptions);
 	// Connect the project back to the created workspace, this allows for accessing the reader via a resources project
@@ -165,16 +165,16 @@ test.serial("test all inner API calls within middleware", async (t) => {
 	let manifestMockCounter = 0;
 	const manifestCreatorStub = sinon.stub().callsFake(() => resourceFactory.createResource({
 		path: "/stub/path",
-		string: `mocked manifest.json ${++manifestMockCounter}`
+		string: `mocked manifest.json ${++manifestMockCounter}`,
 	}));
 	const generateLibraryManifestHelperMock = await esmock(
 		"../../../../lib/middleware/helper/generateLibraryManifest.js", {
-			"@ui5/builder/processors/manifestCreator": manifestCreatorStub
+			"@ui5/builder/processors/manifestCreator": manifestCreatorStub,
 		});
 
 	const mockedVersionInfo = resourceFactory.createResource({
 		path: "/stub/path",
-		string: "mocked version info"
+		string: "mocked version info",
 	});
 	const versionInfoGeneratorStub = sinon.stub().returns([mockedVersionInfo]);
 	const versionInfoMiddleware = await t.context.createVersionInfoMiddleware({
@@ -187,7 +187,7 @@ test.serial("test all inner API calls within middleware", async (t) => {
 	const dependenciesC = createDepWorkspace(["lib", "c"], {virBasePath: "/"});
 	const dependenciesX = createDepWorkspace(["module", "x"], {
 		virBasePath: "/",
-		project: createProjectMetadata(["module", "x"], "1.0.0", "module")
+		project: createProjectMetadata(["module", "x"], "1.0.0", "module"),
 	});
 	// create lib.a without manifest
 	await createDotLibrary(dependenciesA, resourceFactory, ["lib", "a"], [{name: "lib.b"}, {name: "lib.c"}]);
@@ -203,7 +203,7 @@ test.serial("test all inner API calls within middleware", async (t) => {
 		// relevant file extensions for manifest creation
 		"js", "json", "less", "css", "theming", "theme", "properties",
 		// other file extensions are irrelevant
-		"html", "txt", "ts"
+		"html", "txt", "ts",
 	].forEach(async (extension) => {
 		await dependenciesC.write(resourceFactory.createResource({path: `/resources/lib/c/foo.${extension}`}));
 	});
@@ -211,8 +211,8 @@ test.serial("test all inner API calls within middleware", async (t) => {
 	const resources = {
 		dependencies: resourceFactory.createReaderCollection({
 			name: "dependencies",
-			readers: [dependenciesA, dependenciesB, dependenciesC, dependenciesX]
-		})
+			readers: [dependenciesA, dependenciesB, dependenciesC, dependenciesX],
+		}),
 	};
 	const middlewareUtil = {
 		getProject: (projectName) => {
@@ -221,19 +221,19 @@ test.serial("test all inner API calls within middleware", async (t) => {
 			}
 			if (projectName === "my.project") {
 				return {
-					getVersion: () => "project version"
+					getVersion: () => "project version",
 				};
 			}
 			return null;
-		}
+		},
 	};
 	const middleware = versionInfoMiddleware({resources, middlewareUtil});
 
 	const endStub = sinon.stub();
 	await middleware(
 		/* req */ undefined,
-		/* res */ {writeHead: function() {}, end: endStub},
-		/* next */ function(err) {
+		/* res */ {writeHead: function () {}, end: endStub},
+		/* next */ function (err) {
 			throw err;
 		});
 
@@ -242,7 +242,7 @@ test.serial("test all inner API calls within middleware", async (t) => {
 		"libraryResource",
 		"namespace",
 		"resources",
-		"getProjectVersion"
+		"getProjectVersion",
 	], "Expected arguments provided");
 	t.is(manifestCreatorStub.getCall(0).args[0].libraryResource.getPath(), "/resources/lib/a/.library");
 	t.is(manifestCreatorStub.getCall(1).args[0].libraryResource.getPath(), "/resources/lib/c/.library");
@@ -261,7 +261,7 @@ test.serial("test all inner API calls within middleware", async (t) => {
 			"/resources/lib/c/foo.less",
 			"/resources/lib/c/foo.properties",
 			"/resources/lib/c/foo.theme",
-			"/resources/lib/c/foo.theming"
+			"/resources/lib/c/foo.theming",
 		]);
 	const projectVersion1 = manifestCreatorStub.getCall(0).args[0].getProjectVersion("my.project");
 	t.is(projectVersion1, "project version", "getProjectVersion callback returned expected project version");
@@ -334,110 +334,110 @@ test.serial("integration: Library with dependencies and subcomponent complex sce
 	const resources = {
 		dependencies: resourceFactory.createReaderCollection({
 			name: "dependencies",
-			readers: [dependenciesA, dependenciesB, dependenciesC, dependenciesD, dependenciesE]
-		})
+			readers: [dependenciesA, dependenciesB, dependenciesC, dependenciesD, dependenciesE],
+		}),
 	};
 
 	const middlewareUtil = {
-		getProject: () => createProjectMetadata(["myname"], "1.33.7")
+		getProject: () => createProjectMetadata(["myname"], "1.33.7"),
 	};
 
 	const versionInfoMiddleware = await t.context.createVersionInfoMiddleware();
 	const middleware = versionInfoMiddleware({resources, middlewareUtil});
 
 	const expectedVersionInfo = {
-		"name": "myname",
-		"scmRevision": "",
-		"version": "1.33.7",
-		"libraries": [{
-			"name": "lib.a",
-			"scmRevision": "",
-			"manifestHints": {
-				"dependencies": {
-					"libs": {
+		name: "myname",
+		scmRevision: "",
+		version: "1.33.7",
+		libraries: [{
+			name: "lib.a",
+			scmRevision: "",
+			manifestHints: {
+				dependencies: {
+					libs: {
 						"lib.b": {},
 						"lib.c": {},
 						"lib.d": {},
-						"lib.e": {}
-					}
-				}
+						"lib.e": {},
+					},
+				},
 			},
-			"version": "3.0.0-lib.a",
+			version: "3.0.0-lib.a",
 		},
 		{
-			"name": "lib.b",
-			"scmRevision": "",
-			"manifestHints": {
-				"dependencies": {
-					"libs": {
+			name: "lib.b",
+			scmRevision: "",
+			manifestHints: {
+				dependencies: {
+					libs: {
 						"lib.c": {
-							"lazy": true
+							lazy: true,
 						},
 						"lib.d": {
-							"lazy": true
+							lazy: true,
 						},
 						"lib.e": {
-							"lazy": true
-						}
-					}
-				}
+							lazy: true,
+						},
+					},
+				},
 			},
-			"version": "3.0.0-lib.b",
+			version: "3.0.0-lib.b",
 		},
 		{
-			"name": "lib.c",
-			"scmRevision": "",
-			"manifestHints": {
-				"dependencies": {
-					"libs": {
+			name: "lib.c",
+			scmRevision: "",
+			manifestHints: {
+				dependencies: {
+					libs: {
 						"lib.d": {},
-						"lib.e": {}
-					}
-				}
+						"lib.e": {},
+					},
+				},
 			},
-			"version": "3.0.0-lib.c",
+			version: "3.0.0-lib.c",
 		},
 		{
-			"name": "lib.d",
-			"scmRevision": "",
-			"manifestHints": {
-				"dependencies": {
-					"libs": {
-						"lib.e": {}
-					}
-				}
+			name: "lib.d",
+			scmRevision: "",
+			manifestHints: {
+				dependencies: {
+					libs: {
+						"lib.e": {},
+					},
+				},
 			},
-			"version": "3.0.0-lib.d",
+			version: "3.0.0-lib.d",
 		},
 		{
-			"name": "lib.e",
-			"scmRevision": "",
-			"version": "3.0.0-lib.e",
+			name: "lib.e",
+			scmRevision: "",
+			version: "3.0.0-lib.e",
 		}],
-		"components": {
+		components: {
 			"lib.a.sub.fold": {
-				"hasOwnPreload": true,
-				"library": "lib.a",
-				"manifestHints": {
-					"dependencies": {
-						"libs": {
+				hasOwnPreload: true,
+				library: "lib.a",
+				manifestHints: {
+					dependencies: {
+						libs: {
 							"lib.c": {},
 							"lib.d": {},
-							"lib.e": {}
-						}
-					}
-				}
-			}
+							"lib.e": {},
+						},
+					},
+				},
+			},
 		},
 	};
 
 	const res = {
-		writeHead: function() {},
-		end: async function(versionInfoContent) {
+		writeHead: function () {},
+		end: async function (versionInfoContent) {
 			await assertCreatedVersionInfo(t, expectedVersionInfo, versionInfoContent);
-		}
+		},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw err;
 	};
 

@@ -1,5 +1,10 @@
 import createManifestProcessor from "@ui5/builder/processors/manifestCreator";
 
+/**
+ *
+ * @param middlewareUtil
+ * @param dotLibResource
+ */
 export default async function generateLibraryManifest(middlewareUtil, dotLibResource) {
 	const project = dotLibResource.getProject();
 	const libResources = await project.getReader().byGlob(
@@ -11,7 +16,7 @@ export default async function generateLibraryManifest(middlewareUtil, dotLibReso
 		resources: libResources,
 		getProjectVersion: (projectName) => {
 			return middlewareUtil.getProject(projectName)?.getVersion();
-		}
+		},
 	});
 	if (res) {
 		res.setProject(project);

@@ -16,7 +16,7 @@ function getSpecificationVersion(specVersion) {
 test.serial("getPathname", async (t) => {
 	const parseurlStub = sinon.stub().returns({pathname: "path%20name"});
 	const MiddlewareUtil = await esmock("../../../../lib/middleware/MiddlewareUtil.js", {
-		parseurl: parseurlStub
+		parseurl: parseurlStub,
 	});
 	const middlewareUtil = new MiddlewareUtil({graph: "graph", project: "project"});
 	const pathname = middlewareUtil.getPathname("req");
@@ -40,7 +40,7 @@ test.serial("getMimeInfo", (t) => {
 	t.deepEqual(mimeInfo, {
 		type: "mytype",
 		charset: "mycharset",
-		contentType: "mytype; charset=mycharset"
+		contentType: "mytype; charset=mycharset",
 	}, "Correct pathname returned");
 });
 
@@ -58,7 +58,7 @@ test.serial("getMimeInfo: unknown type", (t) => {
 	t.deepEqual(mimeInfo, {
 		type: "application/octet-stream",
 		charset: undefined,
-		contentType: "application/octet-stream"
+		contentType: "application/octet-stream",
 	}, "Correct pathname returned");
 });
 
@@ -66,9 +66,9 @@ test("getProject", (t) => {
 	const getProjectStub = sinon.stub().returns("Pony farm!");
 	const middlewareUtil = new MiddlewareUtil({
 		graph: {
-			getProject: getProjectStub
+			getProject: getProjectStub,
 		},
-		project: "root project"
+		project: "root project",
 	});
 
 	const res = middlewareUtil.getProject("pony farm");
@@ -83,9 +83,9 @@ test("getProject: Default name", (t) => {
 	const getProjectStub = sinon.stub().returns("Pony farm!");
 	const middlewareUtil = new MiddlewareUtil({
 		graph: {
-			getProject: getProjectStub
+			getProject: getProjectStub,
 		},
-		project: "root project"
+		project: "root project",
 	});
 
 	const res = middlewareUtil.getProject();
@@ -98,13 +98,13 @@ test("getProject: Resource", (t) => {
 	const getProjectStub = sinon.stub().returns("Pony farm!");
 	const middlewareUtil = new MiddlewareUtil({
 		graph: {
-			getProject: getProjectStub
+			getProject: getProjectStub,
 		},
-		project: "root project"
+		project: "root project",
 	});
 
 	const mockResource = {
-		getProject: sinon.stub().returns("Pig farm!")
+		getProject: sinon.stub().returns("Pig farm!"),
 	};
 	const res = middlewareUtil.getProject(mockResource);
 
@@ -118,11 +118,11 @@ test("getDependencies", (t) => {
 	const getProjectNameStub = sinon.stub().returns("root project name");
 	const middlewareUtil = new MiddlewareUtil({
 		graph: {
-			getDependencies: getDependenciesStub
+			getDependencies: getDependenciesStub,
 		},
 		project: {
-			getName: getProjectNameStub
-		}
+			getName: getProjectNameStub,
+		},
 	});
 
 	const res = middlewareUtil.getDependencies("pony farm");
@@ -139,11 +139,11 @@ test("getDependencies: Default name", (t) => {
 	const getProjectNameStub = sinon.stub().returns("root project name");
 	const middlewareUtil = new MiddlewareUtil({
 		graph: {
-			getDependencies: getDependenciesStub
+			getDependencies: getDependenciesStub,
 		},
 		project: {
-			getName: getProjectNameStub
-		}
+			getName: getProjectNameStub,
+		},
 	});
 
 	const res = middlewareUtil.getDependencies();
@@ -186,7 +186,7 @@ test("getInterface: specVersion 2.0", (t) => {
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
-		"getMimeInfo"
+		"getMimeInfo",
 	], "Correct methods are provided");
 
 	t.is(typeof interfacedMiddlewareUtil.getPathname, "function", "function getPathname is provided");
@@ -200,7 +200,7 @@ test("getInterface: specVersion 2.1", (t) => {
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
-		"getMimeInfo"
+		"getMimeInfo",
 	], "Correct methods are provided");
 
 	t.is(typeof interfacedMiddlewareUtil.getPathname, "function", "function getPathname is provided");
@@ -214,7 +214,7 @@ test("getInterface: specVersion 2.2", (t) => {
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
-		"getMimeInfo"
+		"getMimeInfo",
 	], "Correct methods are provided");
 
 	t.is(typeof interfacedMiddlewareUtil.getPathname, "function", "function getPathname is provided");
@@ -228,7 +228,7 @@ test("getInterface: specVersion 2.3", (t) => {
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
-		"getMimeInfo"
+		"getMimeInfo",
 	], "Correct methods are provided");
 
 	t.is(typeof interfacedMiddlewareUtil.getPathname, "function", "function getPathname is provided");
@@ -242,7 +242,7 @@ test("getInterface: specVersion 2.4", (t) => {
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
-		"getMimeInfo"
+		"getMimeInfo",
 	], "Correct methods are provided");
 
 	t.is(typeof interfacedMiddlewareUtil.getPathname, "function", "function getPathname is provided");
@@ -256,7 +256,7 @@ test("getInterface: specVersion 2.5", (t) => {
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
-		"getMimeInfo"
+		"getMimeInfo",
 	], "Correct methods are provided");
 
 	t.is(typeof interfacedMiddlewareUtil.getPathname, "function", "function getPathname is provided");
@@ -270,7 +270,7 @@ test("getInterface: specVersion 2.6", (t) => {
 
 	t.deepEqual(Object.keys(interfacedMiddlewareUtil), [
 		"getPathname",
-		"getMimeInfo"
+		"getMimeInfo",
 	], "Correct methods are provided");
 
 	t.is(typeof interfacedMiddlewareUtil.getPathname, "function", "function getPathname is provided");
@@ -300,7 +300,7 @@ test("getInterface: specVersion 3.0", (t) => {
 
 	const mockGraph = {
 		getProject: getProjectStub,
-		getDependencies: getDependenciesStub
+		getDependencies: getDependenciesStub,
 	};
 
 	const middlewareUtil = new MiddlewareUtil({graph: mockGraph, project: "project"});

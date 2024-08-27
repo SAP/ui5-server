@@ -18,13 +18,13 @@ test.before(async (t) => {
 	});
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	t.context.applicationProject = graph.getProject("application.a");
 
 	server = await serve(graph, {
-		port: 3334
+		port: 3334,
 	});
 	request = supertest("http://localhost:3334");
 });
@@ -46,7 +46,7 @@ test("serveResources: manifestEnhancer cache invalidation", async (t) => {
 
 	manifestEnhancer.callsFake(async ({resources}) => {
 		for (const resource of resources) {
-			resource.setString(JSON.stringify({"mockedResponse": "v1"}));
+			resource.setString(JSON.stringify({mockedResponse: "v1"}));
 		}
 	});
 
@@ -56,7 +56,7 @@ test("serveResources: manifestEnhancer cache invalidation", async (t) => {
 	}
 	t.is(response.statusCode, 200, "Correct HTTP status code");
 	t.is(response.text, JSON.stringify({
-		"mockedResponse": "v1"
+		mockedResponse: "v1",
 	}), "Correct response");
 
 	const cachedResponse = await request.get("/manifest.json").set({"If-None-Match": response.headers.etag});
@@ -65,14 +65,14 @@ test("serveResources: manifestEnhancer cache invalidation", async (t) => {
 	// Changes to the response content should invalidate the cache
 	manifestEnhancer.callsFake(async ({resources}) => {
 		for (const resource of resources) {
-			resource.setString(JSON.stringify({"mockedResponse": "v2"}));
+			resource.setString(JSON.stringify({mockedResponse: "v2"}));
 		}
 	});
 
 	const newResponse = await request.get("/manifest.json").set({"If-None-Match": response.headers.etag});
 	t.is(newResponse.statusCode, 200, "Correct HTTP status code");
 	t.is(newResponse.text, JSON.stringify({
-		"mockedResponse": "v2"
+		mockedResponse: "v2",
 	}), "Correct response");
 });
 

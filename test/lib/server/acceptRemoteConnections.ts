@@ -9,12 +9,12 @@ let server;
 // Start server before running tests
 test.before(async () => {
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	server = await serve(graph, {
 		port: 3334,
-		acceptRemoteConnections: true
+		acceptRemoteConnections: true,
 	});
 
 	request = supertest("http://127.0.0.1:3334");

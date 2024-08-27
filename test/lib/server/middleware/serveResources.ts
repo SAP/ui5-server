@@ -7,28 +7,28 @@ import * as resourceFactory from "@ui5/fs/resourceFactory";
 import serveResourcesMiddleware from "../../../../lib/middleware/serveResources.js";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
-const writeResource = function(writer, path, size, stringContent, stringEncoding, project) {
+const writeResource = function (writer, path, size, stringContent, stringEncoding, project) {
 	const statInfo = {
 		ino: 0,
 		ctime: new Date(),
 		mtime: new Date(),
 		size: size,
-		isDirectory: function() {
+		isDirectory: function () {
 			return false;
-		}
+		},
 	};
 	const resource = resourceFactory.createResource({
 		path,
 		buffer: Buffer.from(stringContent, stringEncoding),
 		statInfo,
-		project
+		project,
 	});
 	// stub resource functionality in order to be able to get the Resource's content. Otherwise it would be drained.
 	const getStreamStub = {
 		pipe() {
 			return this;
 		},
-		setEncoding() {}
+		setEncoding() {},
 	};
 	sinon.stub(resource, "getStream").returns(getStreamStub);
 
@@ -39,9 +39,9 @@ const writeResource = function(writer, path, size, stringContent, stringEncoding
 	});
 };
 const fakeResponse = {
-	writeHead: function(status, contentType) {},
-	getHeader: function(string) {},
-	setHeader: function(string, header) {}
+	writeHead: function (status, contentType) {},
+	getHeader: function (string) {},
+	setHeader: function (string, header) {},
 };
 
 test.afterEach.always((t) => {
@@ -56,7 +56,7 @@ test.serial("Check if properties file is served properly", async (t) => {
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
 	const project = {
-		getPropertiesFileSourceEncoding: () => "ISO-8859-1"
+		getPropertiesFileSourceEncoding: () => "ISO-8859-1",
 	};
 
 	const resource = await writeResource(readerWriter, "/myFile3.properties", 1024 * 1024,
@@ -66,8 +66,8 @@ test.serial("Check if properties file is served properly", async (t) => {
 	const middleware = serveResourcesMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -75,9 +75,9 @@ test.serial("Check if properties file is served properly", async (t) => {
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/myFile3.properties",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.message}`);
 	};
 	const content = await middleware(req, response, next).then((o) => {
@@ -96,7 +96,7 @@ test.serial("Check if properties file is served properly with UTF-8", async (t) 
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
 	const project = {
-		getPropertiesFileSourceEncoding: () => "UTF-8"
+		getPropertiesFileSourceEncoding: () => "UTF-8",
 	};
 
 	const resource = await writeResource(readerWriter, "/myFile3.properties", 1024 * 1024,
@@ -106,8 +106,8 @@ test.serial("Check if properties file is served properly with UTF-8", async (t) 
 	const middleware = serveResourcesMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -115,9 +115,9 @@ test.serial("Check if properties file is served properly with UTF-8", async (t) 
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/myFile3.properties",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.message}`);
 	};
 	await middleware(req, response, next);
@@ -142,8 +142,8 @@ test.serial("Check if properties file is served properly without property settin
 	const middleware = serveResourcesMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -151,9 +151,9 @@ test.serial("Check if properties file is served properly without property settin
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/myFile3.properties",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 
@@ -179,7 +179,7 @@ test.serial("Check if properties file is served properly without property settin
 					toString: () => "1.1",
 					lte: () => true,
 				};
-			}
+			},
 		};
 		const resource = await writeResource(readerWriter, "/myFile3.properties",
 			1024 * 1024, "key=titel\nfame=straße", "latin1", project
@@ -188,8 +188,8 @@ test.serial("Check if properties file is served properly without property settin
 		const middleware = serveResourcesMiddleware({
 			middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 			resources: {
-				all: readerWriter
-			}
+				all: readerWriter,
+			},
 		});
 
 		const response = fakeResponse;
@@ -197,9 +197,9 @@ test.serial("Check if properties file is served properly without property settin
 		const setHeaderSpy = sinon.spy(response, "setHeader");
 		const req = {
 			url: "/myFile3.properties",
-			headers: {}
+			headers: {},
 		};
-		const next = function(err) {
+		const next = function (err) {
 			throw new Error(`Next callback called with error: ${err.stack}`);
 		};
 		await middleware(req, response, next);
@@ -222,7 +222,7 @@ test.serial("Check if properties file is served properly without property settin
 				toString: () => "2.0",
 				lte: () => false,
 			};
-		}
+		},
 	};
 	const resource = await writeResource(readerWriter, "/myFile3.properties",
 		1024 * 1024, "key=titel\nfame=straße", "utf8", project
@@ -231,8 +231,8 @@ test.serial("Check if properties file is served properly without property settin
 	const middleware = serveResourcesMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -240,9 +240,9 @@ test.serial("Check if properties file is served properly without property settin
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/myFile3.properties",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 	await middleware(req, response, next);
@@ -267,7 +267,7 @@ test.serial("Check if properties file is served properly for non component proje
 				toString: () => "3.0",
 				lte: () => false,
 			};
-		}
+		},
 	};
 
 	const resource = await writeResource(readerWriter, "/myFile3.properties", 1024 * 1024,
@@ -277,8 +277,8 @@ test.serial("Check if properties file is served properly for non component proje
 	const middleware = serveResourcesMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -286,9 +286,9 @@ test.serial("Check if properties file is served properly for non component proje
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/myFile3.properties",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.message}`);
 	};
 	await middleware(req, response, next);
@@ -305,16 +305,15 @@ test.serial("Check verbose logging", async (t) => {
 	const verboseLogStub = sinon.stub();
 	t.context.loggerStub = {
 		verbose: verboseLogStub,
-		isLevelEnabled: () => true
+		isLevelEnabled: () => true,
 	};
 
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
 		await esmock.p("../../../../lib/middleware/serveResources", {
 			"@ui5/logger": {
-				getLogger: sinon.stub().returns(t.context.loggerStub)
-			}
+				getLogger: sinon.stub().returns(t.context.loggerStub),
+			},
 		});
-
 
 	const resource = {
 		getPath: sinon.stub().returns("/foo.js"),
@@ -323,9 +322,9 @@ test.serial("Check verbose logging", async (t) => {
 			ctime: new Date(),
 			mtime: new Date(),
 			size: 1024 * 1024,
-			isDirectory: function() {
+			isDirectory: function () {
 				return false;
-			}
+			},
 		}),
 		getStream: () => {
 			const stream = new Readable();
@@ -335,27 +334,27 @@ test.serial("Check verbose logging", async (t) => {
 		},
 		getProject: () => {
 			return {
-				getVersion: () => "1.0.0"
+				getVersion: () => "1.0.0",
 			};
 		},
-		isModified: () => false
+		isModified: () => false,
 	};
 
 	const resources = {
 		all: {
-			byPath: sinon.stub()
-		}
+			byPath: sinon.stub(),
+		},
 	};
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
-		resources
+		resources,
 	});
 
 	resources.all.byPath.withArgs("/foo.js").resolves(resource);
 
 	const req = {
 		url: "/foo.js",
-		headers: {}
+		headers: {},
 	};
 
 	return new Promise((resolve, reject) => {
@@ -363,12 +362,12 @@ test.serial("Check verbose logging", async (t) => {
 		res.setHeader = sinon.stub();
 		res.getHeader = sinon.stub();
 		res._write = sinon.stub();
-		res.end = function() {
+		res.end = function () {
 			t.is(verboseLogStub.callCount, 0, "Currently no verbose logging");
 			resolve();
 		};
 
-		middleware(req, res, function(err) {
+		middleware(req, res, function (err) {
 			if (err) {
 				t.fail("Unexpected error passed to next function: " + err);
 			} else {
@@ -390,9 +389,9 @@ test.serial("Check if version replacement is done", (t) => {
 			ctime: new Date(),
 			mtime: new Date(),
 			size: 1024 * 1024,
-			isDirectory: function() {
+			isDirectory: function () {
 				return false;
-			}
+			},
 		}),
 		getStream: () => {
 			const stream = new Readable();
@@ -402,46 +401,46 @@ test.serial("Check if version replacement is done", (t) => {
 		},
 		getProject: () => {
 			return {
-				getVersion: () => "1.0.0"
+				getVersion: () => "1.0.0",
 			};
 		},
 		getPathTree: () => "",
-		isModified: () => false
+		isModified: () => false,
 	};
 
 	const resources = {
 		all: {
-			byPath: sinon.stub()
-		}
+			byPath: sinon.stub(),
+		},
 	};
 	const middleware = serveResourcesMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
-		resources
+		resources,
 	});
 
 	resources.all.byPath.withArgs("/foo.js").resolves(resource);
 
 	const req = {
 		url: "/foo.js",
-		headers: {}
+		headers: {},
 	};
 
 	const res = new Writable();
 	const buffers = [];
 	res.setHeader = sinon.stub();
 	res.getHeader = sinon.stub();
-	res._write = function(chunk, encoding, callback) {
+	res._write = function (chunk, encoding, callback) {
 		buffers.push(chunk);
 		callback();
 	};
 
 	return new Promise((resolve) => {
-		res.end = function() {
+		res.end = function () {
 			t.is(Buffer.concat(buffers).toString(), expected);
 			resolve();
 		};
 
-		middleware(req, res, function(err) {
+		middleware(req, res, function (err) {
 			if (err) {
 				t.fail("Unexpected error passed to next function: " + err);
 			} else {
@@ -463,9 +462,9 @@ test.serial("Check if utf8 characters are correctly processed in version replace
 			ctime: new Date(),
 			mtime: new Date(),
 			size: 1024 * 1024,
-			isDirectory: function() {
+			isDirectory: function () {
 				return false;
-			}
+			},
 		}),
 		getStream: () => {
 			const stream = new Readable();
@@ -482,46 +481,46 @@ test.serial("Check if utf8 characters are correctly processed in version replace
 		},
 		getProject: () => {
 			return {
-				getVersion: () => "1.0.0"
+				getVersion: () => "1.0.0",
 			};
 		},
 		getPathTree: () => "",
-		isModified: () => false
+		isModified: () => false,
 	};
 
 	const resources = {
 		all: {
-			byPath: sinon.stub()
-		}
+			byPath: sinon.stub(),
+		},
 	};
 	const middleware = serveResourcesMiddleware({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
-		resources
+		resources,
 	});
 
 	resources.all.byPath.withArgs("/foo.js").resolves(resource);
 
 	const req = {
 		url: "/foo.js",
-		headers: {}
+		headers: {},
 	};
 
 	const res = new Writable();
 	const buffers = [];
 	res.setHeader = sinon.stub();
 	res.getHeader = sinon.stub();
-	res._write = function(chunk, encoding, callback) {
+	res._write = function (chunk, encoding, callback) {
 		buffers.push(chunk);
 		callback();
 	};
 
 	return new Promise((resolve) => {
-		res.end = function() {
+		res.end = function () {
 			t.is(Buffer.concat(buffers).toString(), expected);
 			resolve();
 		};
 
-		middleware(req, res, function(err) {
+		middleware(req, res, function (err) {
 			if (err) {
 				t.fail("Unexpected error passed to next function: " + err);
 			} else {
@@ -544,7 +543,7 @@ test.serial("Missing manifest.json is generated", async (t) => {
 				toString: () => "3.0",
 				lte: () => false,
 			};
-		}
+		},
 	};
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/", project});
@@ -563,34 +562,34 @@ test.serial("Missing manifest.json is generated", async (t) => {
 	const generateLibraryManifestHelperStub = sinon.stub().resolves(manifestMock);
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
 		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub
+			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({
 			graph: {
-				getProject: () => project
+				getProject: () => project,
 			},
-			project: "project"
+			project: "project",
 		}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const req = {
 		url: "/resources/my/namespace/manifest.json",
-		headers: {}
+		headers: {},
 	};
 	const res = new Writable();
 	const buffers = [];
 	res.setHeader = sinon.stub();
 	res.getHeader = sinon.stub();
-	res._write = function(chunk, encoding, callback) {
+	res._write = function (chunk, encoding, callback) {
 		buffers.push(chunk);
 		callback();
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.message}`);
 	};
 
@@ -618,7 +617,7 @@ test.serial("Missing manifest.json is not generated with missing .library", asyn
 				toString: () => "3.0",
 				lte: () => false,
 			};
-		}
+		},
 	};
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/", project});
@@ -626,28 +625,28 @@ test.serial("Missing manifest.json is not generated with missing .library", asyn
 	const generateLibraryManifestHelperStub = sinon.stub().resolves();
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
 		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub
+			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({
 			graph: {
-				getProject: () => project
+				getProject: () => project,
 			},
-			project: "project"
+			project: "project",
 		}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const req = {
 		url: "/resources/my/namespace/manifest.json",
-		headers: {}
+		headers: {},
 	};
 
 	return new Promise((resolve, reject) => {
-		middleware(req, undefined, function(err) {
+		middleware(req, undefined, function (err) {
 			if (err) {
 				throw new Error(`Next callback called with error: ${err.message}`);
 			}
@@ -669,7 +668,7 @@ test.serial("Missing manifest.json is not generated for request outside /resourc
 				toString: () => "3.0",
 				lte: () => false,
 			};
-		}
+		},
 	};
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/"});
@@ -682,28 +681,28 @@ test.serial("Missing manifest.json is not generated for request outside /resourc
 	const generateLibraryManifestHelperStub = sinon.stub().resolves();
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
 		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub
+			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({
 			graph: {
-				getProject: () => project
+				getProject: () => project,
 			},
-			project: "project"
+			project: "project",
 		}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const req = {
 		url: "/manifest.json",
-		headers: {}
+		headers: {},
 	};
 
 	return new Promise((resolve, reject) => {
-		middleware(req, undefined, function(err) {
+		middleware(req, undefined, function (err) {
 			if (err) {
 				throw new Error(`Next callback called with error: ${err.message}`);
 			}
@@ -725,7 +724,7 @@ test.serial("Missing manifest.json is not generated for non-library projects", a
 				toString: () => "3.0",
 				lte: () => false,
 			};
-		}
+		},
 	};
 
 	const readerWriter = resourceFactory.createAdapter({virBasePath: "/", project});
@@ -738,28 +737,28 @@ test.serial("Missing manifest.json is not generated for non-library projects", a
 	const generateLibraryManifestHelperStub = sinon.stub().resolves();
 	const serveResourcesMiddlewareWithMock = t.context.serveResourcesMiddlewareWithMock =
 		await esmock.p("../../../../lib/middleware/serveResources", {
-			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub
+			"../../../../lib/middleware/helper/generateLibraryManifest.js": generateLibraryManifestHelperStub,
 		});
 
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({
 			graph: {
-				getProject: () => project
+				getProject: () => project,
 			},
-			project: "project"
+			project: "project",
 		}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const req = {
 		url: "/resources/my/namespace/manifest.json",
-		headers: {}
+		headers: {},
 	};
 
 	return new Promise((resolve, reject) => {
-		middleware(req, undefined, function(err) {
+		middleware(req, undefined, function (err) {
 			if (err) {
 				throw new Error(`Next callback called with error: ${err.message}`);
 			}
@@ -827,7 +826,7 @@ test.serial("manifestEnhancer: request manifest.json with auto generated support
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
 		getVersion: () => "1.0.0",
-		getReader: () => readerWriter
+		getReader: () => readerWriter,
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -840,14 +839,14 @@ test.serial("manifestEnhancer: request manifest.json with auto generated support
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					callback(null, ["i18n_de.properties", "i18n_en.properties", "i18n.properties"]);
-				}
-			})
+				},
+			}),
 		});
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -855,9 +854,9 @@ test.serial("manifestEnhancer: request manifest.json with auto generated support
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/manifest.json",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 
@@ -871,7 +870,7 @@ test.serial("manifestEnhancer: request manifest.json with auto generated support
 });
 
 test.serial("manifestEnhancer: request manifest.json with auto generated supported locales " +
-	"(non-root level manifest.json)",
+"(non-root level manifest.json)",
 async (t) => {
 	t.plan(4);
 
@@ -930,7 +929,7 @@ async (t) => {
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
 		getVersion: () => "1.0.0",
-		getReader: () => readerWriter
+		getReader: () => readerWriter,
 	};
 
 	const resource = await writeResource(readerWriter, "/customfolder/manifest.json", 1024 * 1024,
@@ -943,14 +942,14 @@ async (t) => {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					callback(null, ["i18n_de.properties", "i18n_en.properties", "i18n.properties"]);
-				}
-			})
+				},
+			}),
 		});
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -958,9 +957,9 @@ async (t) => {
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/customfolder/manifest.json",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 
@@ -1030,7 +1029,7 @@ test.serial("manifestEnhancer: manifest.json with manual defined supported local
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
 		getVersion: () => "1.0.0",
-		getReader: () => readerWriter
+		getReader: () => readerWriter,
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -1043,14 +1042,14 @@ test.serial("manifestEnhancer: manifest.json with manual defined supported local
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
-				}
-			})
+				},
+			}),
 		});
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -1058,9 +1057,9 @@ test.serial("manifestEnhancer: manifest.json with manual defined supported local
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/manifest.json",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 
@@ -1074,7 +1073,7 @@ test.serial("manifestEnhancer: manifest.json with manual defined supported local
 });
 
 test.serial("manifestEnhancer: no generation of supported locales " +
-	"if manifest.json version is below 1.21.0",
+"if manifest.json version is below 1.21.0",
 async (t) => {
 	t.plan(4);
 
@@ -1120,7 +1119,7 @@ async (t) => {
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
 		getVersion: () => "1.0.0",
-		getReader: () => readerWriter
+		getReader: () => readerWriter,
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -1133,14 +1132,14 @@ async (t) => {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
-				}
-			})
+				},
+			}),
 		});
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -1148,9 +1147,9 @@ async (t) => {
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/manifest.json",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 
@@ -1164,7 +1163,7 @@ async (t) => {
 });
 
 test.serial("manifestEnhancer: no generation of supported locales " +
-	"if manifest.json version is not defined",
+"if manifest.json version is not defined",
 async (t) => {
 	t.plan(4);
 
@@ -1208,7 +1207,7 @@ async (t) => {
 	const project = {
 		getNamespace: () => "sap.ui.demo.app",
 		getVersion: () => "1.0.0",
-		getReader: () => readerWriter
+		getReader: () => readerWriter,
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -1221,14 +1220,14 @@ async (t) => {
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
-				}
-			})
+				},
+			}),
 		});
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -1236,9 +1235,9 @@ async (t) => {
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/manifest.json",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 
@@ -1296,7 +1295,7 @@ test.serial("manifestEnhancer: no generation of supported locales for theme libr
 	const project = {
 		getNamespace: () => null,
 		getVersion: () => "1.0.0",
-		getReader: () => readerWriter
+		getReader: () => readerWriter,
 	};
 
 	const resource = await writeResource(readerWriter, "/manifest.json", 1024 * 1024,
@@ -1309,14 +1308,14 @@ test.serial("manifestEnhancer: no generation of supported locales for theme libr
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
-				}
-			})
+				},
+			}),
 		});
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -1324,9 +1323,9 @@ test.serial("manifestEnhancer: no generation of supported locales for theme libr
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/manifest.json",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 
@@ -1362,7 +1361,7 @@ test.serial("manifestEnhancer: no processing of files within /test-resources/", 
 	const project = {
 		getNamespace: () => "sap.ui.demo.lib",
 		getVersion: () => "1.0.0",
-		getReader: () => readerWriter
+		getReader: () => readerWriter,
 	};
 
 	const resource = await writeResource(readerWriter, "/test-resources/sap/ui/demo/lib/manifest.json", 1024 * 1024,
@@ -1375,14 +1374,14 @@ test.serial("manifestEnhancer: no processing of files within /test-resources/", 
 			"@ui5/fs/fsInterface": sinon.stub().returns({
 				readdir(fsPath, callback) {
 					t.fail("fs.readdir should never be called");
-				}
-			})
+				},
+			}),
 		});
 	const middleware = serveResourcesMiddlewareWithMock({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
 		resources: {
-			all: readerWriter
-		}
+			all: readerWriter,
+		},
 	});
 
 	const response = fakeResponse;
@@ -1390,9 +1389,9 @@ test.serial("manifestEnhancer: no processing of files within /test-resources/", 
 	const setHeaderSpy = sinon.spy(response, "setHeader");
 	const req = {
 		url: "/test-resources/sap/ui/demo/lib/manifest.json",
-		headers: {}
+		headers: {},
 	};
-	const next = function(err) {
+	const next = function (err) {
 		throw new Error(`Next callback called with error: ${err.stack}`);
 	};
 

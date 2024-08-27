@@ -10,11 +10,17 @@ const HEADER_CONTENT_SECURITY_POLICY = "Content-Security-Policy";
 const HEADER_CONTENT_SECURITY_POLICY_REPORT_ONLY = "Content-Security-Policy-Report-Only";
 const rPolicy = /^([-_a-zA-Z0-9]+)(:report-only|:ro)?$/i;
 
+/**
+ *
+ * @param res
+ * @param header
+ * @param value
+ */
 function addHeader(res, header, value) {
 	const current = res.getHeader(header);
-	if ( current == null ) {
+	if (current == null) {
 		res.setHeader(header, value);
-	} else if ( Array.isArray(current) ) {
+	} else if (Array.isArray(current)) {
 		res.setHeader(header, [...current, value]);
 	} else {
 		res.setHeader(header, [current, value]);
@@ -24,28 +30,20 @@ function addHeader(res, header, value) {
 /**
  * Evaluates if the uriPath is either part of the pathName or in the request header referer
  *
- * @param {string} uriPath path in the URI, e.g. "test-resources/sap/ui/qunit/testrunner.html"
- * @param {http.IncomingMessage} req request
- * @param {string} pathName path name of the request
- * @returns {boolean} whether or not path fragment is in pathName or in referer header
+ * @param uriPath path in the URI, e.g. "test-resources/sap/ui/qunit/testrunner.html"
+ * @param req request
+ * @param pathName path name of the request
+ * @returns whether or not path fragment is in pathName or in referer header
  */
 function containsPath(uriPath: string, req: http.IncomingMessage, pathName: string) {
 	return pathName.includes(uriPath) ||
-		(req.headers["referer"] && req.headers["referer"].includes(uriPath));
+		(req.headers.referer?.includes(uriPath));
 }
 
-
 /**
- * @typedef {object} CspConfig
- * @property {boolean} allowDynamicPolicySelection
- * @property {boolean} allowDynamicPolicyDefinition
- * @property {string} defaultPolicy
- * @property {boolean} defaultPolicyIsReportOnly
- * @property {string} defaultPolicy2
- * @property {boolean} defaultPolicy2IsReportOnly
- * @property {object} definedPolicies
- * @property {boolean} serveCSPReports whether to serve the csp resources
- * @property {string[]} ignorePaths URI paths which are ignored by the CSP reports,
+ * serveCSPReports whether to serve the csp resources
+ *
+ * ignorePaths URI paths which are ignored by the CSP reports,
  * e.g. ["test-resources/sap/ui/qunit/testrunner.html"]
  */
 
@@ -67,9 +65,8 @@ function createMiddleware(sCspUrlParameterName: string, oConfig: CspConfig) {
 		defaultPolicy2IsReportOnly = false,
 		definedPolicies = {},
 		serveCSPReports = false,
-		ignorePaths = []
+		ignorePaths = [],
 	} = oConfig;
-
 
 	/**
 	 * List of CSP Report entries
@@ -81,7 +78,7 @@ function createMiddleware(sCspUrlParameterName: string, oConfig: CspConfig) {
 	if (serveCSPReports) {
 		router.post("/.ui5/csp/report.csplog", bodyParser.json({type: "application/csp-report"}));
 	}
-	router.post("/.ui5/csp/report.csplog", function(req, res, next) {
+	router.post("/.ui5/csp/report.csplog", function (req, res, next) {
 		if (req.headers["content-type"] === "application/csp-report") {
 			if (!serveCSPReports) {
 				res.end();
@@ -111,10 +108,10 @@ function createMiddleware(sCspUrlParameterName: string, oConfig: CspConfig) {
 		router.get("/.ui5/csp/csp-reports.json", (req, res, next) => {
 			// serve csp reports
 			const body = JSON.stringify({
-				"csp-reports": cspReportEntries
+				"csp-reports": cspReportEntries,
 			}, null, "\t");
 			res.writeHead(200, {
-				"Content-Type": "application/json"
+				"Content-Type": "application/json",
 			});
 			res.end(body);
 		});
@@ -158,11 +155,11 @@ function createMiddleware(sCspUrlParameterName: string, oConfig: CspConfig) {
 				} // else: ignore parameter
 			} else if (allowDynamicPolicyDefinition) {
 				// Custom CSP policy directives get passed as part of the CSP URL-Parameter value
-				if ( sCspUrlParameterValue.endsWith(":report-only") ) {
-					policy = sCspUrlParameterValue.slice(0, - ":report-only".length);
+				if (sCspUrlParameterValue.endsWith(":report-only")) {
+					policy = sCspUrlParameterValue.slice(0, -":report-only".length);
 					reportOnly = true;
-				} else if ( sCspUrlParameterValue.endsWith(":ro") ) {
-					policy = sCspUrlParameterValue.slice(0, - ":ro".length);
+				} else if (sCspUrlParameterValue.endsWith(":ro")) {
+					policy = sCspUrlParameterValue.slice(0, -":ro".length);
 					reportOnly = true;
 				} else {
 					policy = sCspUrlParameterValue;

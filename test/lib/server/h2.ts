@@ -10,21 +10,21 @@ let server;
 
 // Start server before running tests
 test.before(async (t) => {
-	process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+	process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 	const sslPath = path.join(process.cwd(), "./test/fixtures/ssl/");
 	const {key, cert} = await getSslCertificate(
 		path.join(sslPath, "server.key"),
-		path.join(sslPath, "server.crt"),
+		path.join(sslPath, "server.crt")
 	);
 	server = await serve(graph, {
 		port: 3366,
 		h2: true,
 		key,
-		cert
+		cert,
 	});
 	request = supertest("https://localhost:3366");
 });

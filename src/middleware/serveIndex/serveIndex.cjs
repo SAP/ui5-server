@@ -34,15 +34,17 @@ const cache = {};
 
 function createHtmlFileList(files, view) {
 	let html = "<ul id=\"files\" class=\"view-" + escapeHtml(view) + "\">" +
-		(view === "details" ? (
-			"<li class=\"header\">" +
-			"<span class=\"name\">Name</span>" +
-			"<span class=\"size\">Size</span>" +
-			"<span class=\"date\">Modified</span>" +
-			"<span class=\"project\">Project</span>" +
-			"</li>") : "");
+		(view === "details" ?
+				(
+					"<li class=\"header\">" +
+					"<span class=\"name\">Name</span>" +
+					"<span class=\"size\">Size</span>" +
+					"<span class=\"date\">Modified</span>" +
+					"<span class=\"project\">Project</span>" +
+					"</li>") :
+			"");
 
-	html += files.map(function(file) {
+	html += files.map(function (file) {
 		const classes = [];
 		const isDir = file.isDir;
 		const path = file.path;
@@ -89,7 +91,7 @@ function createHtmlFileList(files, view) {
 function createHtmlRender(template) {
 	return function render(locals, callback) {
 		// read template
-		fs.readFile(template, "utf8", function(err, str) {
+		fs.readFile(template, "utf8", function (err, str) {
 			if (err) return callback(err);
 			const body = str
 				.replace(/{style}/g, locals.style.concat(iconStyle(locals.fileList)))
@@ -133,7 +135,7 @@ function iconLookup(filename) {
 	if (icons[ext]) {
 		return {
 			className: "icon-" + ext.substring(1),
-			fileName: icons[ext]
+			fileName: icons[ext],
 		};
 	}
 
@@ -143,7 +145,7 @@ function iconLookup(filename) {
 	if (mimetype === false) {
 		return {
 			className: "icon-default",
-			fileName: icons.default
+			fileName: icons.default,
 		};
 	}
 
@@ -151,7 +153,7 @@ function iconLookup(filename) {
 	if (icons[mimetype]) {
 		return {
 			className: "icon-" + mimetype.replace("/", "-"),
-			fileName: icons[mimetype]
+			fileName: icons[mimetype],
 		};
 	}
 
@@ -160,7 +162,7 @@ function iconLookup(filename) {
 	if (suffix && icons["+" + suffix]) {
 		return {
 			className: "icon-" + suffix,
-			fileName: icons["+" + suffix]
+			fileName: icons["+" + suffix],
 		};
 	}
 
@@ -170,13 +172,13 @@ function iconLookup(filename) {
 	if (icons[type]) {
 		return {
 			className: "icon-" + type,
-			fileName: icons[type]
+			fileName: icons[type],
 		};
 	}
 
 	return {
 		className: "icon-default",
-		fileName: icons.default
+		fileName: icons.default,
 	};
 }
 
@@ -198,7 +200,7 @@ function iconStyle(files) {
 
 		const isDir = file.isDir;
 		const icon = isDir ?
-			{className: "icon-directory", fileName: icons.folder} :
+				{className: "icon-directory", fileName: icons.folder} :
 			iconLookup(file.name);
 		iconName = icon.fileName;
 
@@ -256,7 +258,7 @@ function normalizeSlashes(path) {
  */
 
 function removeHidden(resourceInfos) {
-	return resourceInfos.filter(function(info) {
+	return resourceInfos.filter(function (info) {
 		return !(/(^|\/)\.[^/.]/g).test(info.path);
 	});
 }
@@ -371,7 +373,7 @@ const icons = {
 	".vbs": "page_white_code.png",
 	".xcf": "page_white_picture.png",
 	".xlsx": "page_white_excel.png",
-	".yaws": "page_white_code.png"
+	".yaws": "page_white_code.png",
 };
 
 function handleRequest({req, res, next, showHidden, simpleIndex, resourceInfos, pathname}) {
@@ -388,7 +390,7 @@ function handleRequest({req, res, next, showHidden, simpleIndex, resourceInfos, 
 	const render = createHtmlRender(template);
 
 	// read stylesheet
-	fs.readFile(stylesheet, "utf8", function(err, style) {
+	fs.readFile(stylesheet, "utf8", function (err, style) {
 		if (err) {
 			return next(err);
 		}
@@ -399,17 +401,17 @@ function handleRequest({req, res, next, showHidden, simpleIndex, resourceInfos, 
 			fileList: resourceInfos,
 			path: path,
 			style: style,
-			viewName: view
+			viewName: view,
 		};
 
 		// render html
-		render(locals, function(err, body) {
+		render(locals, function (err, body) {
 			if (err) return next(err);
 
 			res.writeHead(200, {
 				"Content-Type": "text/html; charset=utf-8",
 				"Content-Length": Buffer.byteLength(body, "utf8"),
-				"X-Content-Type-Options": "nosniff"
+				"X-Content-Type-Options": "nosniff",
 			});
 			res.end(body, "utf8");
 		});

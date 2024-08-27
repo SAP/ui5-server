@@ -6,8 +6,8 @@ import esmock from "esmock";
 import {ThemeBuilder} from "@ui5/builder/processors/themeBuilder";
 import MiddlewareUtil from "../../../../lib/middleware/MiddlewareUtil.js";
 
-const failOnNext = function(t, reject) {
-	return function(err) {
+const failOnNext = function (t, reject) {
+	return function (err) {
 		if (err) {
 			t.fail("Unexpected error passed to next function: " + err);
 		} else {
@@ -17,7 +17,7 @@ const failOnNext = function(t, reject) {
 	};
 };
 
-const createResources = function() {
+const createResources = function () {
 	return {
 		// Input
 		"library.source.less": {},
@@ -25,44 +25,44 @@ const createResources = function() {
 		// Default result
 		"library.css": {
 			getBuffer: sinon.stub().resolves("/* library.css */"),
-			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library.css")
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library.css"),
 		},
 		"library-RTL.css": {
 			getBuffer: sinon.stub().resolves("/* library-RTL.css */"),
-			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-RTL.css")
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-RTL.css"),
 		},
 		"library-parameters.json": {
 			getBuffer: sinon.stub().resolves("/* library-parameters.json */"),
-			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-parameters.json")
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library-parameters.json"),
 		},
 
 		// CSS Variables result
 		"css_variables.source.less": {
 			getBuffer: sinon.stub().resolves(`/* css_variables.source.less */`),
-			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/css_variables.source.less")
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/css_variables.source.less"),
 		},
 		"css_variables.css": {
 			getBuffer: sinon.stub().resolves(`/* css_variables.css */`),
-			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/css_variables.css")
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/css_variables.css"),
 		},
 		"library_skeleton.css": {
 			getBuffer: sinon.stub().resolves(`/* library_skeleton.css */`),
-			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library_skeleton.css")
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library_skeleton.css"),
 		},
 		"library_skeleton-RTL.css": {
 			getBuffer: sinon.stub().resolves(`/* library_skeleton-RTL.css */`),
-			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library_skeleton-RTL.css")
-		}
+			getPath: sinon.stub().returns("/resources/sap/ui/test/themes/base/library_skeleton-RTL.css"),
+		},
 	};
 };
 
-const stubThemeBuild = function(resources) {
+const stubThemeBuild = function (resources) {
 	const build = sinon.stub(ThemeBuilder.prototype, "build");
 	build.rejects(new Error("File not found!"));
 	build.withArgs([resources["library.source.less"]], {}).resolves([
 		resources["library.css"],
 		resources["library-RTL.css"],
-		resources["library-parameters.json"]
+		resources["library-parameters.json"],
 	]);
 	build.withArgs([resources["library.source.less"]], {cssVariables: true}).resolves([
 		resources["library.css"],
@@ -71,12 +71,12 @@ const stubThemeBuild = function(resources) {
 		resources["css_variables.source.less"],
 		resources["css_variables.css"],
 		resources["library_skeleton.css"],
-		resources["library_skeleton-RTL.css"]
+		resources["library_skeleton-RTL.css"],
 	]);
 	return build;
 };
 
-const verifyThemeRequest = function(t, filename) {
+const verifyThemeRequest = function (t, filename) {
 	const resources = createResources();
 
 	stubThemeBuild(resources);
@@ -87,14 +87,14 @@ const verifyThemeRequest = function(t, filename) {
 
 	const req = {
 		url: "/resources/sap/ui/test/themes/base/" + filename,
-		headers: {}
+		headers: {},
 	};
 
 	return new Promise((resolve, reject) => {
 		const res = {
 			setHeader: sinon.stub(),
 			getHeader: sinon.stub(),
-			end: function(responseText) {
+			end: function (responseText) {
 				t.is(responseText, `/* ${filename} */`);
 				if (filename.endsWith(".css")) {
 					t.deepEqual(res.setHeader.getCall(0).args, ["Content-Type", "text/css; charset=UTF-8"]);
@@ -106,7 +106,7 @@ const verifyThemeRequest = function(t, filename) {
 					t.fail("Invalid file extension provided to 'verifyThemeRequest'");
 				}
 				resolve();
-			}
+			},
 		};
 
 		middleware(req, res, failOnNext(t, reject));
@@ -118,20 +118,20 @@ test.beforeEach(async (t) => {
 	t.context.fresh = sinon.stub();
 
 	t.context.serveThemes = await esmock("../../../../lib/middleware/serveThemes.js", {
-		"etag": t.context.etag,
-		"fresh": t.context.fresh
+		etag: t.context.etag,
+		fresh: t.context.fresh,
 	});
 
 	const resources = {
 		all: {
-			byPath: sinon.stub()
-		}
+			byPath: sinon.stub(),
+		},
 	};
 	t.context.byPath = resources.all.byPath;
 
 	t.context.middleware = t.context.serveThemes({
 		middlewareUtil: new MiddlewareUtil({graph: "graph", project: "project"}),
-		resources
+		resources,
 	});
 });
 
@@ -181,13 +181,13 @@ test.serial("Clear cache to rebuild themes when CSS Variables file is requested"
 		function firstRequest() {
 			const req = {
 				url: "/resources/sap/ui/test/themes/base/library.css",
-				headers: {}
+				headers: {},
 			};
 
 			const res = {
 				setHeader: sinon.stub(),
 				getHeader: sinon.stub(),
-				end: function() {
+				end: function () {
 					t.deepEqual(build.getCall(0).args, [[resources["library.source.less"]], {}],
 						"Build should be called without options");
 
@@ -195,7 +195,7 @@ test.serial("Clear cache to rebuild themes when CSS Variables file is requested"
 
 					// Trigger next request
 					secondRequest();
-				}
+				},
 			};
 
 			middleware(req, res, failOnNext(t));
@@ -204,20 +204,20 @@ test.serial("Clear cache to rebuild themes when CSS Variables file is requested"
 		function secondRequest() {
 			const req = {
 				url: "/resources/sap/ui/test/themes/base/css_variables.css",
-				headers: {}
+				headers: {},
 			};
 
 			const res = {
 				setHeader: sinon.stub(),
 				getHeader: sinon.stub(),
-				end: function() {
+				end: function () {
 					t.deepEqual(build.getCall(1).args, [[resources["library.source.less"]], {cssVariables: true}],
 						"Build should be called with cssVariables option");
 
 					t.true(clearCache.called, "Clear cache should be called");
 
 					resolve();
-				}
+				},
 			};
 
 			middleware(req, res, failOnNext(t, reject));
@@ -241,13 +241,13 @@ test.serial("Clear cache only once after enabling CSS Variables", (t) => {
 		function firstRequest() {
 			const req = {
 				url: "/resources/sap/ui/test/themes/base/css_variables.css",
-				headers: {}
+				headers: {},
 			};
 
 			const res = {
 				setHeader: sinon.stub(),
 				getHeader: sinon.stub(),
-				end: function() {
+				end: function () {
 					t.deepEqual(build.getCall(0).args, [[resources["library.source.less"]], {cssVariables: true}],
 						"Build should be called with cssVariables option");
 
@@ -255,7 +255,7 @@ test.serial("Clear cache only once after enabling CSS Variables", (t) => {
 
 					// Trigger next request
 					secondRequest();
-				}
+				},
 			};
 
 			middleware(req, res, failOnNext(t, reject));
@@ -264,20 +264,20 @@ test.serial("Clear cache only once after enabling CSS Variables", (t) => {
 		function secondRequest() {
 			const req = {
 				url: "/resources/sap/ui/test/themes/base/library_skeleton.css",
-				headers: {}
+				headers: {},
 			};
 
 			const res = {
 				setHeader: sinon.stub(),
 				getHeader: sinon.stub(),
-				end: function() {
+				end: function () {
 					t.deepEqual(build.getCall(1).args, [[resources["library.source.less"]], {cssVariables: true}],
 						"Build should be called with cssVariables option");
 
 					t.true(clearCache.calledOnce, "Clear cache should still only be called once");
 
 					resolve();
-				}
+				},
 			};
 
 			middleware(req, res, failOnNext(t, reject));
@@ -291,13 +291,13 @@ test.serial("Do not handle non-theme requests", (t) => {
 	const {middleware} = t.context;
 
 	const req = {
-		url: "/resources/sap/ui/test/test.js"
+		url: "/resources/sap/ui/test/test.js",
 	};
 
 	const res = {};
 
 	return new Promise((resolve) => {
-		middleware(req, res, function() {
+		middleware(req, res, function () {
 			t.pass("Next middleware is called for non-theme requests");
 			resolve();
 		});
@@ -314,13 +314,13 @@ test.serial("Do not handle requests without an existing library.source.less file
 
 	const req = {
 		url: "/resources/sap/ui/test/themes/base/library.css",
-		headers: {}
+		headers: {},
 	};
 
 	const res = {};
 
 	return new Promise((resolve) => {
-		middleware(req, res, function() {
+		middleware(req, res, function () {
 			t.pass("Next middleware is called when no library.source.less file is found");
 			resolve();
 		});
@@ -334,12 +334,12 @@ test.serial("Only send 304 response in case the client has cached the response a
 
 	etag.returns(ETag);
 
-	fresh.callsFake(function(reqHeaders, resHeaders) {
+	fresh.callsFake(function (reqHeaders, resHeaders) {
 		t.deepEqual(reqHeaders, {
-			"If-None-Match": ETag
+			"If-None-Match": ETag,
 		});
 		t.deepEqual(resHeaders, {
-			"etag": ETag
+			etag: ETag,
 		});
 		return true;
 	});
@@ -354,20 +354,20 @@ test.serial("Only send 304 response in case the client has cached the response a
 	const req = {
 		url: "/resources/sap/ui/test/themes/base/library.css",
 		headers: {
-			"If-None-Match": ETag
-		}
+			"If-None-Match": ETag,
+		},
 	};
 
 	return new Promise((resolve, reject) => {
 		const res = {
 			setHeader: sinon.stub(),
 			getHeader: sinon.stub().withArgs("ETag").returns(ETag),
-			end: function(responseText) {
+			end: function (responseText) {
 				t.is(responseText, undefined);
 				t.is(res.statusCode, 304);
 				t.deepEqual(res.setHeader.getCall(1).args, ["ETag", ETag]);
 				resolve();
-			}
+			},
 		};
 
 		middleware(req, res, failOnNext(t, reject));
@@ -389,13 +389,13 @@ test.serial("Error handling: Request resource that ThemeBuild doesn't return", (
 
 	const req = {
 		url: "/resources/sap/ui/test/themes/base/library.css",
-		headers: {}
+		headers: {},
 	};
 
 	const res = {};
 
 	return new Promise((resolve, reject) => {
-		middleware(req, res, function(err) {
+		middleware(req, res, function (err) {
 			t.is(err.message,
 				`Theme Build did not return requested file "/resources/sap/ui/test/themes/base/library.css"`);
 			resolve();
@@ -411,13 +411,13 @@ test.serial("Error handling: Unexpected exception within middleware should call 
 
 	const req = {
 		url: "/resources/sap/ui/test/themes/base/library.css",
-		headers: {}
+		headers: {},
 	};
 
 	const res = {};
 
 	return new Promise((resolve, reject) => {
-		middleware(req, res, function(err) {
+		middleware(req, res, function (err) {
 			t.is(err, error);
 			resolve();
 		});
@@ -439,13 +439,13 @@ test.serial("Multiple parallel requests to the same path should only result in o
 		return new Promise((resolve, reject) => {
 			const req = {
 				url,
-				headers: {}
+				headers: {},
 			};
 
 			const res = {
 				setHeader: sinon.stub(),
 				getHeader: sinon.stub(),
-				end: resolve
+				end: resolve,
 			};
 
 			middleware(req, res, reject);
@@ -458,11 +458,10 @@ test.serial("Multiple parallel requests to the same path should only result in o
 		request("/resources/sap/ui/test/themes/base/library.css"),
 
 		request("/resources/sap/ui/test2/themes/base/library.css"),
-		request("/resources/sap/ui/test2/themes/base/library.css")
+		request("/resources/sap/ui/test2/themes/base/library.css"),
 	]);
 	// Should only build once per url
 	t.is(build.callCount, 2, "Build should be called 2 times");
-
 
 	// After all requests have finished, the build should be started again when another request comes in
 	await Promise.all([
@@ -471,7 +470,7 @@ test.serial("Multiple parallel requests to the same path should only result in o
 		request("/resources/sap/ui/test/themes/base/library.css"),
 
 		request("/resources/sap/ui/test2/themes/base/library.css"),
-		request("/resources/sap/ui/test2/themes/base/library.css")
+		request("/resources/sap/ui/test2/themes/base/library.css"),
 	]);
 	// Should only build once per url
 	t.is(build.callCount, 4, "Build should be called 4 times");

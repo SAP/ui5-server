@@ -5,7 +5,7 @@ import cspModule from "../../../../lib/middleware/csp.js";
 test("getMiddleware", async (t) => {
 	const res = await middlewareRepository.getMiddleware("csp");
 	t.deepEqual(res, {
-		middleware: cspModule
+		middleware: cspModule,
 	}, "Returned correct middleware module");
 });
 

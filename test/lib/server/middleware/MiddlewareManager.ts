@@ -8,11 +8,11 @@ test.beforeEach(async (t) => {
 	const sinon = t.context.sinon = sinonGlobal.createSandbox();
 
 	t.context.logger = {
-		getLogger: sinon.stub().returns("group logger")
+		getLogger: sinon.stub().returns("group logger"),
 	};
 
 	t.context.MiddlewareManager = await esmock("../../../../lib/middleware/MiddlewareManager.js", {
-		"@ui5/logger": t.context.logger
+		"@ui5/logger": t.context.logger,
 	});
 });
 
@@ -25,7 +25,7 @@ test("Missing parameters", (t) => {
 		new MiddlewareManager({
 			graph: {},
 			rootProject: "root project",
-			resources: {}
+			resources: {},
 		});
 	});
 	t.is(err.message, "[MiddlewareManager]: One or more mandatory parameters not provided",
@@ -40,8 +40,8 @@ test("Correct parameters", (t) => {
 			resources: {
 				all: "I",
 				rootProject: "like",
-				dependencies: "ponies"
-			}
+				dependencies: "ponies",
+			},
 		});
 	}, "No error thrown");
 });
@@ -54,21 +54,21 @@ test("applyMiddleware", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "love",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	const addStandardMiddlewareStub = sinon.stub(middlewareManager, "addStandardMiddleware").resolves();
 	const addCustomMiddlewareStub = sinon.stub(middlewareManager, "addCustomMiddleware").resolves();
 	middlewareManager.middlewareExecutionOrder.push(["ponyware"]);
-	middlewareManager.middleware["ponyware"] = {
+	middlewareManager.middleware.ponyware = {
 		mountPath: "/myMountPath",
-		middleware: "myMiddleware"
+		middleware: "myMiddleware",
 	};
 
 	const appUseStub = sinon.stub();
 	const app = {
-		use: appUseStub
+		use: appUseStub,
 	};
 
 	await middlewareManager.applyMiddleware(app);
@@ -86,17 +86,17 @@ test("addMiddleware: Adding already added middleware", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	await middlewareManager.addMiddleware("serveIndex", {
-		mountPath: "/pony"
+		mountPath: "/pony",
 	});
 	await t.throwsAsync(middlewareManager.addMiddleware("serveIndex", {
-		mountPath: "/seagull"
+		mountPath: "/seagull",
 	}), {
-		message: "A middleware with the name serveIndex has already been added"
+		message: "A middleware with the name serveIndex has already been added",
 	});
 });
 
@@ -107,8 +107,8 @@ test("addMiddleware: Adding middleware already added to middlewareExecutionOrder
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	middlewareManager.middlewareExecutionOrder.push("serveIndex");
@@ -128,16 +128,16 @@ test("addMiddleware: Add middleware", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	await middlewareManager.addMiddleware("compression"); // Add some middleware
 
 	await middlewareManager.addMiddleware("serveIndex"); // Add middleware to test for
-	t.truthy(middlewareManager.middleware["serveIndex"], "Middleware got added to internal map");
-	t.truthy(middlewareManager.middleware["serveIndex"].middleware, "Middleware module is given");
-	t.is(middlewareManager.middleware["serveIndex"].mountPath, "/", "Correct default mount path set");
+	t.truthy(middlewareManager.middleware.serveIndex, "Middleware got added to internal map");
+	t.truthy(middlewareManager.middleware.serveIndex.middleware, "Middleware module is given");
+	t.is(middlewareManager.middleware.serveIndex.mountPath, "/", "Correct default mount path set");
 
 	t.is(middlewareManager.middlewareExecutionOrder.length, 2,
 		"Two middleware got added to middleware execution order");
@@ -152,19 +152,19 @@ test("addMiddleware: Add middleware with beforeMiddleware and mountPath paramete
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	await middlewareManager.addMiddleware("compression"); // Add some middleware
 
 	await middlewareManager.addMiddleware("serveIndex", { // Add middleware to test for
 		beforeMiddleware: "compression",
-		mountPath: "/pony"
+		mountPath: "/pony",
 	});
-	t.truthy(middlewareManager.middleware["serveIndex"], "Middleware got added to internal map");
-	t.truthy(middlewareManager.middleware["serveIndex"].middleware, "Middleware module is given");
-	t.is(middlewareManager.middleware["serveIndex"].mountPath, "/pony", "Correct mount path set");
+	t.truthy(middlewareManager.middleware.serveIndex, "Middleware got added to internal map");
+	t.truthy(middlewareManager.middleware.serveIndex.middleware, "Middleware module is given");
+	t.is(middlewareManager.middleware.serveIndex.mountPath, "/pony", "Correct mount path set");
 
 	t.is(middlewareManager.middlewareExecutionOrder.length, 2,
 		"Two middleware got added to middleware execution order");
@@ -176,7 +176,7 @@ test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", asyn
 	const {sinon} = t.context;
 	const warnSpy = sinon.spy();
 	const StubbedMiddlewareManager = await esmock("../../../../lib/middleware/MiddlewareManager.js", {
-		"@ui5/logger": {getLogger: sinon.stub().returns({warn: warnSpy})}
+		"@ui5/logger": {getLogger: sinon.stub().returns({warn: warnSpy})},
 	});
 	const middlewareManager = new StubbedMiddlewareManager({
 		graph: {},
@@ -184,8 +184,8 @@ test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", asyn
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	await middlewareManager.addStandardMiddleware(); // Add standard middleware
@@ -194,7 +194,7 @@ test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", asyn
 		return middlewareManager.addMiddleware("customMiddleware", { // Add middleware to test for
 			customMiddleware: () => {},
 			afterMiddleware: "connectUi5Proxy",
-			mountPath: "/pony"
+			mountPath: "/pony",
 		});
 	});
 
@@ -210,19 +210,19 @@ test("addMiddleware: Add middleware with afterMiddleware parameter", async (t) =
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	await middlewareManager.addMiddleware("compression"); // Add some middleware
 	await middlewareManager.addMiddleware("cors"); // Add some middleware
 
 	await middlewareManager.addMiddleware("serveIndex", { // Add middleware to test for
-		afterMiddleware: "compression"
+		afterMiddleware: "compression",
 	});
-	t.truthy(middlewareManager.middleware["serveIndex"], "Middleware got added to internal map");
-	t.truthy(middlewareManager.middleware["serveIndex"].middleware, "Middleware module is given");
-	t.is(middlewareManager.middleware["serveIndex"].mountPath, "/", "Correct default mount path set");
+	t.truthy(middlewareManager.middleware.serveIndex, "Middleware got added to internal map");
+	t.truthy(middlewareManager.middleware.serveIndex.middleware, "Middleware module is given");
+	t.is(middlewareManager.middleware.serveIndex.mountPath, "/", "Correct default mount path set");
 
 	t.is(middlewareManager.middlewareExecutionOrder.length, 3,
 		"Three middleware got added to middleware execution order");
@@ -237,20 +237,20 @@ test("addMiddleware: Add middleware with invalid afterMiddleware parameter", asy
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 
 	await middlewareManager.addMiddleware("compression"); // Add some middleware
 
 	const err = await t.throwsAsync(() => {
 		return middlewareManager.addMiddleware("serveIndex", { // Add middleware to test for
-			afterMiddleware: "🦆"
+			afterMiddleware: "🦆",
 		});
 	});
 	t.is(err.message, "Could not find middleware 🦆, referenced by custom middleware serveIndex");
 
-	t.falsy(middlewareManager.middleware["serveIndex"], "Middleware did not get added to internal map");
+	t.falsy(middlewareManager.middleware.serveIndex, "Middleware did not get added to internal map");
 	t.is(middlewareManager.middlewareExecutionOrder.length, 1,
 		"No new middleware got added to middleware execution order array");
 });
@@ -263,15 +263,15 @@ test("addMiddleware: Add middleware with wrapperCallback parameter", async (t) =
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const serveIndexMiddlewareInfo = await middlewareRepository.getMiddleware("serveIndex");
 
 	const moduleStub = sinon.stub().returns("🍅");
 	const wrapperCallbackStub = sinon.stub().returns(moduleStub);
 	await middlewareManager.addMiddleware("serveIndex", { // Add middleware to test for
-		wrapperCallback: wrapperCallbackStub
+		wrapperCallback: wrapperCallbackStub,
 	});
 	t.is(wrapperCallbackStub.callCount, 1, "Wrapper callback got called once");
 	t.deepEqual(wrapperCallbackStub.getCall(0).args[0], serveIndexMiddlewareInfo,
@@ -280,13 +280,13 @@ test("addMiddleware: Add middleware with wrapperCallback parameter", async (t) =
 	t.deepEqual(moduleStub.getCall(0).args[0].resources, {
 		all: "I",
 		rootProject: "like",
-		dependencies: "ponies"
+		dependencies: "ponies",
 	}, "Wrapper callback got called with correct arguments");
 
-	t.truthy(middlewareManager.middleware["serveIndex"], "Middleware got added to internal map");
-	t.is(middlewareManager.middleware["serveIndex"].middleware, "🍅",
+	t.truthy(middlewareManager.middleware.serveIndex, "Middleware got added to internal map");
+	t.is(middlewareManager.middleware.serveIndex.middleware, "🍅",
 		"Middleware module is given");
-	t.is(middlewareManager.middleware["serveIndex"].mountPath, "/", "Correct default mount path set");
+	t.is(middlewareManager.middleware.serveIndex.mountPath, "/", "Correct default mount path set");
 
 	t.is(middlewareManager.middlewareExecutionOrder.length, 1,
 		"One middleware got added to middleware execution order");
@@ -302,17 +302,17 @@ test("addMiddleware: Add middleware with async wrapperCallback", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const moduleStub = sinon.stub().resolves("🍅");
 	const wrapperCallbackStub = sinon.stub().returns(moduleStub);
 	await middlewareManager.addMiddleware("serveIndex", { // Add middleware to test for
-		wrapperCallback: wrapperCallbackStub
+		wrapperCallback: wrapperCallbackStub,
 	});
 
-	t.truthy(middlewareManager.middleware["serveIndex"], "Middleware got added to internal map");
-	t.is(middlewareManager.middleware["serveIndex"].middleware, "🍅",
+	t.truthy(middlewareManager.middleware.serveIndex, "Middleware got added to internal map");
+	t.is(middlewareManager.middleware.serveIndex.middleware, "🍅",
 		"Middleware module is given");
 });
 
@@ -324,8 +324,8 @@ test("addStandardMiddleware: Adds standard middleware in correct order", async (
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addStandardMiddleware();
@@ -345,7 +345,7 @@ test("addStandardMiddleware: Adds standard middleware in correct order", async (
 		"serveThemes",
 		"versionInfo",
 		"nonReadRequests",
-		"serveIndex"
+		"serveIndex",
 	], "Correct order of standard middlewares");
 });
 
@@ -355,7 +355,7 @@ test("addCustomMiddleware: No custom middleware defined", async (t) => {
 		getRoot: () => {
 			return {
 				getName: () => "my project",
-				getCustomMiddleware: () => []
+				getCustomMiddleware: () => [],
 			};
 		},
 		getExtension: sinon.stub(),
@@ -366,8 +366,8 @@ test("addCustomMiddleware: No custom middleware defined", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addCustomMiddleware();
@@ -384,8 +384,8 @@ test("addCustomMiddleware: Unknown custom middleware", async (t) => {
 				getName: () => "my project",
 				getCustomMiddleware: () => [{
 					name: "my custom middleware A",
-					afterMiddleware: "serveIndex"
-				}]
+					afterMiddleware: "serveIndex",
+				}],
 			};
 		},
 		getExtension: sinon.stub().returns(undefined),
@@ -396,12 +396,12 @@ test("addCustomMiddleware: Unknown custom middleware", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await t.throwsAsync(middlewareManager.addCustomMiddleware(), {
-		message: "Could not find custom middleware my custom middleware A, referenced by project my project"
+		message: "Could not find custom middleware my custom middleware A, referenced by project my project",
 	}, "Threw with expected error message");
 
 	t.is(addMiddlewareStub.callCount, 0, "addMiddleware was not called");
@@ -419,11 +419,11 @@ test("addCustomMiddleware: Custom middleware got added", async (t) => {
 				getCustomMiddleware: () => [{
 					name: "my custom middleware A",
 					beforeMiddleware: "cors",
-					mountPath: "/pony"
+					mountPath: "/pony",
 				}, {
 					name: "my custom middleware B",
-					afterMiddleware: "my custom middleware A"
-				}]
+					afterMiddleware: "my custom middleware A",
+				}],
 			};
 		},
 		getExtension: sinon.stub().returns("extension"),
@@ -434,8 +434,8 @@ test("addCustomMiddleware: Custom middleware got added", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addCustomMiddleware();
@@ -476,8 +476,8 @@ test("addCustomMiddleware: Custom middleware with duplicate name", async (t) => 
 				getName: () => "my project",
 				getCustomMiddleware: () => [{
 					name: "my custom middleware A",
-					afterMiddleware: "serveIndex"
-				}]
+					afterMiddleware: "serveIndex",
+				}],
 			};
 		},
 		getExtension: sinon.stub().returns("extension"),
@@ -488,8 +488,8 @@ test("addCustomMiddleware: Custom middleware with duplicate name", async (t) => 
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	middlewareManager.middleware["my custom middleware A"] = true;
 	middlewareManager.middleware["my custom middleware A--1"] = true;
@@ -512,8 +512,8 @@ test("addCustomMiddleware: Missing name configuration", async (t) => {
 			return {
 				getName: () => "my project",
 				getCustomMiddleware: () => [{
-					afterMiddleware: "my custom middleware A"
-				}]
+					afterMiddleware: "my custom middleware A",
+				}],
 			};
 		},
 		getExtension: sinon.stub().returns("extension"),
@@ -524,8 +524,8 @@ test("addCustomMiddleware: Missing name configuration", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const err = await t.throwsAsync(() => {
 		return middlewareManager.addCustomMiddleware();
@@ -544,8 +544,8 @@ test("addCustomMiddleware: Both before- and afterMiddleware configuration", asyn
 				getCustomMiddleware: () => [{
 					name: "🦆",
 					beforeMiddleware: "🐝",
-					afterMiddleware: "🐒"
-				}]
+					afterMiddleware: "🐒",
+				}],
 			};
 		},
 		getExtension: sinon.stub().returns("extension"),
@@ -556,15 +556,15 @@ test("addCustomMiddleware: Both before- and afterMiddleware configuration", asyn
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const err = await t.throwsAsync(() => {
 		return middlewareManager.addCustomMiddleware();
 	});
 
 	t.deepEqual(err.message, `Custom middleware definition 🦆 of project 🐧 ` +
-		`defines both "beforeMiddleware" and "afterMiddleware" parameters. Only one must be defined.`,
+	`defines both "beforeMiddleware" and "afterMiddleware" parameters. Only one must be defined.`,
 	"Rejected with correct error message");
 });
 
@@ -575,8 +575,8 @@ test("addCustomMiddleware: Missing before- or afterMiddleware configuration", as
 			return {
 				getName: () => "🐧",
 				getCustomMiddleware: () => [{
-					name: "🦆"
-				}]
+					name: "🦆",
+				}],
 			};
 		},
 		getExtension: sinon.stub().returns("extension"),
@@ -587,15 +587,15 @@ test("addCustomMiddleware: Missing before- or afterMiddleware configuration", as
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const err = await t.throwsAsync(() => {
 		return middlewareManager.addCustomMiddleware();
 	});
 
 	t.deepEqual(err.message, `Custom middleware definition 🦆 of project 🐧 ` +
-		`defines neither a "beforeMiddleware" nor an "afterMiddleware" parameter. One must be defined.`,
+	`defines neither a "beforeMiddleware" nor an "afterMiddleware" parameter. One must be defined.`,
 	"Rejected with correct error message");
 });
 
@@ -605,11 +605,11 @@ test("addCustomMiddleware", async (t) => {
 	const specVersionGteStub = sinon.stub().returns(false);
 	const mockSpecificationVersion = {
 		toString: () => "2.6",
-		gte: specVersionGteStub
+		gte: specVersionGteStub,
 	};
 	const getExtensionStub = sinon.stub().returns({
 		getSpecVersion: () => mockSpecificationVersion,
-		getMiddleware: () => middlewareModuleStub
+		getMiddleware: () => middlewareModuleStub,
 	});
 	const graph = {
 		getRoot: () => {
@@ -619,12 +619,12 @@ test("addCustomMiddleware", async (t) => {
 					name: "my custom middleware A",
 					beforeMiddleware: "cors",
 					configuration: {
-						"🦊": "🐰"
-					}
-				}]
+						"🦊": "🐰",
+					},
+				}],
 			};
 		},
-		getExtension: getExtensionStub
+		getExtension: getExtensionStub,
 	};
 	const middlewareManager = new MiddlewareManager({
 		graph,
@@ -632,8 +632,8 @@ test("addCustomMiddleware", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addCustomMiddleware();
@@ -642,11 +642,11 @@ test("addCustomMiddleware", async (t) => {
 
 	const customMiddleware = addMiddlewareStub.getCall(0).args[1].customMiddleware;
 	const middlewareUtil = {
-		getInterface: sinon.stub().returns("interfacedMiddlewareUtil")
+		getInterface: sinon.stub().returns("interfacedMiddlewareUtil"),
 	};
 	const res = await customMiddleware({
 		resources: "resources",
-		middlewareUtil
+		middlewareUtil,
 	});
 
 	t.is(res, "ok", "Wrapper callback returned expected value");
@@ -661,10 +661,10 @@ test("addCustomMiddleware", async (t) => {
 		resources: "resources",
 		options: {
 			configuration: {
-				"🦊": "🐰"
-			}
+				"🦊": "🐰",
+			},
 		},
-		middlewareUtil: "interfacedMiddlewareUtil"
+		middlewareUtil: "interfacedMiddlewareUtil",
 	}, "Middleware module got called with correct arguments");
 });
 
@@ -674,11 +674,11 @@ test("addCustomMiddleware with specVersion 3.0", async (t) => {
 	const specVersionGteStub = sinon.stub().returns(true);
 	const mockSpecificationVersion = {
 		toString: () => "3.0",
-		gte: specVersionGteStub
+		gte: specVersionGteStub,
 	};
 	const getExtensionStub = sinon.stub().returns({
 		getSpecVersion: () => mockSpecificationVersion,
-		getMiddleware: () => middlewareModuleStub
+		getMiddleware: () => middlewareModuleStub,
 	});
 	const graph = {
 		getRoot: () => {
@@ -688,12 +688,12 @@ test("addCustomMiddleware with specVersion 3.0", async (t) => {
 					name: "my custom middleware",
 					beforeMiddleware: "cors",
 					configuration: {
-						"🦊": "🐰"
-					}
-				}]
+						"🦊": "🐰",
+					},
+				}],
 			};
 		},
-		getExtension: getExtensionStub
+		getExtension: getExtensionStub,
 	};
 	const middlewareManager = new MiddlewareManager({
 		graph,
@@ -701,8 +701,8 @@ test("addCustomMiddleware with specVersion 3.0", async (t) => {
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	// Simulate that a custom middleware with the same name has already been added (twice)
 	middlewareManager.middleware["my custom middleware"] = true;
@@ -714,11 +714,11 @@ test("addCustomMiddleware with specVersion 3.0", async (t) => {
 
 	const customMiddleware = addMiddlewareStub.getCall(0).args[1].customMiddleware;
 	const middlewareUtil = {
-		getInterface: sinon.stub().returns("interfacedMiddlewareUtil")
+		getInterface: sinon.stub().returns("interfacedMiddlewareUtil"),
 	};
 	const res = await customMiddleware({
 		resources: "resources",
-		middlewareUtil
+		middlewareUtil,
 	});
 
 	t.is(res, "ok", "Wrapper callback returned expected value");
@@ -733,12 +733,12 @@ test("addCustomMiddleware with specVersion 3.0", async (t) => {
 		resources: "resources",
 		options: {
 			configuration: {
-				"🦊": "🐰"
+				"🦊": "🐰",
 			},
-			middlewareName: "my custom middleware--2"
+			middlewareName: "my custom middleware--2",
 		},
 		middlewareUtil: "interfacedMiddlewareUtil",
-		log: "group logger"
+		log: "group logger",
 	}, "Middleware module got called with correct arguments");
 });
 
@@ -750,8 +750,8 @@ test("addStandardMiddleware: CSP middleware configured correctly (default)", asy
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
-		}
+			dependencies: "ponies",
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addStandardMiddleware();
@@ -766,7 +766,7 @@ test("addStandardMiddleware: CSP middleware configured correctly (default)", asy
 
 	const middlewareModuleStub = sinon.stub().returns("ok");
 	const middlewareModuleInfo = {
-		middleware: middlewareModuleStub
+		middleware: middlewareModuleStub,
 	};
 	const middlewareWrapper = wrapperCallback(middlewareModuleInfo);
 	const res = middlewareWrapper();
@@ -786,7 +786,7 @@ test("addStandardMiddleware: CSP middleware configured correctly (default)", asy
 			"sap-target-level-3":
 				`default-src 'self'; script-src  'self'; style-src   'self'; font-src    'self'; img-src     'self' https:; media-src   'self' https:; object-src  'self'; frame-src   'self' https: gap: mailto: tel:; worker-src  'self'; child-src   'self'; connect-src 'self' https: wss:; base-uri    'self';`,
 			/* eslint-enable max-len */
-		}
+		},
 	}, "CSP middleware module got called with correct second argument");
 });
 
@@ -798,12 +798,12 @@ test("addStandardMiddleware: CSP middleware configured correctly (enabled)", asy
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
+			dependencies: "ponies",
 		},
 		options: {
 			sendSAPTargetCSP: true,
-			serveCSPReports: true
-		}
+			serveCSPReports: true,
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addStandardMiddleware();
@@ -818,7 +818,7 @@ test("addStandardMiddleware: CSP middleware configured correctly (enabled)", asy
 
 	const middlewareModuleStub = sinon.stub().returns("ok");
 	const middlewareModuleInfo = {
-		middleware: middlewareModuleStub
+		middleware: middlewareModuleStub,
 	};
 	const middlewareWrapper = wrapperCallback(middlewareModuleInfo);
 	const res = middlewareWrapper();
@@ -846,7 +846,7 @@ test("addStandardMiddleware: CSP middleware configured correctly (enabled)", asy
 		ignorePaths: [
 			"test-resources/sap/ui/qunit/testrunner.html",
 		],
-		serveCSPReports: true
+		serveCSPReports: true,
 	}, "CSP middleware module got called with correct second argument");
 });
 
@@ -858,7 +858,7 @@ test("addStandardMiddleware: CSP middleware configured correctly (custom)", asyn
 		resources: {
 			all: "I",
 			rootProject: "like",
-			dependencies: "ponies"
+			dependencies: "ponies",
 		},
 		options: {
 			sendSAPTargetCSP: {
@@ -866,10 +866,10 @@ test("addStandardMiddleware: CSP middleware configured correctly (custom)", asyn
 				defaultPolicyIsReportOnly: false,
 				defaultPolicy2: "sap-target-level-2",
 				defaultPolicy2IsReportOnly: true,
-				ignorePaths: ["lord/tirek.html"]
+				ignorePaths: ["lord/tirek.html"],
 			},
-			serveCSPReports: false
-		}
+			serveCSPReports: false,
+		},
 	});
 	const addMiddlewareStub = sinon.stub(middlewareManager, "addMiddleware").resolves();
 	await middlewareManager.addStandardMiddleware();
@@ -884,7 +884,7 @@ test("addStandardMiddleware: CSP middleware configured correctly (custom)", asyn
 
 	const middlewareModuleStub = sinon.stub().returns("ok");
 	const middlewareModuleInfo = {
-		middleware: middlewareModuleStub
+		middleware: middlewareModuleStub,
 	};
 	const middlewareWrapper = wrapperCallback(middlewareModuleInfo);
 	const res = middlewareWrapper();
@@ -911,6 +911,6 @@ test("addStandardMiddleware: CSP middleware configured correctly (custom)", asyn
 		defaultPolicy2IsReportOnly: true,
 		ignorePaths: [
 			"lord/tirek.html",
-		]
+		],
 	}, "CSP middleware module got called with correct second argument");
 });

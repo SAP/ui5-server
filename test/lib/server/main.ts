@@ -9,11 +9,11 @@ let server;
 // Start server before running tests
 test.before(async (t) => {
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	server = await serve(graph, {
-		port: 3333
+		port: 3333,
 	});
 	request = supertest("http://localhost:3333");
 });
@@ -39,7 +39,6 @@ test("Get resource from application.a (/index.html)", async (t) => {
 	t.regex(res.headers["content-type"], /html/, "Correct content type");
 	t.regex(res.text, /<title>Application A<\/title>/, "Correct response");
 });
-
 
 test("Get resource from application.a with not replaced version placeholder(/versionTest.html)", async (t) => {
 	const res = await request.get("/versionTest.html");
@@ -125,14 +124,14 @@ test("Get app_pages from discovery middleware (/discovery/app_pages)", async (t)
 	}
 	t.is(res.statusCode, 200, "Correct HTTP status code");
 	t.deepEqual(res.body, {
-		"app_pages": [
+		app_pages: [
 			{
-				"entry": "index.html"
+				entry: "index.html",
 			},
 			{
-				"entry": "versionTest.html"
-			}
-		]
+				entry: "versionTest.html",
+			},
+		],
 	}, "Correct response");
 });
 
@@ -143,20 +142,20 @@ test("Get all_libs from discovery middleware (/discovery/all_libs)", async (t) =
 	}
 	t.is(res.statusCode, 200, "Correct HTTP status code");
 	t.deepEqual(res.body, {
-		"all_libs": [
+		all_libs: [
 			{
-				"entry": "library/a"
+				entry: "library/a",
 			},
 			{
-				"entry": "library/b"
+				entry: "library/b",
 			},
 			{
-				"entry": "library/c"
+				entry: "library/c",
 			},
 			{
-				"entry": "library/d"
-			}
-		]
+				entry: "library/d",
+			},
+		],
 	}, "Correct response");
 });
 
@@ -167,23 +166,23 @@ test("Get all_tests from discovery middleware (/discovery/all_tests)", async (t)
 	}
 	t.is(res.statusCode, 200, "Correct HTTP status code");
 	t.deepEqual(res.body, {
-		"all_tests": [
+		all_tests: [
 			{
-				"lib": "library.a",
-				"name": "Test.html",
-				"url": "../library/a/Test.html"
+				lib: "library.a",
+				name: "Test.html",
+				url: "../library/a/Test.html",
 			},
 			{
-				"lib": "library.b",
-				"name": "Test.html",
-				"url": "../library/b/Test.html"
+				lib: "library.b",
+				name: "Test.html",
+				url: "../library/b/Test.html",
 			},
 			{
-				"lib": "library.d",
-				"name": "Test.html",
-				"url": "../library/d/Test.html"
-			}
-		]
+				lib: "library.d",
+				name: "Test.html",
+				url: "../library/d/Test.html",
+			},
+		],
 	}, "Correct response");
 });
 
@@ -196,57 +195,57 @@ test("Get sap-ui-version.json from versionInfo middleware (/resources/sap-ui-ver
 
 	const buildTimestamp = res.body.buildTimestamp;
 	t.deepEqual(res.body, {
-		"name": "application.a",
-		"version": "1.0.0",
-		"buildTimestamp": buildTimestamp,
-		"scmRevision": "",
-		"libraries": [
+		name: "application.a",
+		version: "1.0.0",
+		buildTimestamp: buildTimestamp,
+		scmRevision: "",
+		libraries: [
 			{
 				name: "library.a",
 				manifestHints: {
 					dependencies: {
 						libs: {
-							"library.d": {}
-						}
-					}
+							"library.d": {},
+						},
+					},
 				},
 				version: "1.0.0",
 				buildTimestamp,
-				scmRevision: ""
+				scmRevision: "",
 			},
 			{
 				name: "library.b",
 				manifestHints: {
 					dependencies: {
 						libs: {
-							"library.d": {}
-						}
-					}
+							"library.d": {},
+						},
+					},
 				},
 				version: "1.0.0",
 				buildTimestamp,
-				scmRevision: ""
+				scmRevision: "",
 			},
 			{
 				name: "library.c",
 				manifestHints: {
 					dependencies: {
 						libs: {
-							"library.d": {}
-						}
-					}
+							"library.d": {},
+						},
+					},
 				},
 				version: "1.0.0",
 				buildTimestamp,
-				scmRevision: ""
+				scmRevision: "",
 			},
 			{
 				name: "library.d",
 				version: "1.0.0",
 				buildTimestamp,
-				scmRevision: ""
-			}
-		]
+				scmRevision: "",
+			},
+		],
 	}, "Correct response");
 });
 
@@ -293,7 +292,7 @@ test("Get library-parameters.json from theme middleware (/resources/library/a/th
 		t.is(res.statusCode, 200, "Correct HTTP status code");
 		t.regex(res.headers["content-type"], /json/, "Correct content type");
 		t.deepEqual(res.body, {
-			libraryAColor1: "#fafad2"
+			libraryAColor1: "#fafad2",
 		}, "Correct response");
 	});
 
@@ -364,11 +363,11 @@ test("Stop server", async (t) => {
 	const request = supertest(`http://localhost:${port}`);
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	const serveResult = await serve(graph, {
-		port: port
+		port: port,
 	});
 
 	const res = await request.get("/resources/library/a/themes/base/library-parameters.json");
@@ -480,7 +479,7 @@ test("CSP (defaults)", async (t) => {
 				"response should have report-only csp header");
 			t.regex(res.headers["content-security-policy-report-only"], /default-src\s+http:\s*;/,
 				"header should contain the configured policy");
-		})
+		}),
 	]);
 });
 
@@ -494,18 +493,18 @@ test("CSP (sap policies)", async (t) => {
 	const request = supertest(`http://localhost:${port}`);
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	const serveResult = await serve(graph, {
 		port,
 		sendSAPTargetCSP: true,
-		simpleIndex: false
+		simpleIndex: false,
 	});
 
 	const [
 		result1, result2, result3, result4, result5,
-		result6, result7, result8, result9, result10
+		result6, result7, result8, result9, result10,
 	] = await Promise.all([
 		request.get("/index.html"),
 		request.get("/index.html?sap-ui-xx-csp-policy=sap-target-level-1"),
@@ -516,7 +515,7 @@ test("CSP (sap policies)", async (t) => {
 		request.get("/index.html?sap-ui-xx-csp-policy=sap-target-level-3:report-only"),
 		request.get("/index.html?sap-ui-xx-csp-policy=default-src%20http%3a;"),
 		request.get("/index.html?sap-ui-xx-csp-policy=default-src%20http%3a;:report-only"),
-		request.get("/index.html?sap-ui-xx-csp-policy=default-src%20http%3a;:ro")
+		request.get("/index.html?sap-ui-xx-csp-policy=default-src%20http%3a;:ro"),
 	]);
 
 	t.is(result1.headers["content-security-policy"], undefined, "response must not have enforcing csp header");
@@ -608,13 +607,13 @@ test("CSP serveCSPReports", async (t) => {
 	const request = supertest(`http://localhost:${port}`);
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	const serveResult = await serve(graph, {
 		port,
 		serveCSPReports: true,
-		simpleIndex: false
+		simpleIndex: false,
 	});
 
 	const cspReport = {
@@ -629,8 +628,8 @@ test("CSP serveCSPReports", async (t) => {
 			"line-number": 17,
 			"source-file": "https://otherserver:8080/index.html",
 			"status-code": 0,
-			"script-sample": ""
-		}
+			"script-sample": "",
+		},
 	};
 
 	await request.post("/.ui5/csp/report.csplog")
@@ -662,14 +661,14 @@ test("CSP with ignore paths", async (t) => {
 	const request = supertest(`http://localhost:${port}`);
 
 	const graph = await graphFromPackageDependencies({
-		cwd: "./test/fixtures/application.a"
+		cwd: "./test/fixtures/application.a",
 	});
 
 	const serveResult = await serve(graph, {
 		port,
 		serveCSPReports: true,
 		sendSAPTargetCSP: true,
-		simpleIndex: false
+		simpleIndex: false,
 	});
 	const testrunnerRequest1 = request.get("/test-resources/sap/ui/qunit/testrunner.html")
 		.expect(200);
@@ -679,7 +678,7 @@ test("CSP with ignore paths", async (t) => {
 	const testrunnerRequest3 = request.get("/index.html")
 		.expect(200);
 	const [response1, response2, response3] = await Promise.all([
-		testrunnerRequest1, testrunnerRequest2, testrunnerRequest3
+		testrunnerRequest1, testrunnerRequest2, testrunnerRequest3,
 	]);
 	t.falsy(response1.headers["content-security-policy-report-only"], "url match");
 	t.falsy(response2.headers["content-security-policy-report-only"], "referer match");
@@ -723,6 +722,6 @@ test("Get index of resources", async (t) => {
 			t.is(res.headers["content-type"], "text/html; charset=utf-8", "Correct content type");
 			t.is(/<title>(.*)<\/title>/i.exec(res.text)[1], "Error", "Found correct title");
 			t.is(res.text.match(/<pre/g).length, 1, "Found correct amount of <pre> elements");
-		})
+		}),
 	]);
 });

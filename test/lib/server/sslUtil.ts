@@ -25,11 +25,11 @@ test.beforeEach(async (t) => {
 	t.context.createSslUtilMock = async (mockMkdir = false) => {
 		const mocks = {
 			"yesno": t.context.yesno,
-			"devcert-sanscache": t.context.devcertSanscache
+			"devcert-sanscache": t.context.devcertSanscache,
 		};
 		if (mockMkdir) {
 			mocks["node:fs/promises"] = {
-				mkdir: t.context.mkdir
+				mkdir: t.context.mkdir,
 			};
 		}
 		t.context.sslUtil = await esmock.p("../../../lib/sslUtil.js", mocks);
@@ -47,7 +47,7 @@ test("Get existing certificate", async (t) => {
 	const sslPath = path.join(process.cwd(), "./test/fixtures/ssl/");
 	const result = await sslUtil.getSslCertificate(
 		path.join(sslPath, "dummy.key"),
-		path.join(sslPath, "dummy.crt"),
+		path.join(sslPath, "dummy.crt")
 	);
 	t.is(result.key.toString(), "dummy-key-file", "Key exists");
 	t.is(result.cert.toString(), "dummy-crt-file", "Cert exists");
@@ -62,21 +62,21 @@ test.serial("Create new certificate and install it", async (t) => {
 	const sslKey = "abcd";
 	const sslCert = "defg";
 
-	yesno.callsFake(async function(options) {
+	yesno.callsFake(async function (options) {
 		t.deepEqual(options, {
 			question: "No SSL certificates found. " +
-				"Do you want to create new SSL certificates and install them locally? (yes)",
-			defaultValue: true
+			"Do you want to create new SSL certificates and install them locally? (yes)",
+			defaultValue: true,
 		}, "Pass options to yesno");
 
 		return true;
 	});
 
-	devcertSanscache.callsFake(function(name) {
+	devcertSanscache.callsFake(function (name) {
 		t.is(name, "UI5Tooling", "Create certificate for UI5Tooling.");
 		return Promise.resolve({
 			key: sslKey,
-			cert: sslCert
+			cert: sslCert,
 		});
 	});
 
@@ -91,7 +91,7 @@ test.serial("Create new certificate and install it", async (t) => {
 
 	const fileExistsResult = await Promise.all([
 		fileExists(sslPathKey),
-		fileExists(sslPathCert)
+		fileExists(sslPathCert),
 	]);
 
 	t.is(fileExistsResult[0], true, "Key was created.");
@@ -104,11 +104,11 @@ test.serial("Create new certificate and do not install it", async (t) => {
 
 	t.plan(2);
 
-	yesno.callsFake(async function(options) {
+	yesno.callsFake(async function (options) {
 		t.deepEqual(options, {
 			question: "No SSL certificates found. " +
-				"Do you want to create new SSL certificates and install them locally? (yes)",
-			defaultValue: true
+			"Do you want to create new SSL certificates and install them locally? (yes)",
+			defaultValue: true,
 		}, "Pass options to yesno");
 
 		return false;
@@ -133,24 +133,24 @@ test.serial("Create new certificate not succeeded", async (t) => {
 
 	t.plan(6);
 
-	yesno.callsFake(async function(options) {
+	yesno.callsFake(async function (options) {
 		t.deepEqual(options, {
 			question: "No SSL certificates found. " +
-				"Do you want to create new SSL certificates and install them locally? (yes)",
-			defaultValue: true
+			"Do you want to create new SSL certificates and install them locally? (yes)",
+			defaultValue: true,
 		}, "Pass options to yesno");
 
 		return true;
 	});
 
-	devcertSanscache.callsFake(async function(name) {
+	devcertSanscache.callsFake(async function (name) {
 		t.is(name, "UI5Tooling", "Create certificate for UI5Tooling.");
 		return {
 			key: "aaa",
-			cert: "bbb"
+			cert: "bbb",
 		};
 	});
-	mkdir.callsFake(async function(dirName) {
+	mkdir.callsFake(async function (dirName) {
 		t.pass("mkdir mock reached.");
 
 		throw new Error("some error");
@@ -162,4 +162,3 @@ test.serial("Create new certificate not succeeded", async (t) => {
 	const err = await t.throwsAsync(sslUtil.getSslCertificate(sslPathKey, sslPathCert));
 	t.is(err.message, "some error", "Correct error thrown");
 });
-
