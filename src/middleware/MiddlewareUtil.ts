@@ -8,6 +8,11 @@ import {
 	createLinkReader,
 	createFlatReader,
 } from "@ui5/fs/resourceFactory";
+import type {Project} from "@ui5/project/specifications/Project";
+import type {ProjectGraph} from "@ui5/project/graph/ProjectGraph";
+import type {Specification} from "@ui5/project/specifications/Specification";
+import type {Request} from "express";
+import type Resource from "@ui5/fs/Resource";
 
 /**
  * Convenience functions for UI5 Server middleware.
@@ -18,17 +23,19 @@ import {
  * The set of functions that can be accessed by a custom middleware depends on the specification
  * version defined for the extension.
  *
- * @alias @ui5/server/middleware/MiddlewareUtil
  * @hideconstructor
  */
 class MiddlewareUtil {
+	_graph: ProjectGraph;
+	_project: Project;
+
 	/**
 	 *
 	 * @param parameters
 	 * @param parameters.graph Relevant ProjectGraph
 	 * @param parameters.project Project that is being served
 	 */
-	constructor({graph, project}: object) {
+	constructor({graph, project}: {graph: ProjectGraph; project: Project}) {
 		if (!graph) {
 			throw new Error(`Missing parameter "graph"`);
 		}
@@ -50,7 +57,7 @@ class MiddlewareUtil {
 	 * @returns [Pathname]{@link https://developer.mozilla.org/en-US/docs/Web/API/URL/pathname}
 	 * of the given request
 	 */
-	public getPathname(req: object) {
+	public getPathname(req: Request): string {
 		let {pathname} = parseurl(req);
 		pathname = decodeURIComponent(pathname);
 		return pathname;
@@ -80,7 +87,7 @@ class MiddlewareUtil {
 	 * @param resourcePath
 	 * @returns
 	 */
-	public getMimeInfo(resourcePath: object) {
+	public getMimeInfo(resourcePath: string) {
 		const type = mime.lookup(resourcePath) || "application/octet-stream";
 		const charset = mime.charset(type);
 		return {
@@ -134,11 +141,11 @@ class MiddlewareUtil {
 	 * Specification Version-dependent interface to the Project instance or <code>undefined</code>
 	 * if the project name is unknown or the provided resource is not associated with any project.
 	 */
-	public getProject(projectNameOrResource) {
+	public getProject(projectNameOrResource: string | Resource) {
 		if (projectNameOrResource) {
 			if (typeof projectNameOrResource === "string" || projectNameOrResource instanceof String) {
 				// A project name has been provided
-				return this._graph.getProject(projectNameOrResource);
+				return this._graph.getProject(projectNameOrResource as string);
 			} else {
 				// A Resource instance has been provided
 				return projectNameOrResource.getProject();
@@ -162,7 +169,7 @@ class MiddlewareUtil {
 	 * @throws {Error} If the requested project is unknown to the graph
 	 */
 	public getDependencies(projectName?: string) {
-		return this._graph.getDependencies(projectName || this._project.getName());
+		return this._graph.getDependencies(projectName ?? this._project.getName());
 	}
 
 	/**
@@ -214,22 +221,22 @@ class MiddlewareUtil {
 	 * SpecVersionComparator instance of the custom server middleware
 	 * @returns An object with bound instance methods supported by the given specification version
 	 */
-	getInterface(specVersion) {
+	getInterface(specVersion: Specification) {
 		if (specVersion.lt("2.0")) {
 			// Custom middleware defining specVersion <2.0 does not have access to any MiddlewareUtil API
 			return undefined;
 		}
 
-		const baseInterface = {};
+		const baseInterface: Partial<MiddlewareUtil> = {};
 		bindFunctions(this, baseInterface, [
 			"getPathname", "getMimeInfo",
 		]);
 
 		if (specVersion.gte("3.0")) {
 			// getProject function, returning an interfaced project instance
-			baseInterface.getProject = (projectName) => {
+			baseInterface.getProject = (projectName: string) => {
 				const project = this.getProject(projectName);
-				const baseProjectInterface = {};
+				const baseProjectInterface = {} as Project;
 				bindFunctions(project, baseProjectInterface, [
 					"getType", "getName", "getVersion", "getNamespace",
 					"getRootReader", "getRootPath", "getSourcePath",
@@ -243,7 +250,7 @@ class MiddlewareUtil {
 				// Therefore default to style "runtime" here so that custom middleware will commonly work with
 				// the same paths as ui5-server and no unexpected builder-excludes.
 				baseProjectInterface.getReader = function (options = {style: "runtime"}) {
-					return project.getReader(options);
+					return project?.getReader(options);
 				};
 				return baseProjectInterface;
 			};
@@ -252,14 +259,16 @@ class MiddlewareUtil {
 				return this.getDependencies(projectName);
 			};
 
-			baseInterface.resourceFactory = Object.create(null);
+			baseInterface.resourceFactory = Object.create(null) as typeof this.resourceFactory;
+
 			[
 				// Once new functions get added, extract this array into a variable
 				// and enhance based on spec version once new functions get added
 				"createResource", "createReaderCollection", "createReaderCollectionPrioritized",
 				"createFilterReader", "createLinkReader", "createFlatReader",
 			].forEach((factoryFunction) => {
-				baseInterface.resourceFactory[factoryFunction] = this.resourceFactory[factoryFunction];
+				baseInterface.resourceFactory[factoryFunction as keyof typeof baseInterface.resourceFactory] =
+					this.resourceFactory[factoryFunction as keyof typeof baseInterface.resourceFactory];
 			});
 		}
 		return baseInterface;

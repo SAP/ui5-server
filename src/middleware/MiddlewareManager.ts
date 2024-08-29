@@ -1,7 +1,18 @@
 import middlewareRepository from "./middlewareRepository.js";
 import MiddlewareUtil from "./MiddlewareUtil.js";
 import {getLogger} from "@ui5/logger";
+import type AbstractReader from "@ui5/fs/AbstractReader";
+import type {Project} from "@ui5/project/specifications/Project";
 const hasOwn = Function.prototype.call.bind(Object.prototype.hasOwnProperty);
+
+export interface Middleware_Args {
+	resources: {
+		all: AbstractReader;
+		dependencies: AbstractReader;
+		rootProject: Project;
+	};
+	middlewareUtil: MiddlewareUtil;
+};
 
 /**
  * all Reader or Collection to read resources of the

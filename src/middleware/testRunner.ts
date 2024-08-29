@@ -7,7 +7,6 @@ import parseurl from "parseurl";
 import {getLogger} from "@ui5/logger";
 const log = getLogger("server:middleware:testRunner");
 import type {Request, Response, NextFunction} from "express";
-import type ReaderCollection from "@ui5/fs/ReaderCollection";
 
 const testRunnerResourceRegEx = /\/test-resources\/sap\/ui\/qunit\/(testrunner\.(html|css)|TestRunner.js)$/;
 const resourceCache = Object.create(null) as Record<string, Promise<string> | undefined>;
@@ -33,14 +32,9 @@ function serveResource(res: Response, resourcePath: string, resourceContent: str
 /**
  * Creates and returns the middleware to serve a resource index.
  *
- * @param parameters Parameters
- * @param parameters._resources Contains the resource reader or collection to access project related files
- * @param parameters._resources.dependencies Contains the resource reader or collection to access project related files
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({_resources}: {
-	_resources: {dependencies: ReaderCollection};
-}) {
+function createMiddleware() {
 	return async function (req: Request, res: Response, next: NextFunction) {
 		try {
 			const pathname = parseurl(req).pathname;

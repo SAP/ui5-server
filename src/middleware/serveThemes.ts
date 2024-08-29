@@ -4,13 +4,16 @@ import {basename, dirname} from "node:path/posix";
 import etag from "etag";
 import fresh from "fresh";
 import parseurl from "parseurl";
+import type {NextFunction, Request, Response} from "express";
+import type Resource from "@ui5/fs/Resource";
+import type {Middleware_Args} from "./MiddlewareManager.js";
 
 /**
  *
  * @param req
  * @param res
  */
-function isFresh(req, res) {
+function isFresh(req: Request, res: Response) {
 	return fresh(req.headers, {
 		etag: res.getHeader("ETag"),
 	});
@@ -39,15 +42,16 @@ const themeResources = [
  *
  * @param parameters Parameters
  * @param parameters.resources Parameters
+ * @param parameters.resources.all Dependencies reader
  * @param parameters.middlewareUtil Specification version dependent interface to a
  *                                        [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}: object) {
+function createMiddleware({resources, middlewareUtil}: Middleware_Args) {
 	const builder = new ThemeBuilder({
 		fs: fsInterface(resources.all),
 	});
-	const buildOptions = Object.create(null);
+	const buildOptions = Object.create(null) as {compress: boolean; cssVariables: boolean};
 
 	const currentRequests = Object.create(null);
 
@@ -55,7 +59,7 @@ function createMiddleware({resources, middlewareUtil}: object) {
 	 *
 	 * @param pathname
 	 */
-	async function buildTheme(pathname) {
+	async function buildTheme(pathname: string) {
 		const filename = basename(pathname);
 
 		if (cssVariablesThemeResources.includes(filename) && !buildOptions.cssVariables) {
@@ -88,7 +92,7 @@ function createMiddleware({resources, middlewareUtil}: object) {
 	 * @param res
 	 * @param resource
 	 */
-	async function sendResponse(req, res, resource) {
+	async function sendResponse(req: Request, res: Response, resource: Resource) {
 		const resourcePath = resource.getPath();
 		const {contentType} = middlewareUtil.getMimeInfo(resourcePath);
 		res.setHeader("Content-Type", contentType);
@@ -107,7 +111,7 @@ function createMiddleware({resources, middlewareUtil}: object) {
 		res.end(content);
 	}
 
-	return async function theme(req, res, next) {
+	return async function theme(req: Request, res: Response, next: NextFunction) {
 		try {
 			const pathname = parseurl(req).pathname;
 			const filename = basename(pathname);
