@@ -68,7 +68,7 @@ export function getSslCertificate(
  * @param keyPath
  * @param certPath
  */
-async function createAndInstallCertificate(keyPath, certPath) {
+async function createAndInstallCertificate(keyPath: string, certPath: string) {
 	const {default: yesno} = await import("yesno");
 
 	const ok = await yesno({
@@ -112,7 +112,7 @@ async function createAndInstallCertificate(keyPath, certPath) {
  *
  * @param filePath
  */
-function fileExists(filePath) {
+function fileExists(filePath: string) {
 	return stat(filePath).then((s) => s, (err) => {
 		if (err.code === "ENOENT") { // "File or directory does not exist"
 			return false;
