@@ -91,6 +91,7 @@
 		"@istanbuljs/esm-loader-hook": "^0.2.0",
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
 		"@stylistic/eslint-plugin": "^2.6.4",
+		"@types/express": "^4.17.21",
 		"@types/node": "^22.5.0",
 		"@types/sinon": "^17.0.3",
 		"@ui5/project": "^4.0.3",

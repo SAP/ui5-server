@@ -1,5 +1,8 @@
 import createVersionInfoProcessor from "@ui5/builder/processors/versionInfoGenerator";
 import generateLibraryManifest from "./helper/generateLibraryManifest.js";
+import type MiddlewareUtil from "./MiddlewareUtil.js";
+import type {Request, Response, NextFunction} from "express";
+import type ReaderCollection from "@ui5/fs/ReaderCollection";
 
 const MANIFEST_JSON = "manifest.json";
 
@@ -8,11 +11,13 @@ const MANIFEST_JSON = "manifest.json";
  *
  * @param parameters Parameters
  * @param parameters.resources Parameters
+ * @param parameters.resources.dependencies Dependencies reader
  * @param parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}: object) {
-	return async function versionInfo(req, res, next) {
+function createMiddleware({resources, middlewareUtil}:
+{resources: {dependencies: ReaderCollection}; middlewareUtil: MiddlewareUtil}) {
+	return async function versionInfo(_req: Request, res: Response, next: NextFunction) {
 		try {
 			const dependencies = resources.dependencies;
 			let dotLibResources = await dependencies.byGlob("/resources/**/.library");
@@ -24,7 +29,7 @@ function createMiddleware({resources, middlewareUtil}: object) {
 			});
 
 			const libraryInfosPromises = dotLibResources.map(async (dotLibResource) => {
-				const namespace = dotLibResource.getProject().getNamespace();
+				const namespace = dotLibResource.getProject()?.getNamespace();
 				const manifestResources = await dependencies.byGlob(`/resources/${namespace}/**/${MANIFEST_JSON}`);
 				let libraryManifest = manifestResources.find((manifestResource) => {
 					return manifestResource.getPath() === `/resources/${namespace}/${MANIFEST_JSON}`;
@@ -37,8 +42,8 @@ function createMiddleware({resources, middlewareUtil}: object) {
 				return {
 					libraryManifest,
 					embeddedManifests,
-					name: dotLibResource.getProject().getName(),
-					version: dotLibResource.getProject().getVersion(),
+					name: dotLibResource.getProject()?.getName(),
+					version: dotLibResource.getProject()?.getVersion(),
 				};
 			});
 			const rootProject = middlewareUtil.getProject();
