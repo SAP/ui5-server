@@ -6,9 +6,11 @@ import mime from "mime-types";
 import parseurl from "parseurl";
 import {getLogger} from "@ui5/logger";
 const log = getLogger("server:middleware:testRunner");
+import type {Request, Response, NextFunction} from "express";
+import type ReaderCollection from "@ui5/fs/ReaderCollection";
 
 const testRunnerResourceRegEx = /\/test-resources\/sap\/ui\/qunit\/(testrunner\.(html|css)|TestRunner.js)$/;
-const resourceCache = Object.create(null);
+const resourceCache = Object.create(null) as Record<string, Promise<string> | undefined>;
 
 /**
  *
@@ -16,9 +18,9 @@ const resourceCache = Object.create(null);
  * @param resourcePath
  * @param resourceContent
  */
-function serveResource(res, resourcePath, resourceContent) {
-	const type = mime.lookup(resourcePath) || "application/octet-stream";
-	const charset = mime.charset(type);
+function serveResource(res: Response, resourcePath: string, resourceContent: string) {
+	const type = mime.lookup(resourcePath) ?? "application/octet-stream";
+	const charset = mime.charset(type) ?? "";
 	const contentType = type + (charset ? "; charset=" + charset : "");
 
 	// resources served by this middleware do not change often
@@ -32,17 +34,18 @@ function serveResource(res, resourcePath, resourceContent) {
  * Creates and returns the middleware to serve a resource index.
  *
  * @param parameters Parameters
- * @param parameters.resources Contains the resource reader or collection to access project related files
+ * @param parameters._resources Contains the resource reader or collection to access project related files
+ * @param parameters._resources.dependencies Contains the resource reader or collection to access project related files
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({resources}: {
-	resources: object;
+function createMiddleware({_resources}: {
+	_resources: {dependencies: ReaderCollection};
 }) {
-	return async function (req, res, next) {
+	return async function (req: Request, res: Response, next: NextFunction) {
 		try {
 			const pathname = parseurl(req).pathname;
 			const parts = testRunnerResourceRegEx.exec(pathname);
-			const resourceName = parts && parts[1];
+			const resourceName = parts?.[1];
 
 			if (resourceName) { // either "testrunner.html", "testrunner.css" or "TestRunner.js" (case sensitive!)
 				log.verbose(`Serving ${pathname}`);
