@@ -4,7 +4,8 @@ import replaceStream from "replacestream";
 import etag from "etag";
 import fresh from "fresh";
 import fsInterface from "@ui5/fs/fsInterface";
-import * as http from "http";
+import type * as Express from "express";
+import {type ExpressMiddleware, type MiddlewareParams} from "./middlewareRepository.js";
 
 const rProperties = /\.properties$/i;
 const rReplaceVersion = /\.(library|js|json)$/i;
@@ -17,7 +18,7 @@ const rTestResourcesPrefix = /^\/test-resources\//i;
  * @param req
  * @param res
  */
-function isFresh(req: http.IncomingMessage, res: http.ServerResponse) {
+function isFresh(req: Express.Request, res: Express.Response) {
 	return fresh(req.headers, {
 		etag: res.getHeader("ETag"),
 	});
@@ -31,7 +32,7 @@ function isFresh(req: http.IncomingMessage, res: http.ServerResponse) {
  * @param parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}: object) {
+function createMiddleware({resources, middlewareUtil}: MiddlewareParams): ExpressMiddleware {
 	return async function serveResources(req, res, next) {
 		try {
 			const pathname = middlewareUtil.getPathname(req);

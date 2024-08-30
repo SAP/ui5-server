@@ -1,3 +1,7 @@
+import type * as Express from "express";
+import type Logger from "@ui5/logger/Logger";
+import type AbstractReaderWriter from "@ui5/fs/AbstractReaderWriter";
+
 const middlewareInfos = {
 	compression: {path: "compression"},
 	cors: {path: "cors"},
@@ -9,6 +13,19 @@ const middlewareInfos = {
 	serveThemes: {path: "./serveThemes.js"},
 	testRunner: {path: "./testRunner.js"},
 	nonReadRequests: {path: "./nonReadRequests.js"},
+};
+
+export type ExpressMiddleware = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => Promise<void>;
+
+export type Middleware =
+	(params: MiddlewareParams) => Promise<ExpressMiddleware>;
+
+export interface MiddlewareParams {
+	log: Logger;
+	middlewareUtil: any;
+	options: Record<string, unknown>;
+	resources: {
+		workspace: AbstractReaderWriter;
 };
 
 // see  @ui5/server/internal/middlewareRepository#getMiddleware
