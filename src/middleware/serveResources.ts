@@ -4,6 +4,7 @@ import replaceStream from "replacestream";
 import etag from "etag";
 import fresh from "fresh";
 import fsInterface from "@ui5/fs/fsInterface";
+import * as http from "http";
 
 const rProperties = /\.properties$/i;
 const rReplaceVersion = /\.(library|js|json)$/i;
@@ -16,7 +17,7 @@ const rTestResourcesPrefix = /^\/test-resources\//i;
  * @param req
  * @param res
  */
-function isFresh(req, res) {
+function isFresh(req: http.IncomingMessage, res: http.ServerResponse) {
 	return fresh(req.headers, {
 		etag: res.getHeader("ETag"),
 	});

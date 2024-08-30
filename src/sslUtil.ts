@@ -50,7 +50,7 @@ export function getSslCertificate(
 				log.verbose(`Detected outdated file permissions for certificate file at ${keyPath}. ` +
 				`Fixing permissions...`);
 				await chmod(certPath, 0o400).catch((err) => {
-					log.error(`Failed to update permissions of certificate file at ${certPath}: ${err}`);
+					log.verbose(`Failed to update permissions of certificate file at ${certPath}: ${err}`);
 				});
 			}
 			return readFile(certPath);
