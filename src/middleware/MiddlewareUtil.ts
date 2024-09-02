@@ -141,7 +141,7 @@ class MiddlewareUtil {
 	 * Specification Version-dependent interface to the Project instance or <code>undefined</code>
 	 * if the project name is unknown or the provided resource is not associated with any project.
 	 */
-	public getProject(projectNameOrResource: string | Resource) {
+	public getProject(projectNameOrResource?: string | Resource) {
 		if (projectNameOrResource) {
 			if (typeof projectNameOrResource === "string" || projectNameOrResource instanceof String) {
 				// A project name has been provided

@@ -10,7 +10,6 @@ const MANIFEST_JSON = "manifest.json";
  *
  * @param parameters Parameters
  * @param parameters.resources Parameters
- * @param parameters.resources.dependencies Dependencies reader
  * @param parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns Returns a server middleware closure.
  */
@@ -23,11 +22,11 @@ function createMiddleware({resources, middlewareUtil}: Middleware_Args) {
 			dotLibResources = dotLibResources.filter((res) => res.getProject()?.getType() === "library");
 
 			dotLibResources.sort((a, b) => {
-				return a.getProject().getName().localeCompare(b.getProject().getName());
+				return a.getProject()!.getName().localeCompare(b.getProject()!.getName());
 			});
 
 			const libraryInfosPromises = dotLibResources.map(async (dotLibResource) => {
-				const namespace = dotLibResource.getProject()?.getNamespace();
+				const namespace = dotLibResource.getProject()!.getNamespace();
 				const manifestResources = await dependencies.byGlob(`/resources/${namespace}/**/${MANIFEST_JSON}`);
 				let libraryManifest = manifestResources.find((manifestResource) => {
 					return manifestResource.getPath() === `/resources/${namespace}/${MANIFEST_JSON}`;
@@ -40,16 +39,16 @@ function createMiddleware({resources, middlewareUtil}: Middleware_Args) {
 				return {
 					libraryManifest,
 					embeddedManifests,
-					name: dotLibResource.getProject()?.getName(),
-					version: dotLibResource.getProject()?.getVersion(),
+					name: dotLibResource.getProject()!.getName(),
+					version: dotLibResource.getProject()!.getVersion(),
 				};
 			});
 			const rootProject = middlewareUtil.getProject();
 			const libraryInfos = await Promise.all(libraryInfosPromises);
 			const [versionInfoResource] = await createVersionInfoProcessor({
 				options: {
-					rootProjectName: rootProject.getName(),
-					rootProjectVersion: rootProject.getVersion(),
+					rootProjectName: rootProject?.getName(),
+					rootProjectVersion: rootProject?.getVersion(),
 					libraryInfos,
 				},
 			});
