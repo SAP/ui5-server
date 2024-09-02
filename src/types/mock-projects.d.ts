@@ -68,6 +68,7 @@ declare module "@ui5/logger" {
 	interface logger {
 		silly(x: string): void;
 		verbose(x: string): void;
+		error(x: Error): void;
 		isLevelEnabled(x: string): boolean;
 	}
 
