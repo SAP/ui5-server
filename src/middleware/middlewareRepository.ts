@@ -30,6 +30,7 @@ export interface MiddlewareParams {
 		all: AbstractReader;
 		dependencies: AbstractReader;
 		workspace: AbstractReader;
+		rootProject: AbstractReader;
 	};
 };
 
