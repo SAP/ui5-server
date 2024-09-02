@@ -1,7 +1,7 @@
 import type * as Express from "express";
 import type Logger from "@ui5/logger/Logger";
 import type AbstractReaderWriter from "@ui5/fs/AbstractReaderWriter";
-import MiddlewareUtil from "./MiddlewareUtil.js";
+import type MiddlewareUtil from "./MiddlewareUtil.js";
 
 const middlewareInfos = {
 	compression: {path: "compression"},
@@ -16,7 +16,8 @@ const middlewareInfos = {
 	nonReadRequests: {path: "./nonReadRequests.js"},
 };
 
-export type ExpressMiddleware = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => Promise<void>;
+export type ExpressMiddleware =
+	(req: Express.Request, res: Express.Response, next: Express.NextFunction) => Promise<void>;
 
 export type Middleware =
 	(params: MiddlewareParams) => Promise<ExpressMiddleware>;
@@ -29,19 +30,21 @@ export interface MiddlewareParams {
 		all: AbstractReaderWriter;
 		dependencies: AbstractReaderWriter;
 		workspace: AbstractReaderWriter;
+	};
 };
 
 // see  @ui5/server/internal/middlewareRepository#getMiddleware
 /**
  *
- * @param middlewareName
+ * @param middlewareName Middleware's name
  */
-async function getMiddleware(middlewareName) {
-	const middlewareInfo = middlewareInfos[middlewareName];
-
-	if (!middlewareInfo) {
+async function getMiddleware(middlewareName: string) {
+	if (!(middlewareName in middlewareInfos)) {
 		throw new Error(`middlewareRepository: Unknown Middleware ${middlewareName}`);
 	}
+
+	const middlewareInfo = middlewareInfos[middlewareName as keyof typeof middlewareInfos];
+
 	try {
 		const {default: middleware} = await import(middlewareInfo.path);
 		return {
