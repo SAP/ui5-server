@@ -13,13 +13,13 @@ const resourceCache = Object.create(null) as Record<string, Promise<string> | un
 
 /**
  *
- * @param res
- * @param resourcePath
- * @param resourceContent
+ * @param res Response object
+ * @param resourcePath Path to the resource
+ * @param resourceContent Content of the resource
  */
 function serveResource(res: Response, resourcePath: string, resourceContent: string) {
 	const type = mime.lookup(resourcePath) ?? "application/octet-stream";
-	const charset = mime.charset(type) ?? "";
+	const charset = (typeof type === "string") ? mime.charset(type) ?? "" : "";
 	const contentType = type + (charset ? "; charset=" + charset : "");
 
 	// resources served by this middleware do not change often
@@ -37,7 +37,7 @@ function serveResource(res: Response, resourcePath: string, resourceContent: str
 function createMiddleware() {
 	return async function (req: Request, res: Response, next: NextFunction) {
 		try {
-			const pathname = parseurl(req).pathname;
+			const pathname = parseurl(req)!.pathname ?? "";
 			const parts = testRunnerResourceRegEx.exec(pathname);
 			const resourceName = parts?.[1];
 
