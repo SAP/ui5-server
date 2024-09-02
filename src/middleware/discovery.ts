@@ -1,6 +1,16 @@
+import type {Request, Response, NextFunction} from "express";
+import type {ExpressMiddleware, MiddlewareParams} from "./middlewareRepository.js";
+
 const librariesPattern = /([A-Z0-9._%+-/]+)\/[A-Z0-9._]*\.library$/i;
 const testPagesPattern = /(([A-Z0-9._%+-]+\/)+([A-Z_0-9-\\.]+)\.(html|htm))$/i;
 const urlPattern = /\/(app_pages|all_libs|all_tests)(?:[?#].*)?$/;
+
+type Discovery_Type = "app_pages" | "all_libs" | "all_tests";
+type Response_Type<discType extends Discovery_Type> = discType extends "app_pages"
+	? {entry: string}
+	: discType extends "all_libs"
+		? {entry: string}
+		: {lib: string};
 
 /**
  * Creates and returns the middleware to discover project files.
@@ -16,23 +26,24 @@ const urlPattern = /\/(app_pages|all_libs|all_tests)(?:[?#].*)?$/;
  * @param parameters.resources Parameters
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({resources}: object) {
-	return function discoveryMiddleware(req, res, next) {
+function createMiddleware({resources}: MiddlewareParams): ExpressMiddleware {
+	return function discoveryMiddleware(req: Request, res: Response, next: NextFunction) {
 		const parts = urlPattern.exec(req.url);
-		const type = parts && parts[1];
+		const type = parts?.[1] as Discovery_Type;
 		if (!type) {
 			next();
 			return;
 		}
 
-		const response = [];
+		const response = [] as Response_Type<typeof type>[];
 
 		/**
 		 *
 		 */
 		function sendResponse() {
-			const responseData = {};
-			response.sort((a, b) => {
+			const responseData = {} as typeof response;
+
+			response.sort((a: Response_Type<typeof type>, b: Response_Type<typeof type>) => {
 				if (type === "app_pages" || type === "all_libs") {
 					return a.entry.localeCompare(b.entry);
 				} else {
@@ -47,7 +58,7 @@ function createMiddleware({resources}: object) {
 		}
 
 		if (type === "app_pages") {
-			resources.rootProject.byGlob("/**/*.{html,htm}").then(function (resources) {
+			void resources.rootProject.byGlob("/**/*.{html,htm}").then(function (resources) {
 				resources.forEach(function (resource) {
 					const relPath = resource.getPath().substr(1); // cut off leading "/"
 					response.push({
@@ -57,7 +68,7 @@ function createMiddleware({resources}: object) {
 				sendResponse();
 			});
 		} else if (type === "all_libs") {
-			resources.all.byGlob([
+			void resources.all.byGlob([
 				"/resources/**/*.library",
 			]).then(function (resources) {
 				resources.forEach(function (resource) {
@@ -72,7 +83,7 @@ function createMiddleware({resources}: object) {
 				sendResponse();
 			});
 		} else if (type === "all_tests") {
-			Promise.all([
+			void Promise.all([
 				resources.all.byGlob("/resources/**/*.library"),
 				resources.all.byGlob("/test-resources/**/*.{html,htm}"),
 			]).then(function (results) {
