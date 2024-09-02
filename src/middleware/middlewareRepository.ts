@@ -1,6 +1,7 @@
 import type * as Express from "express";
 import type Logger from "@ui5/logger/Logger";
 import type AbstractReaderWriter from "@ui5/fs/AbstractReaderWriter";
+import MiddlewareUtil from "./MiddlewareUtil.js";
 
 const middlewareInfos = {
 	compression: {path: "compression"},
@@ -22,9 +23,11 @@ export type Middleware =
 
 export interface MiddlewareParams {
 	log: Logger;
-	middlewareUtil: any;
+	middlewareUtil: MiddlewareUtil;
 	options: Record<string, unknown>;
 	resources: {
+		all: AbstractReaderWriter;
+		dependencies: AbstractReaderWriter;
 		workspace: AbstractReaderWriter;
 };
 
