@@ -1,7 +1,7 @@
 import createVersionInfoProcessor from "@ui5/builder/processors/versionInfoGenerator";
 import generateLibraryManifest from "./helper/generateLibraryManifest.js";
 import type {Request, Response, NextFunction} from "express";
-import type {Middleware_Args} from "./MiddlewareManager.js";
+import type {MiddlewareParams, ExpressMiddleware} from "./middlewareRepository.js";
 
 const MANIFEST_JSON = "manifest.json";
 
@@ -13,7 +13,7 @@ const MANIFEST_JSON = "manifest.json";
  * @param parameters.middlewareUtil [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}: Middleware_Args) {
+function createMiddleware({resources, middlewareUtil}: MiddlewareParams): ExpressMiddleware {
 	return async function versionInfo(_req: Request, res: Response, next: NextFunction) {
 		try {
 			const dependencies = resources.dependencies;

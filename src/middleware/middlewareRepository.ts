@@ -1,6 +1,6 @@
 import type * as Express from "express";
 import type Logger from "@ui5/logger/Logger";
-import type AbstractReaderWriter from "@ui5/fs/AbstractReaderWriter";
+import type AbstractReader from "@ui5/fs/AbstractReader";
 import type MiddlewareUtil from "./MiddlewareUtil.js";
 
 const middlewareInfos = {
@@ -17,7 +17,7 @@ const middlewareInfos = {
 };
 
 export type ExpressMiddleware =
-	(req: Express.Request, res: Express.Response, next: Express.NextFunction) => Promise<void>;
+	(req: Express.Request, res: Express.Response, next: Express.NextFunction) => Promise<void> | void;
 
 export type Middleware =
 	(params: MiddlewareParams) => Promise<ExpressMiddleware>;
@@ -27,9 +27,9 @@ export interface MiddlewareParams {
 	middlewareUtil: MiddlewareUtil;
 	options: Record<string, unknown>;
 	resources: {
-		all: AbstractReaderWriter;
-		dependencies: AbstractReaderWriter;
-		workspace: AbstractReaderWriter;
+		all: AbstractReader;
+		dependencies: AbstractReader;
+		workspace: AbstractReader;
 	};
 };
 

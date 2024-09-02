@@ -5,8 +5,8 @@ import etag from "etag";
 import fresh from "fresh";
 import parseurl from "parseurl";
 import type {NextFunction, Request, Response} from "express";
-import type {Middleware_Args} from "./MiddlewareManager.js";
 import type {ResourceInterface} from "@ui5/fs/Resource";
+import type {MiddlewareParams, ExpressMiddleware} from "./middlewareRepository.js";
 
 /**
  *
@@ -46,7 +46,7 @@ const themeResources = [
  *                                        [MiddlewareUtil]{@link @ui5/server/middleware/MiddlewareUtil} instance
  * @returns Returns a server middleware closure.
  */
-function createMiddleware({resources, middlewareUtil}: Middleware_Args) {
+function createMiddleware({resources, middlewareUtil}: MiddlewareParams): ExpressMiddleware {
 	// TODO: Use @ui5/builder type when ready
 	const builder = new ThemeBuilder({
 		fs: fsInterface(resources.all),
