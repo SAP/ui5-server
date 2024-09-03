@@ -6,11 +6,13 @@ const testPagesPattern = /(([A-Z0-9._%+-]+\/)+([A-Z_0-9-\\.]+)\.(html|htm))$/i;
 const urlPattern = /\/(app_pages|all_libs|all_tests)(?:[?#].*)?$/;
 
 type Discovery_Type = "app_pages" | "all_libs" | "all_tests";
-type Response_Type<discType extends Discovery_Type> = discType extends "app_pages"
-	? {entry: string}
-	: discType extends "all_libs"
-		? {entry: string}
-		: {lib: string};
+interface Entry_Type {entry: string};
+interface Lib_Type {lib: string; name: string; url: string};
+type Response_Type<discType extends Discovery_Type> = discType extends "app_pages" | "all_libs"
+	? Entry_Type
+	: discType extends "all_tests"
+		? Lib_Type
+		: never;
 
 /**
  * Creates and returns the middleware to discover project files.
@@ -35,19 +37,23 @@ function createMiddleware({resources}: MiddlewareParams): ExpressMiddleware {
 			return;
 		}
 
-		const response = [] as Response_Type<typeof type>[];
+		const response = [] as Response_Type<Discovery_Type>[];
 
 		/**
 		 *
 		 */
 		function sendResponse() {
-			const responseData = {} as typeof response;
+			const responseData = {} as Record<Discovery_Type, typeof response>;
 
-			response.sort((a: Response_Type<typeof type>, b: Response_Type<typeof type>) => {
-				if (type === "app_pages" || type === "all_libs") {
-					return a.entry.localeCompare(b.entry);
+			response.sort((a: Response_Type<Discovery_Type>, b: Response_Type<Discovery_Type>): number => {
+				if ((type === "app_pages" || type === "all_libs")) {
+					const left = a as Entry_Type;
+					const right = b as Entry_Type;
+					return left.entry.localeCompare(right.entry);
 				} else {
-					return a.lib.localeCompare(b.lib);
+					const left = a as Lib_Type;
+					const right = b as Lib_Type;
+					return left.lib.localeCompare(right.lib);
 				}
 			});
 			responseData[type] = response;
@@ -89,7 +95,7 @@ function createMiddleware({resources}: MiddlewareParams): ExpressMiddleware {
 			]).then(function (results) {
 				const libraryResources = results[0];
 				const testPageResources = results[1];
-				const libs = Object.create(null);
+				const libs = Object.create(null) as Record<string, string>;
 
 				libraryResources.forEach(function (resource) {
 					const relPath = resource.getPath().substr(11); // cut off leading "/resources/"
@@ -120,7 +126,7 @@ function createMiddleware({resources}: MiddlewareParams): ExpressMiddleware {
 				sendResponse();
 			});
 		} else {
-			next(new Error(`Unknown discovery type "${type}"`));
+			next(new Error(`Unknown discovery type "${String(type)}"`));
 		}
 	};
 }
