@@ -45,15 +45,16 @@ declare module "@ui5/project/specifications/Project" {
 		getType: () => "project" | "application" | "library";
 		getNamespace: () => string;
 		getReader: (options?: {style: string}) => AbstractReader;
+		getCustomMiddleware: () => unknown;
 	}
 }
-
 declare module "@ui5/project/graph/ProjectGraph" {
 	import type {Project} from "@ui5/project/specifications/Project";
-
 	export interface ProjectGraph {
 		getProject: (name: string) => Project;
+		getRoot: () => Project;
 		getDependencies: (name: string) => string[];
+		getExtension: (name: string) => unknown;
 	}
 }
 
@@ -61,6 +62,15 @@ declare module "@ui5/project/specifications/Specification" {
 	export interface Specification {
 		lt: (specVersion: string) => boolean;
 		gte: (specVersion: string) => boolean;
+	}
+}
+
+declare module "@ui5/project/specifications/Extension" {
+	export default interface Extension {
+		getSpecVersion: () => {
+			gte: (specVersion: string) => boolean;
+		};
+		getMiddleware: () => unknown;
 	}
 }
 

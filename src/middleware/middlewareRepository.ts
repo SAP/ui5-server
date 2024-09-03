@@ -22,16 +22,19 @@ export type ExpressMiddleware =
 export type Middleware =
 	(params: MiddlewareParams) => Promise<ExpressMiddleware>;
 
+export interface ResourcesParam {
+	all: AbstractReader;
+	dependencies: AbstractReader;
+	workspace: AbstractReader;
+	rootProject: AbstractReader;
+}
+
 export interface MiddlewareParams {
-	log: Logger;
+	log?: Logger;
 	middlewareUtil: MiddlewareUtil;
-	options: Record<string, unknown>;
-	resources: {
-		all: AbstractReader;
-		dependencies: AbstractReader;
-		workspace: AbstractReader;
-		rootProject: AbstractReader;
-	};
+	options?: Record<string, unknown>;
+	resources: ResourcesParam;
+	simpleIndex?: number;
 };
 
 // see  @ui5/server/internal/middlewareRepository#getMiddleware
@@ -47,7 +50,7 @@ async function getMiddleware(middlewareName: string) {
 	const middlewareInfo = middlewareInfos[middlewareName as keyof typeof middlewareInfos];
 
 	try {
-		const {default: middleware} = await import(middlewareInfo.path);
+		const {default: middleware} = await import(middlewareInfo.path) as {default: Middleware};
 		return {
 			middleware,
 		};
