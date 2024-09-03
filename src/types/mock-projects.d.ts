@@ -46,6 +46,7 @@ declare module "@ui5/project/specifications/Project" {
 		getNamespace: () => string;
 		getReader: (options?: {style: string}) => AbstractReader;
 		getCustomMiddleware: () => unknown;
+		getRootPath: () => string;
 	}
 }
 declare module "@ui5/project/graph/ProjectGraph" {

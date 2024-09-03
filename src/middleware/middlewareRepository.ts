@@ -34,7 +34,8 @@ export interface MiddlewareParams {
 	middlewareUtil: MiddlewareUtil;
 	options?: Record<string, unknown>;
 	resources: ResourcesParam;
-	simpleIndex?: number;
+	simpleIndex?: boolean;
+	showHidden?: boolean;
 };
 
 // see  @ui5/server/internal/middlewareRepository#getMiddleware

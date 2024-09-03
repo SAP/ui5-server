@@ -29,7 +29,7 @@ class MiddlewareManager {
 	rootProject: Project;
 	resources: ResourcesParam;
 	options: {
-		simpleIndex: number;
+		simpleIndex: boolean;
 		sendSAPTargetCSP: boolean;
 		serveCSPReports: boolean;
 	};
