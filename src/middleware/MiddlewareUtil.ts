@@ -31,7 +31,7 @@ class MiddlewareUtil {
 
 	/**
 	 *
-	 * @param parameters
+	 * @param parameters Constructor parameters
 	 * @param parameters.graph Relevant ProjectGraph
 	 * @param parameters.project Project that is being served
 	 */
@@ -58,8 +58,8 @@ class MiddlewareUtil {
 	 * of the given request
 	 */
 	public getPathname(req: Request): string {
-		let {pathname} = parseurl(req);
-		pathname = decodeURIComponent(pathname);
+		let {pathname} = parseurl(req)!;
+		pathname = decodeURIComponent(pathname!);
 		return pathname;
 	}
 
@@ -76,7 +76,6 @@ class MiddlewareUtil {
 	 * type Detected content-type for the given resource path
 	 * charset Default charset for the detected content-type
 	 * contentType Calculated content-type header value
-	 * @memberof @ui5/server/middleware/MiddlewareUtil
 	 */
 	/**
 	 * Returns MIME information derived from a given resource path.
@@ -84,7 +83,7 @@ class MiddlewareUtil {
 	 * This method is only available to custom middleware extensions defining
 	 * <b>Specification Version 2.0 and above</b>.
 	 *
-	 * @param resourcePath
+	 * @param resourcePath Resource path
 	 * @returns
 	 */
 	public getMimeInfo(resourcePath: string) {
@@ -277,11 +276,12 @@ class MiddlewareUtil {
 
 /**
  *
- * @param sourceObject
- * @param targetObject
- * @param funcNames
+ * @param sourceObject Source object to take functions from
+ * @param targetObject Target object to bind functions on
+ * @param funcNames Names of the functions to be transferred
  */
-function bindFunctions(sourceObject, targetObject, funcNames) {
+function bindFunctions(sourceObject: Record<string, () => void>,
+	targetObject: Record<string, () => void>, funcNames: string[]) {
 	funcNames.forEach((funcName) => {
 		targetObject[funcName] = sourceObject[funcName].bind(sourceObject);
 	});
