@@ -1,3 +1,5 @@
+import type {NextFunction, Request, Response} from "express";
+
 /**
  * Creates and returns the middleware to handle non read requests.
  *
@@ -7,7 +9,7 @@
  * @returns Returns a server middleware closure.
  */
 function createMiddleware() {
-	return function nonReadRequests(req, res, next) {
+	return function nonReadRequests(req: Request, res: Response, next: NextFunction) {
 		// Handle anything but read operations *before* the serveIndex middleware
 		//	as it will reject them with a 405 (Method not allowed) instead of 404 like our old tooling
 		if (req.method !== "GET" && req.method !== "HEAD" && req.method !== "OPTIONS") {
