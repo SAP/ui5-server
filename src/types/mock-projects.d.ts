@@ -26,7 +26,7 @@ declare module "@ui5/builder/processors/manifestCreator" {
 		namespace?: string;
 		libraryResource?: ResourceInterface;
 		resources?: ResourceInterface[];
-		getProjectVersion?: (name: string) => string;
+		getProjectVersion?: (name: string) => string | undefined;
 		options?: {
 			descriptorVersion: string;
 			include3rdParty: boolean;

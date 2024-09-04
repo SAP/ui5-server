@@ -18,7 +18,7 @@ export default async function generateLibraryManifest(
 		namespace: project.getNamespace(),
 		resources: libResources,
 		getProjectVersion: (projectName) => {
-			return middlewareUtil.getProject(projectName)!.getVersion();
+			return middlewareUtil.getProject(projectName)?.getVersion();
 		},
 	});
 	if (res) {
