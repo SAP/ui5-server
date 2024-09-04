@@ -1,0 +1,294 @@
+import parseurl from "parseurl";
+import mime from "mime-types";
+import {
+	createReaderCollection,
+	createReaderCollectionPrioritized,
+	createResource,
+	createFilterReader,
+	createLinkReader,
+	createFlatReader,
+} from "@ui5/fs/resourceFactory";
+import type {Project} from "@ui5/project/specifications/Project";
+import type {ProjectGraph} from "@ui5/project/graph/ProjectGraph";
+import type {Specification} from "@ui5/project/specifications/Specification";
+import type {Request} from "express";
+import type Resource from "@ui5/fs/Resource";
+
+/**
+ * Convenience functions for UI5 Server middleware.
+ * An instance of this class is passed to every standard UI5 Server middleware.
+ * Custom middleware that define a specification version >= 2.0 will also receive an instance
+ * of this class as part of the parameters of their create-middleware function.
+ *
+ * The set of functions that can be accessed by a custom middleware depends on the specification
+ * version defined for the extension.
+ *
+ * @hideconstructor
+ */
+class MiddlewareUtil {
+	_graph: ProjectGraph;
+	_project: Project;
+
+	/**
+	 *
+	 * @param parameters Constructor parameters
+	 * @param parameters.graph Relevant ProjectGraph
+	 * @param parameters.project Project that is being served
+	 */
+	constructor({graph, project}: {graph: ProjectGraph; project: Project}) {
+		if (!graph) {
+			throw new Error(`Missing parameter "graph"`);
+		}
+		if (!project) {
+			throw new Error(`Missing parameter "project"`);
+		}
+		this._graph = graph;
+		this._project = project;
+	}
+
+	/**
+	 * Returns the [pathname]{@link https://developer.mozilla.org/en-US/docs/Web/API/URL/pathname}
+	 * of a given request. Any escape sequences will be decoded.
+	 * </br></br>
+	 * This method is only available to custom middleware extensions defining
+	 * <b>Specification Version 2.0 and above</b>.
+	 *
+	 * @param req Request object
+	 * @returns [Pathname]{@link https://developer.mozilla.org/en-US/docs/Web/API/URL/pathname}
+	 * of the given request
+	 */
+	public getPathname(req: Request): string {
+		let {pathname} = parseurl(req)!;
+		pathname = decodeURIComponent(pathname!);
+		return pathname;
+	}
+
+	/**
+	 * MIME Info
+	 *
+	 * @example
+	 * const mimeInfo = {
+	 * 	"type": "text/html",
+	 * 	"charset": "utf-8",
+	 * 	"contentType": "text/html; charset=utf-8"
+	 * };
+	 *
+	 * type Detected content-type for the given resource path
+	 * charset Default charset for the detected content-type
+	 * contentType Calculated content-type header value
+	 */
+	/**
+	 * Returns MIME information derived from a given resource path.
+	 * </br></br>
+	 * This method is only available to custom middleware extensions defining
+	 * <b>Specification Version 2.0 and above</b>.
+	 *
+	 * @param resourcePath Resource path
+	 * @returns
+	 */
+	public getMimeInfo(resourcePath: string) {
+		const type = mime.lookup(resourcePath) || "application/octet-stream";
+		const charset = mime.charset(type);
+		return {
+			type,
+			charset,
+			contentType: type + (charset ? "; charset=" + charset : ""),
+		};
+	}
+	/**
+	 * Specification Version-dependent [Project]{@link @ui5/project/specifications/Project} interface.
+	 * For details on individual functions, see [Project]{@link @ui5/project/specifications/Project}
+	 *
+	 * getType Get the project type
+	 *
+	 * getName Get the project name
+	 *
+	 * getVersion Get the project version
+	 *
+	 * getNamespace Get the project namespace
+	 *
+	 * getRootReader Get the project rootReader
+	 *
+	 * getReader Get the project reader, defaulting to "runtime" style instead of "buildtime"
+	 *
+	 * getRootPath Get the local File System path of the project's root directory
+	 *
+	 * getSourcePath Get the local File System path of the project's source directory
+	 *
+	 * getCustomConfiguration Get the project Custom Configuration
+	 *
+	 * isFrameworkProject Check whether the project is a UI5-Framework project
+	 *
+	 * getFrameworkName Get the project's framework name configuration
+	 *
+	 * getFrameworkVersion Get the project's framework version configuration
+	 *
+	 * getFrameworkDependencies Get the project's framework dependencies configuration
+	 */
+
+	/**
+	 * Retrieve a single project from the dependency graph
+	 *
+	 * </br></br>
+	 * This method is only available to custom server middleware extensions defining
+	 * <b>Specification Version 3.0 and above</b>.
+	 *
+	 * @param [projectNameOrResource]
+	 * Name of the project to retrieve or a Resource instance to retrieve the associated project for.
+	 * Defaults to the name of the current root project
+	 * @returns
+	 * Specification Version-dependent interface to the Project instance or <code>undefined</code>
+	 * if the project name is unknown or the provided resource is not associated with any project.
+	 */
+	public getProject(projectNameOrResource?: string | Resource) {
+		if (projectNameOrResource) {
+			if (typeof projectNameOrResource === "string" || projectNameOrResource instanceof String) {
+				// A project name has been provided
+				return this._graph.getProject(projectNameOrResource as string);
+			} else {
+				// A Resource instance has been provided
+				return projectNameOrResource.getProject();
+			}
+		}
+		// No parameter has been provided, default to the root project
+		return this._project;
+	}
+
+	/**
+	 * Retrieve a list of direct dependencies of a given project from the dependency graph.
+	 * Note that this list does not include transitive dependencies.
+	 *
+	 * </br></br>
+	 * This method is only available to custom server middleware extensions defining
+	 * <b>Specification Version 3.0 and above</b>.
+	 *
+	 * @param [projectName] Name of the project to retrieve.
+	 * Defaults to the name of the current root project
+	 * @returns Names of all direct dependencies
+	 * @throws {Error} If the requested project is unknown to the graph
+	 */
+	public getDependencies(projectName?: string) {
+		return this._graph.getDependencies(projectName ?? this._project.getName());
+	}
+
+	/**
+	 * Specification Version-dependent set of [@ui5/fs/resourceFactory]{@link @ui5/fs/resourceFactory}
+	 * functions provided to middleware.
+	 * For details on individual functions, see [@ui5/fs/resourceFactory]{@link @ui5/fs/resourceFactory}
+	 *
+	 * createResource Creates a [Resource]{@link @ui5/fs/Resource}.
+	 * Accepts the same parameters as the [Resource]{@link @ui5/fs/Resource} constructor.
+	 *
+	 * createReaderCollection Creates a reader collection:
+	 * [ReaderCollection]{@link @ui5/fs/ReaderCollection}
+	 *
+	 * createReaderCollectionPrioritized Creates a prioritized reader collection:
+	 * [ReaderCollectionPrioritized]{@link @ui5/fs/ReaderCollectionPrioritized}
+	 *
+	 * createFilterReader
+	 * Create a [Filter-Reader]{@link @ui5/fs/readers/Filter} with the given reader.
+	 *
+	 * createLinkReader
+	 * Create a [Link-Reader]{@link @ui5/fs/readers/Filter} with the given reader.
+	 *
+	 * createFlatReader Create a [Link-Reader]{@link @ui5/fs/readers/Link}
+	 * where all requests are prefixed with <code>/resources/<namespace></code>.
+	 */
+
+	/**
+	 * Provides limited access to [@ui5/fs/resourceFactory]{@link @ui5/fs/resourceFactory} functions
+	 *
+	 * </br></br>
+	 * This attribute is only available to custom server middleware extensions defining
+	 * <b>Specification Version 3.0 and above</b>.
+	 *
+	 */
+	resourceFactory = {
+		createResource,
+		createReaderCollection,
+		createReaderCollectionPrioritized,
+		createFilterReader,
+		createLinkReader,
+		createFlatReader,
+	};
+
+	/**
+	 * Get an interface to an instance of this class that only provides those functions
+	 * that are supported by the given custom middleware extension specification version.
+	 *
+	 * @param specVersion
+	 * SpecVersionComparator instance of the custom server middleware
+	 * @returns An object with bound instance methods supported by the given specification version
+	 */
+	getInterface(specVersion: Specification) {
+		if (specVersion.lt("2.0")) {
+			// Custom middleware defining specVersion <2.0 does not have access to any MiddlewareUtil API
+			return undefined;
+		}
+
+		const baseInterface: Partial<MiddlewareUtil> = {};
+		bindFunctions(this, baseInterface, [
+			"getPathname", "getMimeInfo",
+		]);
+
+		if (specVersion.gte("3.0")) {
+			// getProject function, returning an interfaced project instance
+			baseInterface.getProject = (projectName: string) => {
+				const project = this.getProject(projectName);
+				const baseProjectInterface = {} as Project;
+				bindFunctions(project, baseProjectInterface, [
+					"getType", "getName", "getVersion", "getNamespace",
+					"getRootReader", "getRootPath", "getSourcePath",
+					"getCustomConfiguration", "isFrameworkProject", "getFrameworkName",
+					"getFrameworkVersion", "getFrameworkDependencies",
+				]);
+				// Project#getReader defaults to style "buildtime". However ui5-server uses
+				// style "runtime". The main difference is that for some project types (like applications)
+				// the /resources/<namespace> path prefix is omitted for "runtime". Also, no builder resource-
+				// exclude configuration is applied.
+				// Therefore default to style "runtime" here so that custom middleware will commonly work with
+				// the same paths as ui5-server and no unexpected builder-excludes.
+				// @ts-expect-error Making it the TS way would make the code more complex
+				baseProjectInterface.getReader = function (options = {style: "runtime"}) {
+					return project?.getReader(options);
+				};
+				return baseProjectInterface;
+			};
+			// getDependencies function, returning an array of project names
+			baseInterface.getDependencies = (projectName) => {
+				return this.getDependencies(projectName);
+			};
+
+			baseInterface.resourceFactory = Object.create(null) as typeof this.resourceFactory;
+
+			[
+				// Once new functions get added, extract this array into a variable
+				// and enhance based on spec version once new functions get added
+				"createResource", "createReaderCollection", "createReaderCollectionPrioritized",
+				"createFilterReader", "createLinkReader", "createFlatReader",
+			].forEach((factoryFunction) => {
+				// @ts-expect-error: Would make the code unreadable
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				baseInterface.resourceFactory[factoryFunction] = this.resourceFactory[factoryFunction];
+			});
+		}
+		return baseInterface;
+	}
+}
+
+/**
+ *
+ * @param sourceObject Source object to take functions from
+ * @param targetObject Target object to bind functions on
+ * @param funcNames Names of the functions to be transferred
+ */
+function bindFunctions(sourceObject: unknown,
+	targetObject: unknown, funcNames: string[]) {
+	funcNames.forEach((funcName) => {
+		// @ts-expect-error ignore for now as the solution would be unreadable
+		// eslint-disable-next-line
+		targetObject[funcName] = sourceObject[funcName].bind(sourceObject);
+	});
+}
+
+export default MiddlewareUtil;

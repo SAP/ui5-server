@@ -1,0 +1,124 @@
+// TODO: This file is meant only for temp resolve of the UI5 tooling
+// dependencies, until they got migrated and we can have the real TS definitions
+
+declare module "@ui5/builder/processors/versionInfoGenerator" {
+	import type {ResourceInterface} from "@ui5/fs/Resource";
+
+	export default function versionInfoGenerator(options: {
+		options: {
+			rootProjectName?: string;
+			rootProjectVersion?: string;
+			libraryInfos?: {
+				name?: string;
+				rootProjectName?: string;
+				version?: string;
+				libraryManifest?: ResourceInterface | null;
+				embeddedManifests?: ResourceInterface[];
+			}[];
+		};
+	}): Promise<ResourceInterface[]>;
+}
+
+declare module "@ui5/builder/processors/manifestCreator" {
+	import type {ResourceInterface} from "@ui5/fs/Resource";
+
+	export default function (params: {
+		namespace?: string;
+		libraryResource?: ResourceInterface;
+		resources?: ResourceInterface[];
+		getProjectVersion?: (name: string) => string | undefined;
+		options?: {
+			descriptorVersion: string;
+			include3rdParty: boolean;
+			prettyPrint: boolean;
+			omitMinVersions: boolean;
+		};
+	}): Promise<ResourceInterface>;
+}
+
+declare module "@ui5/builder/processors/manifestEnhancer" {
+	export default function manifestEnhancer(params: {
+		resources: unknown[];
+		fs: unknown;
+	}): Promise<void>;
+}
+
+declare module "@ui5/builder/processors/nonAsciiEscaper" {
+	function nonAsciiEscaper(params: {
+		resources: unknown[];
+		options: unknown;
+	}): Promise<void>;
+
+	export default nonAsciiEscaper;
+}
+
+declare module "@ui5/builder/processors/themeBuilder" {
+	export class ThemeBuilder {
+		constructor(params: {
+			fs: unknown;
+		});
+
+		build: (resources: unknown[],
+			buildOptions: {
+				compress: boolean;
+				cssVariables: boolean;
+			}) => Promise<unknown[]>;
+
+		clearCache: () => void;
+	}
+}
+
+declare module "@ui5/project/specifications/Project" {
+	import type AbstractReader from "@ui5/fs/AbstractReader";
+
+	export interface Project {
+		getName: () => string;
+		getVersion: () => string;
+		getType: () => "project" | "application" | "library";
+		getNamespace: () => string;
+		getReader: (options?: {style: string}) => AbstractReader;
+		getCustomMiddleware: () => unknown;
+		getRootPath: () => string;
+		getPropertiesFileSourceEncoding: () => string;
+		getSpecVersion: () => {
+			lte: (specVersion: string) => boolean;
+		};
+	}
+}
+declare module "@ui5/project/graph/ProjectGraph" {
+	import type {Project} from "@ui5/project/specifications/Project";
+	export interface ProjectGraph {
+		getProject: (name: string) => Project;
+		getRoot: () => Project;
+		getDependencies: (name: string) => string[];
+		getExtension: (name: string) => unknown;
+		traverseBreadthFirst: (callback: (params: {project: Project}) => Promise<void> | void) => Promise<void>;
+	}
+}
+
+declare module "@ui5/project/specifications/Specification" {
+	export interface Specification {
+		lt: (specVersion: string) => boolean;
+		gte: (specVersion: string) => boolean;
+	}
+}
+
+declare module "@ui5/project/specifications/Extension" {
+	export default interface Extension {
+		getSpecVersion: () => {
+			gte: (specVersion: string) => boolean;
+		};
+		getMiddleware: () => unknown;
+	}
+}
+
+declare module "@ui5/logger" {
+	interface logger {
+		silly(x: string): void;
+		verbose(x: string): void;
+		error(x: Error | string): void;
+		isLevelEnabled(x: string): boolean;
+	}
+
+	export function getLogger(x: string): logger;
+}

@@ -28,13 +28,13 @@ Files: *
 Copyright: 2018-2024 SAP SE or an SAP affiliate company and UI5 Tooling contributors
 License: Apache-2.0
 
-Files: lib/middleware/serveIndex/*
+Files: src/middleware/serveIndex/*
 Copyright: 2010 Sencha Inc.
            2011 LearnBoost
            2011 TJ Holowaychuk
            2014-2015 Douglas Christopher Wilson
 License: MIT
 
-Files: lib/middleware/testRunner/*
+Files: src/middleware/testRunner/*
 Copyright: 2009-2024 SAP SE or an SAP affiliate company and OpenUI5 contributors
 License: Apache-2.0
