@@ -248,6 +248,7 @@ class MiddlewareUtil {
 				// exclude configuration is applied.
 				// Therefore default to style "runtime" here so that custom middleware will commonly work with
 				// the same paths as ui5-server and no unexpected builder-excludes.
+				// @ts-expect-error Making it the TS way would make the code more complex
 				baseProjectInterface.getReader = function (options = {style: "runtime"}) {
 					return project?.getReader(options);
 				};
@@ -266,8 +267,9 @@ class MiddlewareUtil {
 				"createResource", "createReaderCollection", "createReaderCollectionPrioritized",
 				"createFilterReader", "createLinkReader", "createFlatReader",
 			].forEach((factoryFunction) => {
-				baseInterface.resourceFactory[factoryFunction as keyof typeof baseInterface.resourceFactory] =
-					this.resourceFactory[factoryFunction as keyof typeof baseInterface.resourceFactory];
+				// @ts-expect-error: Would make the code unreadable
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				baseInterface.resourceFactory[factoryFunction] = this.resourceFactory[factoryFunction];
 			});
 		}
 		return baseInterface;
@@ -280,9 +282,11 @@ class MiddlewareUtil {
  * @param targetObject Target object to bind functions on
  * @param funcNames Names of the functions to be transferred
  */
-function bindFunctions(sourceObject: Record<string, () => void>,
-	targetObject: Record<string, () => void>, funcNames: string[]) {
+function bindFunctions(sourceObject: unknown,
+	targetObject: unknown, funcNames: string[]) {
 	funcNames.forEach((funcName) => {
+		// @ts-expect-error ignore for now as the solution would be unreadable
+		// eslint-disable-next-line
 		targetObject[funcName] = sourceObject[funcName].bind(sourceObject);
 	});
 }

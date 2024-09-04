@@ -12,7 +12,7 @@ declare module "@ui5/builder/processors/versionInfoGenerator" {
 				name?: string;
 				rootProjectName?: string;
 				version?: string;
-				libraryManifest?: ResourceInterface;
+				libraryManifest?: ResourceInterface | null;
 				embeddedManifests?: ResourceInterface[];
 			}[];
 		};
@@ -116,7 +116,7 @@ declare module "@ui5/logger" {
 	interface logger {
 		silly(x: string): void;
 		verbose(x: string): void;
-		error(x: Error): void;
+		error(x: Error | string): void;
 		isLevelEnabled(x: string): boolean;
 	}
 

@@ -1,5 +1,6 @@
 import {getLogger} from "@ui5/logger";
 const log = getLogger("server:middleware:serveResources");
+// @ts-expect-error: No definitions. Handled with ignore annotations
 import replaceStream from "replacestream";
 import etag, {type StatsLike} from "etag";
 import fresh from "fresh";
@@ -91,6 +92,7 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 						propertiesFileSourceEncoding = "UTF-8";
 					}
 				}
+				// @ts-expect-error: Cannot provide definitions for it. TODO: Remove when builder defs are integrated
 				// eslint-disable-next-line
 				const encoding: string = nonAsciiEscaper.getEncodingFromAlias(propertiesFileSourceEncoding);
 				await nonAsciiEscaper({

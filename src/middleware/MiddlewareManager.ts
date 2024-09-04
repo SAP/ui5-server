@@ -29,9 +29,9 @@ class MiddlewareManager {
 	rootProject: Project;
 	resources: ResourcesParam;
 	options: {
-		simpleIndex: boolean;
 		sendSAPTargetCSP: boolean;
 		serveCSPReports: boolean;
+		simpleIndex?: boolean;
 	};
 
 	middleware: Record<string, {
@@ -52,6 +52,7 @@ class MiddlewareManager {
 		options: {
 			sendSAPTargetCSP: boolean;
 			serveCSPReports: boolean;
+			simpleIndex?: boolean;
 		};
 	}) {
 		if (!graph || !rootProject || !resources?.all ||
@@ -208,7 +209,7 @@ class MiddlewareManager {
 									`Unknown SAP Target CSP configuration option '${name}'. Allowed options are ` +
 									`${String(Object.keys(defaultSAPTargetConfig))}`);
 							}
-							oCspConfig[name] = value;
+							oCspConfig[name as keyof typeof oCspConfig] = value as typeof this.options.sendSAPTargetCSP;
 						}
 					}
 				}
@@ -218,6 +219,7 @@ class MiddlewareManager {
 					});
 				}
 				return () => {
+					// @ts-expect-error maybe incorrect type
 					return cspModule("sap-ui-xx-csp-policy", oCspConfig);
 				};
 			},
@@ -257,7 +259,7 @@ class MiddlewareManager {
 			mountPath: string;
 		}[];
 
-		if (!projectCustomMiddleware.length === 0) {
+		if (projectCustomMiddleware.length !== 0) {
 			return; // No custom middleware defined
 		}
 
@@ -307,6 +309,7 @@ class MiddlewareManager {
 					const specVersion = customMiddleware.getSpecVersion();
 					if (specVersion.gte("3.0")) {
 						params.options!.middlewareName = middlewareName;
+						// @ts-expect-error Remove when @ui5/logger is integrated
 						params.log = getLogger(`server:custom-middleware:${middlewareDef.name}`);
 					}
 					const middlewareUtilInterface = middlewareUtil.getInterface(specVersion as Specification);

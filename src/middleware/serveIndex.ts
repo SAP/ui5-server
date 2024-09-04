@@ -1,6 +1,7 @@
 import {getLogger} from "@ui5/logger";
 const log = getLogger("server:middleware:serveIndex");
 import mime from "mime-types";
+// @ts-expect-error: No definitions. Handled with ignore annotations
 import serveIndex from "./serveIndex/serveIndex.cjs";
 import type {ResourceInterface} from "@ui5/fs/Resource";
 import type {MiddlewareParams} from "./middlewareRepository.js";

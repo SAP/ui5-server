@@ -25,7 +25,7 @@ export type Middleware =
 export interface ResourcesParam {
 	all: AbstractReader;
 	dependencies: AbstractReader;
-	workspace: AbstractReader;
+	workspace?: AbstractReader;
 	rootProject: AbstractReader;
 }
 
@@ -57,7 +57,8 @@ async function getMiddleware(middlewareName: string) {
 		};
 	} catch (err) {
 		throw new Error(
-			`middlewareRepository: Failed to require middleware module for ${middlewareName}:\n${err.stack}`);
+			`middlewareRepository: Failed to require middleware module for ` +
+			`${middlewareName}:\n${(err as Error).stack}`);
 	}
 }
 /**

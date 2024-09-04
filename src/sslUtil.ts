@@ -25,7 +25,7 @@ export function getSslCertificate(
 	// checks the certificates if they are present
 	return Promise.all([
 		fileExists(keyPath).then(async (statsOrFalse) => {
-			if (!statsOrFalse) {
+			if (!statsOrFalse || typeof statsOrFalse === "boolean") {
 				log.verbose(`No SSL private key found at ${keyPath}`);
 				return false;
 			}
@@ -42,7 +42,7 @@ export function getSslCertificate(
 			return readFile(keyPath);
 		}),
 		fileExists(certPath).then(async (statsOrFalse) => {
-			if (!statsOrFalse) {
+			if (!statsOrFalse || typeof statsOrFalse === "boolean") {
 				log.verbose(`No SSL certificate found at ${certPath}`);
 				return false;
 			}
@@ -56,11 +56,11 @@ export function getSslCertificate(
 			}
 			return readFile(certPath);
 		}),
-	]).then(function ([key, cert]) {
+	]).then(async function ([key, cert]) {
 		if (key && cert) {
 			return {key, cert};
 		}
-		return createAndInstallCertificate(keyPath, certPath);
+		return await createAndInstallCertificate(keyPath, certPath);
 	});
 }
 

@@ -2,6 +2,7 @@ import createVersionInfoProcessor from "@ui5/builder/processors/versionInfoGener
 import generateLibraryManifest from "./helper/generateLibraryManifest.js";
 import type {Request, Response, NextFunction} from "express";
 import type {MiddlewareParams, ExpressMiddleware} from "./middlewareRepository.js";
+import { ResourceInterface } from "@ui5/fs/Resource";
 
 const MANIFEST_JSON = "manifest.json";
 
@@ -28,9 +29,9 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 			const libraryInfosPromises = dotLibResources.map(async (dotLibResource) => {
 				const namespace = dotLibResource.getProject()!.getNamespace();
 				const manifestResources = await dependencies.byGlob(`/resources/${namespace}/**/${MANIFEST_JSON}`);
-				let libraryManifest = manifestResources.find((manifestResource) => {
+				let libraryManifest: ResourceInterface | null = manifestResources.find((manifestResource) => {
 					return manifestResource.getPath() === `/resources/${namespace}/${MANIFEST_JSON}`;
-				});
+				})!;
 				const embeddedManifests =
 					manifestResources.filter((manifestResource) => manifestResource !== libraryManifest);
 				if (!libraryManifest) {

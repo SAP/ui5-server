@@ -6,6 +6,7 @@ import ReaderCollectionPrioritized from "@ui5/fs/ReaderCollectionPrioritized";
 import type {IncomingMessage, Server, ServerResponse} from "http";
 import type {ProjectGraph} from "@ui5/project/graph/ProjectGraph";
 import type AbstractReader from "@ui5/fs/AbstractReader";
+import { ExecOptions } from "child_process";
 
 /**
  * @module @ui5/server
@@ -20,7 +21,7 @@ import type AbstractReader from "@ui5/fs/AbstractReader";
  * @param acceptRemoteConnections If true, listens to remote connections and not only to localhost connections
  * @returns Returns an object containing server related information like (selected port, protocol)
  */
-function _listen(app: express.Application, port: number, changePortIfInUse: boolean, acceptRemoteConnections: boolean):
+function _listen(app: express.Express, port: number, changePortIfInUse: boolean, acceptRemoteConnections: boolean):
 Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerResponse>}> {
 	return new Promise(function (resolve, reject) {
 		const options = {} as Record<string, unknown>;
@@ -47,17 +48,25 @@ Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerRespo
 				if (changePortIfInUse) {
 					const error = new Error(
 						`EADDRINUSE: Could not find available ports between ${port} and ${portMax}.`);
+					// @ts-expect-error: Extending Error object
 					error.code = "EADDRINUSE";
+					// @ts-expect-error: Extending Error object
 					error.errno = "EADDRINUSE";
+					// @ts-expect-error: Extending Error object
 					error.address = host;
+					// @ts-expect-error: Extending Error object
 					error.port = portMax;
 					reject(error);
 					return;
 				} else {
 					const error = new Error(`EADDRINUSE: Port ${port} is already in use.`);
+					// @ts-expect-error: Extending Error object
 					error.code = "EADDRINUSE";
+					// @ts-expect-error: Extending Error object
 					error.errno = "EADDRINUSE";
+					// @ts-expect-error: Extending Error object
 					error.address = host;
+					// @ts-expect-error: Extending Error object
 					error.port = portMax;
 					reject(error);
 					return;
@@ -86,14 +95,14 @@ Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerRespo
  * @returns The express application with SSL support
  */
 async function _addSsl({app, key, cert}: {
-	app: object;
+	app: express.Express;
 	key: string;
 	cert: string;
 }) {
 	// Using spdy as http2 server as the native http2 implementation
 	// from Node v8.4.0 doesn't seem to work with express
 	const {default: spdy} = await import("spdy");
-	return spdy.createServer({cert, key}, app);
+	return spdy.createServer({cert: cert, key}, app);
 }
 
 /**
@@ -186,6 +195,7 @@ export async function serve(graph: ProjectGraph, {
 	});
 
 	let app = express();
+	// @ts-expect-error: Access of private method
 	await middlewareManager.applyMiddleware(app);
 
 	if (h2) {
