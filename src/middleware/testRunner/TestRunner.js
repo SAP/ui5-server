@@ -1,18 +1,18 @@
-(function(window) {
+(function (window) {
 	"use strict";
 
-	/*global CollectGarbage, Handlebars */
+	/* global CollectGarbage, Handlebars */
 	/* eslint radix: 0 */
 
 	/*
 	 * Simulate the JSUnit Testsuite to collect the available
 	 * test pages per Suite
 	 */
-	window.jsUnitTestSuite = function() {};
-	window.jsUnitTestSuite.prototype.getTestPages = function() {
+	window.jsUnitTestSuite = function () {};
+	window.jsUnitTestSuite.prototype.getTestPages = function () {
 		return this.aPages;
 	};
-	window.jsUnitTestSuite.prototype.addTestPage = function(sTestPage) {
+	window.jsUnitTestSuite.prototype.addTestPage = function (sTestPage) {
 		this.aPages = this.aPages || [];
 		// in case of running in the root context the testsuites right now
 		// generate an invalid URL because they assume that test-resources is
@@ -32,12 +32,12 @@
 		this.iLastTaskExecution = -Infinity;
 	}
 
-	XHRQueue.prototype.ajax = function(sUrl, options) {
+	XHRQueue.prototype.ajax = function (sUrl, options) {
 		var oTask = {
 			url: sUrl,
-			options: options
+			options: options,
 		};
-		oTask.promise = new Promise(function(resolve, reject) {
+		oTask.promise = new Promise(function (resolve, reject) {
 			oTask.resolve = resolve;
 			oTask.reject = reject;
 		});
@@ -46,22 +46,22 @@
 		return oTask.promise;
 	};
 
-	XHRQueue.prototype._processNext = function() {
+	XHRQueue.prototype._processNext = function () {
 		var iNow = Date.now();
 		var iDelay = iNow - this.iLastTaskExecution;
-		if ( iDelay < this.iWaitTime ) {
-			setTimeout(function() {
+		if (iDelay < this.iWaitTime) {
+			setTimeout(function () {
 				this._processNext();
 			}.bind(this), iDelay);
 			return;
 		}
-		if ( this.aPendingTasks.length > 0 && this.oRunningTasks.size < this.iLimit ) {
+		if (this.aPendingTasks.length > 0 && this.oRunningTasks.size < this.iLimit) {
 			var oTask = this.aPendingTasks.shift();
 			this.oRunningTasks.add(oTask);
 			this.iLastTaskExecution = iNow;
 			Promise.resolve(jQuery.ajax(oTask.url, oTask.options))
 				.then(oTask.resolve, oTask.reject)
-				.finally(function() {
+				.finally(function () {
 					this.oRunningTasks.delete(oTask);
 					this._processNext();
 				}.bind(this));
@@ -74,28 +74,28 @@
 	 * Template for test results
 	 */
 	var sResultsTemplate = "{{#tests}}" +
-							"<div class=\"testResult {{outcome}}\">" +
-								"<p>{{header}}</p>" +
-									"<ol style=\"display: none\">" +
-									"{{#results}}" +
-										"<li class=\"{{result.sLiClass}} test\">" +
-											"<p style=\"display: inline\">{{result.TestName}} ({{result.Failed}} ,{{result.Passed}} ,{{result.All}}) </p>" +
-											"<a href=\"{{result.rerunlink}}\"> Rerun</a>" +
-											"<ol>" +
-											"{{#result.testmessages}}" +
-												"<li class=\"{{classname}} check\">{{message}}" +
-												"<br>{{expected}}" +
-												"<br>{{actual}}" +
-												"<br>{{diff}}" +
-												"<br>{{source}}" +
-												"</li>" +
+		"<div class=\"testResult {{outcome}}\">" +
+		"<p>{{header}}</p>" +
+		"<ol style=\"display: none\">" +
+		"{{#results}}" +
+		"<li class=\"{{result.sLiClass}} test\">" +
+		"<p style=\"display: inline\">{{result.TestName}} ({{result.Failed}} ,{{result.Passed}} ,{{result.All}}) </p>" +
+		"<a href=\"{{result.rerunlink}}\"> Rerun</a>" +
+		"<ol>" +
+		"{{#result.testmessages}}" +
+		"<li class=\"{{classname}} check\">{{message}}" +
+							"<br>{{expected}}" +
+								"<br>{{actual}}" +
+									"<br>{{diff}}" +
+									"<br>{{source}}" +
+										"</li>" +
 											"{{/result.testmessages}}" +
 											"</ol>" +
-										"</li>" +
-									"{{/results}}" +
-									"</ol>" +
-							"</div>" +
-						"{{/tests}}";
+											"</li>" +
+											"{{/results}}" +
+												"</ol>" +
+												"</div>" +
+												"{{/tests}}";
 
 	/**
 	 * Utility class to find test pages and check them for being
@@ -107,21 +107,19 @@
 	window.sap.ui.qunit = window.sap.ui.qunit || {};
 	window.sap.ui.qunit.TestRunner = {
 
-		checkTestPage: function(sTestPage, bSequential) {
+		checkTestPage: function (sTestPage, bSequential) {
 			var oPromise =
 				this._checkTestPage(sTestPage, bSequential)
-				.then(function(aTestPages) {
-					return aTestPages;
-				});
+					.then(function (aTestPages) {
+						return aTestPages;
+					});
 			oPromise.done = oPromise.then; // compat for Deferred
 			oPromise.fail = oPromise.catch; // compat for Deferred
 			return oPromise;
 		},
 
-		_checkTestPage: function(sTestPage, bSequential) {
-
-			var oPromise = new Promise(function(resolve, reject) {
-
+		_checkTestPage: function (sTestPage, bSequential) {
+			var oPromise = new Promise(function (resolve, reject) {
 				if (typeof sTestPage !== "string") {
 					window.console.log("QUnit: invalid test page specified");
 					reject("QUnit: invalid test page specified");
@@ -130,23 +128,23 @@
 				/*
 				if (window.console && typeof window.console.log === "function") {
 					window.console.log("QUnit: checking test page: " + sTestPage);
-				}*/
+				} */
 
 				// check for an existing test page and check for test suite or page
-				oXHRQueue.ajax(sTestPage).then(function(sData) {
-					if (/(?:window\.suite\s*=|function\s*suite\s*\(\s*\)\s*{)/.test(sData)
-							|| (/data-sap-ui-testsuite/.test(sData) && !/sap\/ui\/test\/starter\/runTest/.test(sData))
-							|| /sap\/ui\/test\/starter\/createSuite/.test(sData) ) {
+				oXHRQueue.ajax(sTestPage).then(function (sData) {
+					if (/(?:window\.suite\s*=|function\s*suite\s*\(\s*\)\s*{)/.test(sData) ||
+						(/data-sap-ui-testsuite/.test(sData) && !/sap\/ui\/test\/starter\/runTest/.test(sData)) ||
+						/sap\/ui\/test\/starter\/createSuite/.test(sData)) {
 						var $frame = jQuery("<iframe>");
 						var that = this;
 
-						var onSuiteReady = function(oIFrame) {
-							that.findTestPages(oIFrame, bSequential).then(function(aTestPages) {
-								var aTestPagesFiltered = aTestPages.filter(function(e, i, a) { return a.indexOf(e) === i; });
+						var onSuiteReady = function (oIFrame) {
+							that.findTestPages(oIFrame, bSequential).then(function (aTestPages) {
+								var aTestPagesFiltered = aTestPages.filter(function (e, i, a) {return a.indexOf(e) === i;});
 								$frame.remove();
 								// avoid duplicates in test pages
 								resolve(aTestPagesFiltered);
-							}, function(oError) {
+							}, function (oError) {
 								if (window.console && typeof window.console.error === "function") {
 									window.console.error("QUnit: failed to load page '" + sTestPage + "'" + " Error: " + oError);
 								}
@@ -156,12 +154,12 @@
 						};
 
 						$frame.css("display", "none");
-						$frame.one("load", function() {
+						$frame.one("load", function () {
 							if (typeof this.contentWindow.suite === "function") {
 								onSuiteReady(this);
 							} else {
 								// Wait for a CustomEvent in case window.suite isn't defined, yet
-								this.contentWindow.addEventListener("sap-ui-testsuite-ready", function() {
+								this.contentWindow.addEventListener("sap-ui-testsuite-ready", function () {
 									onSuiteReady(this);
 								}.bind(this));
 							}
@@ -171,8 +169,8 @@
 					} else {
 						resolve([sTestPage]);
 					}
-				}.bind(this)).catch(function(xhr,status,msg) {
-					var text = (xhr ? xhr.status + " " : "") + (msg || status || 'unspecified error');
+				}.bind(this)).catch(function (xhr, status, msg) {
+					var text = (xhr ? xhr.status + " " : "") + (msg || status || "unspecified error");
 					if (window.console && typeof window.console.error === "function") {
 						window.console.error("QUnit: failed to load page '" + sTestPage + "': " + text);
 					}
@@ -180,81 +178,66 @@
 					this.printTestResult(oContext);
 					resolve([]);
 				}.bind(this));
-
 			}.bind(this));
 
 			return oPromise;
-
 		},
 
-		findTestPages: function(oIFrame, bSequential) {
-
-			return Promise.resolve(oIFrame.contentWindow.suite()).then(function(oSuite) {
+		findTestPages: function (oIFrame, bSequential) {
+			return Promise.resolve(oIFrame.contentWindow.suite()).then(function (oSuite) {
 				var aPages = oSuite && oSuite.getTestPages() || [];
-				return new Promise(function(resolve, reject) {
-
+				return new Promise(function (resolve, reject) {
 					try {
-
 						if (aPages.length > 0) {
-
 							var aTestPagePromises = [];
 
 							if (bSequential) {
-
 								var aTestPages = [];
-								aTestPagePromises.push(aPages.reduce(function(oPromise, sTestPage) {
-									return oPromise.then(this._checkTestPage.bind(this, sTestPage, bSequential)).then(function(aFoundTestPages) {
+								aTestPagePromises.push(aPages.reduce(function (oPromise, sTestPage) {
+									return oPromise.then(this._checkTestPage.bind(this, sTestPage, bSequential)).then(function (aFoundTestPages) {
 										aTestPages = aTestPages.concat(aFoundTestPages);
 									});
-								}.bind(this), Promise.resolve([])).then(function() {
+								}.bind(this), Promise.resolve([])).then(function () {
 									return aTestPages;
 								}));
-
 							} else {
-
 								for (var i = 0, l = aPages.length; i < l; i++) {
 									var sTestPage = aPages[i];
 									aTestPagePromises.push(this._checkTestPage(sTestPage, bSequential));
 								}
-
 							}
 
 							if (aTestPagePromises.length > 0) {
-								Promise.all(aTestPagePromises).then(function(aFoundTestPages) {
+								Promise.all(aTestPagePromises).then(function (aFoundTestPages) {
 									var aTestPages = [];
 									for (var i = 0, l = aFoundTestPages.length; i < l; i++) {
 										aTestPages = aTestPages.concat(aFoundTestPages[i]);
 									}
 									resolve(aTestPages);
 								})
-								.catch(function(oError){
-									if (window.console && typeof window.console.error === "function") {
-										window.console.error("[DEBUG] findTestPages Promise.all error: " + oError);
-									}
-								});
+									.catch(function (oError) {
+										if (window.console && typeof window.console.error === "function") {
+											window.console.error("[DEBUG] findTestPages Promise.all error: " + oError);
+										}
+									});
 							}
-
-					} else {
-						resolve([]);
-					}
-
+						} else {
+							resolve([]);
+						}
 					} catch (ex) {
 						if (window.console && typeof window.console.error === "function") {
 							window.console.error("QUnit: error while analyzing test page '" + oIFrame.src + "':\n" + ex);
-							if ( ex.stack ) {
+							if (ex.stack) {
 								window.console.error(ex.stack);
 							}
 						}
 						resolve([]);
 					}
-
 				}.bind(this));
 			}.bind(this));
-
 		},
 
-		runTests: function(aTestPages, nBarStep, bInternal) {
-
+		runTests: function (aTestPages, nBarStep, bInternal) {
 			if (!bInternal) {
 				this._bStopped = false;
 			}
@@ -265,46 +248,43 @@
 
 			aTestPages = aTestPages.slice(1);
 
-			return new Promise(function(resolve, reject) {
-
+			return new Promise(function (resolve, reject) {
 				if (sTestPage) {
-					this.runTest(sTestPage, true, this).then(function(oResult) {
+					this.runTest(sTestPage, true, this).then(function (oResult) {
 						var nBarwidth = parseFloat(jQuery("div#innerBar")[0].style.width, 10);
 						var sNewwidth = nBarwidth + nBarStep + "%";
 						jQuery("div#innerBar").text(Math.round(nBarwidth + nBarStep) + "%");
 						jQuery("div#innerBar").width(sNewwidth);
 						if (parseInt(jQuery("div#reportingHeader span.failed").text()) > 0) {
-							jQuery("div#innerBar")[0].style.backgroundColor = '#ed866f';
+							jQuery("div#innerBar")[0].style.backgroundColor = "#ed866f";
 						}
 						jQuery("div#time").text(Math.round((new Date() - window.oStartTime) / 1000) + " Seconds");
-						jQuery("#selectedTests").find("option").each(function() {
+						jQuery("#selectedTests").find("option").each(function () {
 							if (jQuery(this).text() === sTestPage) {
 								jQuery(this).remove();
 							}
 						});
 						return this.runTests(aTestPages, nBarStep, true);
-					}.bind(this)).then(function() {
+					}.bind(this)).then(function () {
 						resolve();
 					});
 				} else {
 					resolve();
 				}
-
 			}.bind(this));
-
 		},
 
-		printTestResultAndRemoveFrame : function (oInst, $frame, $framediv, oContext) {
+		printTestResultAndRemoveFrame: function (oInst, $frame, $framediv, oContext) {
 			var oBlanketCoverage = $frame[0].contentWindow._$blanket;
 
 			// in case of coverage either merge it or set it on the _$blanket object
 			if (oBlanketCoverage) {
 				window._$blanket = window._$blanket || {};
-				jQuery.each(oBlanketCoverage, function(sModule, aCoverageInfo) {
+				jQuery.each(oBlanketCoverage, function (sModule, aCoverageInfo) {
 					if (!window._$blanket[sModule]) {
 						window._$blanket[sModule] = aCoverageInfo;
 					} else {
-						jQuery.each(aCoverageInfo, function(iIndex, iCount) {
+						jQuery.each(aCoverageInfo, function (iIndex, iCount) {
 							window._$blanket[sModule][iIndex] += iCount;
 						});
 					}
@@ -312,11 +292,11 @@
 			}
 
 			$frame[0].src = "about:blank";
-			$frame[0].contentWindow.document.write('');
+			$frame[0].contentWindow.document.write("");
 			$frame[0].contentWindow.close();
 
-			if ( typeof CollectGarbage == "function") {
-				CollectGarbage(); // eslint-disable-line
+			if (typeof CollectGarbage == "function") {
+				CollectGarbage();
 			}
 
 			$framediv.remove();
@@ -329,40 +309,35 @@
 			var sHTML = fnTemplate(oContext);
 			var $testResult = jQuery(sHTML);
 			var $children = $testResult.children();
-			jQuery($children[0]).on("click", function() {
+			jQuery($children[0]).on("click", function () {
 				jQuery(this.nextSibling).toggle();
 			});
-			jQuery($children[1]).find("li.test > p").on("click", function() {
+			jQuery($children[1]).find("li.test > p").on("click", function () {
 				jQuery(this.parentElement.children[2]).toggle();
 			});
 			$testResult.appendTo("div.test-reporting");
 		},
 
-		runTest: function(sTestPage, bInternal, oInst) {
-
+		runTest: function (sTestPage, bInternal, oInst) {
 			if (!bInternal) {
 				this._bStopped = false;
 			}
 
-			return new Promise(function(resolve, reject) {
-
+			return new Promise(function (resolve, reject) {
 				if (this._bStopped) {
-
 					reject();
-
 				} else {
-
 					// we could make this configurable
 					var $frame = jQuery("<iframe>").css({
 						height: "1024px",
-						width: "1280px"
+						width: "1280px",
 					});
 
 					$frame.attr("src", sTestPage);
 					var $framediv = jQuery("<div>").css({
 						height: "400px",
 						width: "100%",
-						overflow: "scroll"
+						overflow: "scroll",
 					});
 					$frame.appendTo($framediv);
 					$framediv.appendTo("div.test-execution");
@@ -370,7 +345,7 @@
 					var iTestTimeout = parseInt(this.getUrlParameter("test-timeout")) || 300000;
 					var tBegin = new Date();
 					var oContext;
-					var fnCheckSuccess = function() {
+					var fnCheckSuccess = function () {
 						var doc = $frame[0].contentWindow.document;
 						var $doc = jQuery(doc);
 						var sTestName = $doc.find("h1#qunit-header").text();
@@ -378,7 +353,6 @@
 						var $qunitBanner = $doc.find("#qunit-banner");
 
 						if ($qunitBanner.hasClass("qunit-fail") || $qunitBanner.hasClass("qunit-pass")) {
-
 							if (sTestName == " ") {
 								sTestName = "QUnit page for " + doc.baseURI.substring(doc.baseURI.indexOf("test-resources") + 15, doc.baseURI.length);
 							}
@@ -400,16 +374,16 @@
 								oContext.tests[0].outcome = "fail";
 								oContext.tests[0].results.push(
 									{
-										result : {
+										result: {
 											TestName: "Timeout occured",
 											outcome: "fail",
 											Failed: "1",
 											Passed: "0",
 											All: "1",
-											rerunlink : $frame[0].contentWindow.location.href,
+											rerunlink: $frame[0].contentWindow.location.href,
 											sLiClass: "fail",
-											testmessages: "no assertions"
-										}
+											testmessages: "no assertions",
+										},
 									}
 								);
 							} else {
@@ -423,45 +397,42 @@
 					}.bind(this);
 
 					fnCheckSuccess();
-
 				}
-
 			}.bind(this));
-
 		},
 
-		createFailContext : function (sHref, sHeaderMessage) {
+		createFailContext: function (sHref, sHeaderMessage) {
 			this.updateResultHeader("1", "0", "1");
 			return {
 				tests: [{
 					header: sHeaderMessage + " : " + sHref,
 					outcome: "fail",
-					results:[
+					results: [
 						{
 							result: {
 								TestName: "No test where run",
 								Failed: "1",
 								Passed: "0",
 								All: "1",
-								rerunlink : sHref,
+								rerunlink: sHref,
 								sLiClass: "fail",
-								testmessages: "no assertions"
-							}
-						}
-					]
-				}]
+								testmessages: "no assertions",
+							},
+						},
+					],
+				}],
 			};
 		},
 
-		stopTests: function() {
+		stopTests: function () {
 			this._bStopped = true;
 		},
 
-		hasCoverage: function() {
+		hasCoverage: function () {
 			return !!this.getCoverage();
 		},
 
-		getCoverage: function() {
+		getCoverage: function () {
 			return window._$blanket || window.top.__coverage__;
 		},
 
@@ -472,40 +443,40 @@
 				return;
 			}
 
-			if ( window.blanket && !window.top.__coverage__ ) {
+			if (window.blanket && !window.top.__coverage__) {
 				window.blanket.report({});
 			} else {
 				jQuery.ajax("/.ui5/coverage/report", {
 					method: "POST",
 					data: JSON.stringify(window.top.__coverage__),
 					headers: {
-						"Content-Type": "application/json"
-					}
+						"Content-Type": "application/json",
+					},
 				})
-				.then(function (oData) {
-					var aReports = oData.availableReports;
-					var oHTMLReport = aReports.filter(function (oCurReport) {
+					.then(function (oData) {
+						var aReports = oData.availableReports;
+						var oHTMLReport = aReports.filter(function (oCurReport) {
 						// HTML is the only one that make sense and
 						// provides understandable information
-						return oCurReport.report === "html";
-					})[0];
+							return oCurReport.report === "html";
+						})[0];
 
-					if (!oHTMLReport) { // Do not render reports if HTML or lcov are not provided
-						return;
-					}
+						if (!oHTMLReport) { // Do not render reports if HTML or lcov are not provided
+							return;
+						}
 
-					var oFrameEl = document.createElement("iframe");
-					oFrameEl.src = "/.ui5/coverage/report/" + oHTMLReport.destination;
-					oFrameEl.style.border = "none";
-					oFrameEl.style.width = "100%";
-					oFrameEl.style.height = "100vh";
-					oFrameEl.sandbox = "allow-scripts";
-					reportToEl.appendChild(oFrameEl);
-				});
+						var oFrameEl = document.createElement("iframe");
+						oFrameEl.src = "/.ui5/coverage/report/" + oHTMLReport.destination;
+						oFrameEl.style.border = "none";
+						oFrameEl.style.width = "100%";
+						oFrameEl.style.height = "100vh";
+						oFrameEl.sandbox = "allow-scripts";
+						reportToEl.appendChild(oFrameEl);
+					});
 			}
 		},
 
-		getTestPageUrl: function(sFallbackUrl) {
+		getTestPageUrl: function (sFallbackUrl) {
 			var sTestPageUrl = this.getUrlParameter("testpage");
 			if (sTestPageUrl) {
 				var sOrigin = window.location.origin ? window.location.origin : (window.location.protocol + "//" + window.location.host);
@@ -526,7 +497,7 @@
 			}
 
 			// Fallback to generic testsuite page
-			if ( sFallbackUrl == null ) {
+			if (sFallbackUrl == null) {
 				var sContextPath;
 				// Match the path segment before the first "test-resources" segment
 				var aContextPathMatch = window.location.pathname.match(/(.*?)\/(?:test-resources)/);
@@ -541,12 +512,12 @@
 			return sFallbackUrl;
 		},
 
-		getAutoStart: function() {
+		getAutoStart: function () {
 			var sAutoStart = this.getUrlParameter("autostart");
 			return sAutoStart == "true";
 		},
 
-		getUrlParameter: function(sName) {
+		getUrlParameter: function (sName) {
 			var sTestPageUrlParam = window.location.search.substring(1),
 				aUrlParameters = sTestPageUrlParam.split("&"),
 				aParameter;
@@ -558,7 +529,7 @@
 			}
 		},
 
-		updateResultHeader : function (sNumAll, sNumPassed, sNumFailed) {
+		updateResultHeader: function (sNumAll, sNumPassed, sNumFailed) {
 			var nTotalTests = parseInt(jQuery("div#reportingHeader span.total").text());
 			nTotalTests = nTotalTests + parseInt(sNumAll);
 			jQuery("div#reportingHeader span.total").text(nTotalTests);
@@ -572,28 +543,25 @@
 			jQuery("div#reportingHeader span.failed").text(nFailedTests);
 		},
 
-		fnGetTestResults: function(sHeader, aTestResults) {
-
+		fnGetTestResults: function (sHeader, aTestResults) {
 			// build the context
 			var oContext = {
 				tests: [{
 					header: sHeader,
 					outcome: "pass",
-					results:[]
-				}]
+					results: [],
+				}],
 			};
 
 			for (var i = 0; i < aTestResults.length; i++) {
-
 				var $checkItems = jQuery(aTestResults[i]).find("ol > li");
 				var aTestMessages = [];
 
 				for (var y = 0; y < $checkItems.length; y++) {
-
 					var oTestMessage = {message: "", expected: "", actual: "", diff: "", source: "", classname: $checkItems[y].className};
 
 					if ($checkItems[y].className === "pass") {
-					oTestMessage.message = jQuery($checkItems[y]).text();
+						oTestMessage.message = jQuery($checkItems[y]).text();
 					} else {
 						var $messageSpan = jQuery($checkItems[y]).find("span.test-message");
 						oTestMessage.message = jQuery($messageSpan[0]).text();
@@ -636,7 +604,7 @@
 					sNumFailed = "1";
 				} else {
 					sTestName = m[1];
-					if ( m[3] || m[4] ) {
+					if (m[3] || m[4]) {
 						sNumFailed = m[2];
 						sNumPassed = m[3];
 						sNumAll = m[4];
@@ -653,22 +621,20 @@
 					oContext.tests[0].outcome = sLineItemClass;
 				}
 
-				oContext.tests[0].results.push({result:{
+				oContext.tests[0].results.push({result: {
 					TestName: sTestName,
 					Failed: sNumFailed,
 					Passed: sNumPassed,
 					All: sNumAll,
 					rerunlink: sRerunLink,
 					sLiClass: sLineItemClass,
-					testmessages: aTestMessages }
+					testmessages: aTestMessages},
 				});
 				this.updateResultHeader(sNumAll, sNumPassed, sNumFailed);
 			}
 
 			return oContext;
-
-		}
+		},
 
 	};
-
 }(window));

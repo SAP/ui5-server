@@ -19,7 +19,8 @@ const log = getLogger("server:sslUtil");
  * @returns Resolves with an sslObject containing <code>cert</code> and <code>key</code>
  */
 export function getSslCertificate(
-	keyPath: string = path.join(os.homedir(), ".ui5/server/server.key"), certPath: string = path.join(os.homedir(), ".ui5/server/server.crt")
+	keyPath: string = path.join(os.homedir(), ".ui5/server/server.key"),
+	certPath: string = path.join(os.homedir(), ".ui5/server/server.crt")
 ) {
 	// checks the certificates if they are present
 	return Promise.all([
@@ -65,8 +66,8 @@ export function getSslCertificate(
 
 /**
  *
- * @param keyPath
- * @param certPath
+ * @param keyPath Path to the key
+ * @param certPath Path to the certificate
  */
 async function createAndInstallCertificate(keyPath: string, certPath: string) {
 	const {default: yesno} = await import("yesno");
@@ -110,10 +111,10 @@ async function createAndInstallCertificate(keyPath: string, certPath: string) {
 
 /**
  *
- * @param filePath
+ * @param filePath Path to the file
  */
 function fileExists(filePath: string) {
-	return stat(filePath).then((s) => s, (err) => {
+	return stat(filePath).then((s) => s, (err: NodeJS.ErrnoException) => {
 		if (err.code === "ENOENT") { // "File or directory does not exist"
 			return false;
 		} else {
