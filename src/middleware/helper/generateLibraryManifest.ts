@@ -24,5 +24,7 @@ export default async function generateLibraryManifest(
 	if (res) {
 		res.setProject(project);
 		return res;
+	} else {
+		return null;
 	}
 }

@@ -36,6 +36,22 @@ declare module "@ui5/builder/processors/manifestCreator" {
 	}): Promise<ResourceInterface>;
 }
 
+declare module "@ui5/builder/processors/manifestEnhancer" {
+	export default function manifestEnhancer(params: {
+		resources: unknown[];
+		fs: unknown;
+	}): Promise<void>;
+}
+
+declare module "@ui5/builder/processors/nonAsciiEscaper" {
+	function nonAsciiEscaper(params: {
+		resources: unknown[];
+		options: unknown;
+	}): Promise<void>;
+
+	export default nonAsciiEscaper;
+}
+
 declare module "@ui5/project/specifications/Project" {
 	import type AbstractReader from "@ui5/fs/AbstractReader";
 
@@ -47,6 +63,10 @@ declare module "@ui5/project/specifications/Project" {
 		getReader: (options?: {style: string}) => AbstractReader;
 		getCustomMiddleware: () => unknown;
 		getRootPath: () => string;
+		getPropertiesFileSourceEncoding: () => string;
+		getSpecVersion: () => {
+			lte: (specVersion: string) => boolean;
+		};
 	}
 }
 declare module "@ui5/project/graph/ProjectGraph" {

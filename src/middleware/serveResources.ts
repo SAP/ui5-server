@@ -1,7 +1,7 @@
 import {getLogger} from "@ui5/logger";
 const log = getLogger("server:middleware:serveResources");
 import replaceStream from "replacestream";
-import etag from "etag";
+import etag, {type StatsLike} from "etag";
 import fresh from "fresh";
 import fsInterface from "@ui5/fs/fsInterface";
 import type * as Express from "express";
@@ -15,8 +15,8 @@ const rTestResourcesPrefix = /^\/test-resources\//i;
 
 /**
  *
- * @param req
- * @param res
+ * @param req Request
+ * @param res Response
  */
 function isFresh(req: Express.Request, res: Express.Response) {
 	return fresh(req.headers, {
@@ -71,7 +71,7 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 					resources: [resource],
 					// Ensure that only files within the manifest's project are accessible
 					// Using the "runtime" style to match the style used by the UI5 server
-					fs: fsInterface(resource.getProject().getReader({style: "runtime"})),
+					fs: fsInterface(resource.getProject()!.getReader({style: "runtime"})),
 				});
 			}
 
@@ -80,7 +80,7 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 				// Special handling for *.properties files escape non ascii characters.
 				const {default: nonAsciiEscaper} = await import("@ui5/builder/processors/nonAsciiEscaper");
 				const project = resource.getProject();
-				let propertiesFileSourceEncoding = project?.getPropertiesFileSourceEncoding?.();
+				let propertiesFileSourceEncoding = project?.getPropertiesFileSourceEncoding();
 
 				if (!propertiesFileSourceEncoding) {
 					if (project?.getSpecVersion().lte("1.1")) {
@@ -91,7 +91,8 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 						propertiesFileSourceEncoding = "UTF-8";
 					}
 				}
-				const encoding = nonAsciiEscaper.getEncodingFromAlias(propertiesFileSourceEncoding);
+				// eslint-disable-next-line
+				const encoding: string = nonAsciiEscaper.getEncodingFromAlias(propertiesFileSourceEncoding);
 				await nonAsciiEscaper({
 					resources: [resource], options: {
 						encoding,
@@ -107,11 +108,11 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 			// Enable ETag caching
 			const statInfo = resource.getStatInfo();
 			if (statInfo?.size !== undefined && !resource.isModified()) {
-				let etagHeader = etag(statInfo);
+				let etagHeader = etag(statInfo as StatsLike);
 				if (resource.getProject()) {
 					// Add project version to ETag to invalidate cache when project version changes.
 					// This is necessary to invalidate files with ${version} placeholders.
-					etagHeader = etagHeader.slice(0, -1) + `-${resource.getProject().getVersion()}"`;
+					etagHeader = etagHeader.slice(0, -1) + `-${resource.getProject()!.getVersion()}"`;
 				}
 				res.setHeader("ETag", etagHeader);
 			} else {
@@ -137,7 +138,9 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 			if ((!charset || charset === "UTF-8") && rReplaceVersion.test(resourcePath)) {
 				if (resource.getProject()) {
 					stream.setEncoding("utf8");
-					stream = stream.pipe(replaceStream("${version}", resource.getProject().getVersion()));
+					// eslint-disable-next-line max-len
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+					stream = stream.pipe(replaceStream("${version}", resource.getProject()!.getVersion()));
 				} else {
 					log.verbose(`Project missing from resource ${pathname}"`);
 				}
