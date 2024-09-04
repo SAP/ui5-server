@@ -40,7 +40,7 @@ function _listen(app: express.Application | Server<typeof IncomingMessage, typeo
 
 		void portscanner.findAPortNotInUse(port, portMax, host, function (error, foundPort) {
 			if (error) {
-				reject(error as Error);
+				reject(error);
 				return;
 			}
 
