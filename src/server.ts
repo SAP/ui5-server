@@ -3,6 +3,9 @@ import portscanner from "portscanner";
 import MiddlewareManager from "./middleware/MiddlewareManager.js";
 import {createReaderCollection} from "@ui5/fs/resourceFactory";
 import ReaderCollectionPrioritized from "@ui5/fs/ReaderCollectionPrioritized";
+import type {IncomingMessage, Server, ServerResponse} from "http";
+import type {ProjectGraph} from "@ui5/project/graph/ProjectGraph";
+import type AbstractReader from "@ui5/fs/AbstractReader";
 
 /**
  * @module @ui5/server
@@ -17,9 +20,10 @@ import ReaderCollectionPrioritized from "@ui5/fs/ReaderCollectionPrioritized";
  * @param acceptRemoteConnections If true, listens to remote connections and not only to localhost connections
  * @returns Returns an object containing server related information like (selected port, protocol)
  */
-function _listen(app: object, port: number, changePortIfInUse: boolean, acceptRemoteConnections: boolean) {
+function _listen(app: express.Application, port: number, changePortIfInUse: boolean, acceptRemoteConnections: boolean):
+Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerResponse>}> {
 	return new Promise(function (resolve, reject) {
-		const options = {};
+		const options = {} as Record<string, unknown>;
 
 		if (!acceptRemoteConnections) {
 			options.host = "localhost";
@@ -33,7 +37,7 @@ function _listen(app: object, port: number, changePortIfInUse: boolean, acceptRe
 			portMax = port;
 		}
 
-		portscanner.findAPortNotInUse(port, portMax, host, function (error, foundPort) {
+		void portscanner.findAPortNotInUse(port, portMax, host, function (error, foundPort) {
 			if (error) {
 				reject(error);
 				return;
@@ -62,7 +66,7 @@ function _listen(app: object, port: number, changePortIfInUse: boolean, acceptRe
 
 			options.port = foundPort;
 			const server = app.listen(options, function () {
-				resolve({port: options.port, server});
+				resolve({port: options.port as number, server});
 			});
 
 			server.on("error", function (err) {
@@ -75,7 +79,7 @@ function _listen(app: object, port: number, changePortIfInUse: boolean, acceptRe
 /**
  * Adds SSL support to an express application.
  *
- * @param parameters
+ * @param parameters Parameters
  * @param parameters.app The original express application
  * @param parameters.key Path to private key to be used for https
  * @param parameters.cert Path to certificate to be used for for https
@@ -121,7 +125,16 @@ async function _addSsl({app, key, cert}: {
  * 							<code>h2</code>-flag and a <code>close</code> function,
  * 							which can be used to stop the server.
  */
-export async function serve(graph, {port: requestedPort, changePortIfInUse = false, h2 = false, key, cert, acceptRemoteConnections = false, sendSAPTargetCSP = false, simpleIndex = false, serveCSPReports = false}: {
+export async function serve(graph: ProjectGraph, {
+	port: requestedPort,
+	changePortIfInUse = false,
+	h2 = false,
+	key, cert,
+	acceptRemoteConnections = false,
+	sendSAPTargetCSP = false,
+	simpleIndex = false,
+	serveCSPReports = false,
+}: {
 	port: number;
 	changePortIfInUse?: boolean;
 	h2?: boolean;
@@ -129,11 +142,13 @@ export async function serve(graph, {port: requestedPort, changePortIfInUse = fal
 	cert?: string;
 	simpleIndex?: boolean;
 	acceptRemoteConnections?: boolean;
+	sendSAPTargetCSP: boolean;
+	serveCSPReports: boolean;
 }) {
 	const rootProject = graph.getRoot();
 
-	const readers = [];
-	await graph.traverseBreadthFirst(async function ({project: dep}) {
+	const readers = [] as AbstractReader[];
+	await graph.traverseBreadthFirst(function ({project: dep}) {
 		if (dep.getName() === rootProject.getName()) {
 			// Ignore root project
 			return;
@@ -182,7 +197,7 @@ export async function serve(graph, {port: requestedPort, changePortIfInUse = fal
 	return {
 		h2,
 		port,
-		close: function (callback) {
+		close: function (callback?: (err?: Error) => void) {
 			server.close(callback);
 		},
 	};

@@ -106,7 +106,7 @@ function createMiddleware({resources, middlewareUtil, simpleIndex = false, showH
 			}
 
 			const resourceInfos = createResourceInfos(resources);
-			// eslint-disable-next-line
+
 			serveIndex({
 				req,
 				res,

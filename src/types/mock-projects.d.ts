@@ -92,6 +92,7 @@ declare module "@ui5/project/graph/ProjectGraph" {
 		getRoot: () => Project;
 		getDependencies: (name: string) => string[];
 		getExtension: (name: string) => unknown;
+		traverseBreadthFirst: (callback: (params: {project: Project}) => Promise<void> | void) => Promise<void>;
 	}
 }
 
