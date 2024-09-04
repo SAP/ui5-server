@@ -2,7 +2,7 @@
 // dependencies, until they got migrated and we can have the real TS definitions
 
 declare module "@ui5/builder/processors/versionInfoGenerator" {
-	import type {ResourceInterface} from "@ui5/fs/Resource";
+	import type { ResourceInterface } from "@ui5/fs/Resource";
 
 	export default function versionInfoGenerator(options: {
 		options: {
@@ -20,7 +20,7 @@ declare module "@ui5/builder/processors/versionInfoGenerator" {
 }
 
 declare module "@ui5/builder/processors/manifestCreator" {
-	import type {ResourceInterface} from "@ui5/fs/Resource";
+	import type { ResourceInterface } from "@ui5/fs/Resource";
 
 	export default function (params: {
 		namespace?: string;
@@ -52,6 +52,22 @@ declare module "@ui5/builder/processors/nonAsciiEscaper" {
 	export default nonAsciiEscaper;
 }
 
+declare module "@ui5/builder/processors/themeBuilder" {
+	export class ThemeBuilder {
+		constructor(params: {
+			fs: unknown;
+		});
+
+		build: (resources: unknown[],
+			buildOptions: {
+				compress: boolean;
+				cssVariables: boolean;
+			}) => Promise<unknown[]>;
+
+		clearCache: () => void;
+	}
+}
+
 declare module "@ui5/project/specifications/Project" {
 	import type AbstractReader from "@ui5/fs/AbstractReader";
 
@@ -60,7 +76,7 @@ declare module "@ui5/project/specifications/Project" {
 		getVersion: () => string;
 		getType: () => "project" | "application" | "library";
 		getNamespace: () => string;
-		getReader: (options?: {style: string}) => AbstractReader;
+		getReader: (options?: { style: string }) => AbstractReader;
 		getCustomMiddleware: () => unknown;
 		getRootPath: () => string;
 		getPropertiesFileSourceEncoding: () => string;
@@ -70,7 +86,7 @@ declare module "@ui5/project/specifications/Project" {
 	}
 }
 declare module "@ui5/project/graph/ProjectGraph" {
-	import type {Project} from "@ui5/project/specifications/Project";
+	import type { Project } from "@ui5/project/specifications/Project";
 	export interface ProjectGraph {
 		getProject: (name: string) => Project;
 		getRoot: () => Project;

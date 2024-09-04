@@ -50,11 +50,7 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 	// TODO: Use @ui5/builder type when ready
 	const builder = new ThemeBuilder({
 		fs: fsInterface(resources.all),
-	}) as {
-		build: (resources: ResourceInterface[],
-			buildOptions: {compress: boolean; cssVariables: boolean}) => Promise<ResourceInterface[]>;
-		clearCache: () => void;
-	};
+	});
 	const buildOptions = Object.create(null) as {compress: boolean; cssVariables: boolean};
 
 	const currentRequests = Object.create(null) as Record<string, Promise<ResourceInterface | undefined> | undefined>;
@@ -79,7 +75,7 @@ function createMiddleware({resources, middlewareUtil}: MiddlewareParams): Expres
 			return;
 		}
 
-		const createdResources = await builder.build([sourceLessResource], buildOptions);
+		const createdResources = await builder.build([sourceLessResource], buildOptions) as ResourceInterface[];
 
 		// Pick requested file resource
 		const resource = createdResources.find((res) => basename(res.getPath()) === filename);
