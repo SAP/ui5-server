@@ -6,14 +6,14 @@ import type MiddlewareUtil from "./MiddlewareUtil.js";
 const middlewareInfos = {
 	compression: {path: "compression"},
 	cors: {path: "cors"},
-	csp: {path: "./csp.js"},
-	serveResources: {path: "./serveResources.js"},
-	serveIndex: {path: "./serveIndex.js"},
-	discovery: {path: "./discovery.js"},
-	versionInfo: {path: "./versionInfo.js"},
-	serveThemes: {path: "./serveThemes.js"},
-	testRunner: {path: "./testRunner.js"},
-	nonReadRequests: {path: "./nonReadRequests.js"},
+	csp: {path: "./csp.ts"},
+	serveResources: {path: "./serveResources.ts"},
+	serveIndex: {path: "./serveIndex.ts"},
+	discovery: {path: "./discovery.ts"},
+	versionInfo: {path: "./versionInfo.ts"},
+	serveThemes: {path: "./serveThemes.ts"},
+	testRunner: {path: "./testRunner.ts"},
+	nonReadRequests: {path: "./nonReadRequests.ts"},
 };
 
 export type ExpressMiddleware =

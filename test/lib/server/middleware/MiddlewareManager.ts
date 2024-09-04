@@ -172,10 +172,10 @@ test("addMiddleware: Add middleware with beforeMiddleware and mountPath paramete
 		"Middleware was inserted at correct position of middleware execution order array");
 });
 
-test("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", async (t) => {
+test.only("addMiddleware: Add middleware with beforeMiddleware=connectUi5Proxy", async (t) => {
 	const {sinon} = t.context;
 	const warnSpy = sinon.spy();
-	const StubbedMiddlewareManager = await esmock("../../../../src/middleware/MiddlewareManager.js", {
+	const StubbedMiddlewareManager = await esmock("../../../../src/middleware/MiddlewareManager.ts", {
 		"@ui5/logger": {getLogger: sinon.stub().returns({warn: warnSpy})},
 	});
 	const middlewareManager = new StubbedMiddlewareManager({

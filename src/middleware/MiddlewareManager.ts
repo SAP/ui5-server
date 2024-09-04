@@ -259,7 +259,7 @@ class MiddlewareManager {
 			mountPath: string;
 		}[];
 
-		if (projectCustomMiddleware.length !== 0) {
+		if (projectCustomMiddleware.length === 0) {
 			return; // No custom middleware defined
 		}
 
