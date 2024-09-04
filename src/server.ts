@@ -20,8 +20,9 @@ import type AbstractReader from "@ui5/fs/AbstractReader";
  * @param acceptRemoteConnections If true, listens to remote connections and not only to localhost connections
  * @returns Returns an object containing server related information like (selected port, protocol)
  */
-function _listen(app: express.Express, port: number, changePortIfInUse: boolean, acceptRemoteConnections: boolean):
-Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerResponse>}> {
+function _listen(app: express.Application | Server<typeof IncomingMessage, typeof ServerResponse>,
+	port: number, changePortIfInUse: boolean, acceptRemoteConnections: boolean):
+	Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerResponse>}> {
 	return new Promise(function (resolve, reject) {
 		const options = {} as Record<string, unknown>;
 
@@ -29,7 +30,7 @@ Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerRespo
 			options.host = "localhost";
 		}
 
-		const host = options.host || "127.0.0.1";
+		const host = options.host as string ?? "127.0.0.1";
 		let portMax;
 		if (changePortIfInUse) {
 			portMax = port + 30;
@@ -39,7 +40,7 @@ Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerRespo
 
 		void portscanner.findAPortNotInUse(port, portMax, host, function (error, foundPort) {
 			if (error) {
-				reject(error);
+				reject(error as Error);
 				return;
 			}
 
@@ -94,7 +95,7 @@ Promise<{port: number; server: Server<typeof IncomingMessage, typeof ServerRespo
  * @returns The express application with SSL support
  */
 async function _addSsl({app, key, cert}: {
-	app: express.Express;
+	app: express.Application;
 	key: string;
 	cert: string;
 }) {
@@ -193,15 +194,19 @@ export async function serve(graph: ProjectGraph, {
 		},
 	});
 
-	let app = express();
+	const app = express();
 	// @ts-expect-error: Access of private method
 	await middlewareManager.applyMiddleware(app);
 
+	let h2App;
 	if (h2) {
-		app = await _addSsl({app, key, cert});
+		h2App = await _addSsl({app, key: key ?? "", cert: cert ?? ""}) as Server<
+			typeof IncomingMessage,
+			typeof ServerResponse
+		>;
 	}
 
-	const {port, server} = await _listen(app, requestedPort, changePortIfInUse, acceptRemoteConnections);
+	const {port, server} = await _listen(h2App ?? app, requestedPort, changePortIfInUse, acceptRemoteConnections);
 
 	return {
 		h2,
