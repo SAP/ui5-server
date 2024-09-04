@@ -6,7 +6,6 @@ import ReaderCollectionPrioritized from "@ui5/fs/ReaderCollectionPrioritized";
 import type {IncomingMessage, Server, ServerResponse} from "http";
 import type {ProjectGraph} from "@ui5/project/graph/ProjectGraph";
 import type AbstractReader from "@ui5/fs/AbstractReader";
-import { ExecOptions } from "child_process";
 
 /**
  * @module @ui5/server

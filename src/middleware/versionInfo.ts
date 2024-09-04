@@ -2,7 +2,7 @@ import createVersionInfoProcessor from "@ui5/builder/processors/versionInfoGener
 import generateLibraryManifest from "./helper/generateLibraryManifest.js";
 import type {Request, Response, NextFunction} from "express";
 import type {MiddlewareParams, ExpressMiddleware} from "./middlewareRepository.js";
-import { ResourceInterface } from "@ui5/fs/Resource";
+import {type ResourceInterface} from "@ui5/fs/Resource";
 
 const MANIFEST_JSON = "manifest.json";
 
