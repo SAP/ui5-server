@@ -6,7 +6,8 @@ export default [
 		// Add project-specific ESLint config rules here
 		// in order to override common config
 		ignores: [
-			"lib/middleware/testRunner/",
+			"src/middleware/testRunner/",
+			"src/middleware/serveIndex/serveIndex.cjs",
 		],
 	},
 ];
