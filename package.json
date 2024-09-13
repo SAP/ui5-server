@@ -131,7 +131,7 @@
 		"parseurl": "^1.3.3",
 		"portscanner": "^2.2.0",
 		"replacestream": "^4.0.3",
-		"router": "^1.3.8",
+		"router": "^2.0.0",
 		"spdy": "^4.0.2",
 		"yesno": "^0.4.0"
 	},
@@ -152,7 +152,7 @@
 		"nyc": "^15.1.0",
 		"open-cli": "^7.2.0",
 		"rimraf": "^5.0.10",
-		"sinon": "^16.1.3",
+		"sinon": "^18.0.1",
 		"supertest": "^6.3.4",
 		"tap-xunit": "^2.4.1"
 	}
