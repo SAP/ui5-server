@@ -138,7 +138,7 @@
 		"yesno": "^0.4.0"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.8.0",
+		"@eslint/js": "^9.11.1",
 		"@istanbuljs/esm-loader-hook": "^0.2.0",
 		"@ui5/project": "^4.0.3",
 		"ava": "^6.1.3",
