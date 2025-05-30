@@ -10,6 +10,8 @@ let server;
 
 const nodeVersion = parseInt(process.versions.node.split(".")[0], 10);
 
+// Withe Node.js 24 and later, the HTTP parser is missing, which breaks the HTTP/2 support in the spdy package.
+// Tests need to be NodeJs version agnostic.
 if (nodeVersion < 24) {
 	// Start server before running tests
 	test.before(async (t) => {
