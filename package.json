@@ -46,7 +46,7 @@
 		"version": "git-chglog --sort semver --next-tag v$npm_package_version -o CHANGELOG.md v4.0.0.. && git add CHANGELOG.md",
 		"prepublishOnly": "git push --follow-tags",
 		"release-note": "git-chglog --sort semver -c .chglog/release-config.yml v$npm_package_version",
-		"depcheck": "depcheck --ignores @ui5/server,docdash,compression,cors,@istanbuljs/esm-loader-hook --parsers='**/*.js:es6,**/*.cjs:es6'"
+		"depcheck": "depcheck --ignores @ui5/server,docdash,compression,cors,@istanbuljs/esm-loader-hook,cross-env --parsers='**/*.js:es6,**/*.cjs:es6'"
 	},
 	"files": [
 		"CHANGELOG.md",
@@ -143,7 +143,7 @@
 		"@ui5/project": "^4.0.6",
 		"ava": "^6.4.1",
 		"chokidar-cli": "^3.0.0",
-		"cross-env": "^7.0.3",
+		"cross-env": "^10.0.0",
 		"depcheck": "^1.4.7",
 		"docdash": "^2.0.2",
 		"eslint": "^9.36.0",
