@@ -117,7 +117,7 @@
 		"url": "git@github.com:SAP/ui5-server.git"
 	},
 	"dependencies": {
-		"@ui5/builder": "^4.0.11",
+		"@ui5/builder": "^4.0.12",
 		"@ui5/fs": "^4.0.3",
 		"@ui5/logger": "^4.0.2",
 		"body-parser": "^1.20.2",
@@ -149,7 +149,7 @@
 		"eslint": "^9.37.0",
 		"eslint-config-google": "^0.14.0",
 		"eslint-plugin-ava": "^15.1.0",
-		"eslint-plugin-jsdoc": "^60.8.2",
+		"eslint-plugin-jsdoc": "^60.8.3",
 		"esmock": "^2.7.3",
 		"globals": "^16.4.0",
 		"jsdoc": "^4.0.4",
