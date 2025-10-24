@@ -143,7 +143,7 @@
 		"@ui5/project": "^4.0.8",
 		"ava": "^6.4.1",
 		"chokidar-cli": "^3.0.0",
-		"cross-env": "^7.0.3",
+		"cross-env": "^10.1.0",
 		"depcheck": "^1.4.7",
 		"docdash": "^2.0.2",
 		"eslint": "^9.38.0",
