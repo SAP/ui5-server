@@ -16,8 +16,22 @@ const config = {
 	},
 
 	ignoreDependencies: [
+		/**
+		 * Used via nyc ava --node-arguments="--experimental-loader=@istanbuljs/esm-loader-hook"
+		 * which is not detected by knip as a usage of this package
+		 */
 		"@istanbuljs/esm-loader-hook",
+
+		/**
+		 * Used as jsdoc template in package.json script, which is not detected
+		 */
 		"docdash",
+
+		/**
+		 * We ignore these dependencies here because these are dynamic imports
+		 * and knip is unable to detect that these are being used
+		 * (See packages/server/lib/middleware/MiddlewareManager.js)
+		 */
 		"compression",
 		"cors"
 	]
