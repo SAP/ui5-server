@@ -30,7 +30,7 @@ const config = {
 		/**
 		 * We ignore these dependencies here because these are dynamic imports
 		 * and knip is unable to detect that these are being used
-		 * (See packages/server/lib/middleware/MiddlewareManager.js)
+		 * (lib/middleware/MiddlewareManager.js)
 		 */
 		"compression",
 		"cors"
