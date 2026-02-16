@@ -2,10 +2,16 @@
 All notable changes to this project will be documented in this file.  
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-A list of unreleased changes can be found [here](https://github.com/SAP/ui5-server/compare/v4.0.11...HEAD).
+A list of unreleased changes can be found [here](https://github.com/SAP/ui5-server/compare/v4.0.12...HEAD).
+
+<a name="v4.0.12"></a>
+## [v4.0.12] - 2026-02-16
+### Dependency Updates
+- Bump body-parser from 1.20.3 to 2.2.0 ([#715](https://github.com/SAP/ui5-server/issues/715)) [`98b2ee2`](https://github.com/SAP/ui5-server/commit/98b2ee23d36c155c9d1a5541276ffb08e1cfe2f6)
+
 
 <a name="v4.0.11"></a>
-## [v4.0.11] - 2025-12-08
+## [v4.0.11] - 2026-01-23
 ### Bug Fixes
 - Explicitly bind to IPv4 loopback [`9d3c252`](https://github.com/SAP/ui5-server/commit/9d3c2522667eea923aca571070bf65a514e9dd34)
 
@@ -420,6 +426,7 @@ Only Node.js v10 or higher is supported.
 
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2018-06-06
+[v4.0.12]: https://github.com/SAP/ui5-server/compare/v4.0.11...v4.0.12
 [v4.0.11]: https://github.com/SAP/ui5-server/compare/v4.0.10...v4.0.11
 [v4.0.10]: https://github.com/SAP/ui5-server/compare/v4.0.9...v4.0.10
 [v4.0.9]: https://github.com/SAP/ui5-server/compare/v4.0.8...v4.0.9
