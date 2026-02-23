@@ -160,5 +160,10 @@
 		"sinon": "^21.0.1",
 		"supertest": "^7.2.2",
 		"tap-xunit": "^2.4.1"
+	},
+	"overrides": {
+		"glob": {
+			"minimatch": "^10.2.2"
+		}
 	}
 }
