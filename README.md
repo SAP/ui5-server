@@ -14,7 +14,7 @@
 > Part of the [UI5 CLI](https://github.com/UI5/cli)
 
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP/ui5-server)](https://api.reuse.software/info/github.com/SAP/ui5-server)
-[![Build Status](https://dev.azure.com/sap/opensource/_apis/build/status/SAP.ui5-server?branchName=v4)](https://dev.azure.com/sap/opensource/_build/latest?definitionId=34&branchName=v4)
+[![Build Status](https://github.com/SAP/ui5-server/actions/workflows/github-ci.yml/badge.svg)](https://github.com/SAP/ui5-server/actions/workflows/github-ci.yml)
 [![npm Package Version](https://badge.fury.io/js/%40ui5%2Fserver.svg)](https://www.npmjs.com/package/@ui5/server)
 [![Coverage Status](https://coveralls.io/repos/github/SAP/ui5-server/badge.svg)](https://coveralls.io/github/SAP/ui5-server)
 
