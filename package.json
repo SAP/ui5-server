@@ -116,10 +116,10 @@
 		"url": "git@github.com:SAP/ui5-server.git"
 	},
 	"dependencies": {
-		"@ui5/builder": "^4.1.6",
+		"@ui5/builder": "^4.2.0",
 		"@ui5/fs": "^4.0.6",
 		"@ui5/logger": "^4.0.2",
-		"body-parser": "^2.2.2",
+		"body-parser": "^2.3.0",
 		"compression": "^1.8.1",
 		"cors": "^2.8.6",
 		"devcert-sanscache": "^0.5.1",
