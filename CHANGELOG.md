@@ -2,7 +2,13 @@
 All notable changes to this project will be documented in this file.  
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-A list of unreleased changes can be found [here](https://github.com/SAP/ui5-server/compare/v4.0.15...HEAD).
+A list of unreleased changes can be found [here](https://github.com/SAP/ui5-server/compare/v4.0.16...HEAD).
+
+<a name="v4.0.16"></a>
+## [v4.0.16] - 2026-09-03
+### Dependency Updates
+- Bump uuid and nyc ([#799](https://github.com/SAP/ui5-server/issues/799)) [`70fa171`](https://github.com/SAP/ui5-server/commit/70fa171d775106f4c90773111ad4d15bce7e18df)
+
 
 <a name="v4.0.15"></a>
 ## [v4.0.15] - 2026-03-25
@@ -435,6 +441,7 @@ Only Node.js v10 or higher is supported.
 
 <a name="v0.0.1"></a>
 ## v0.0.1 - 2018-06-06
+[v4.0.16]: https://github.com/SAP/ui5-server/compare/v4.0.15...v4.0.16
 [v4.0.15]: https://github.com/SAP/ui5-server/compare/v4.0.14...v4.0.15
 [v4.0.14]: https://github.com/SAP/ui5-server/compare/v4.0.13...v4.0.14
 [v4.0.13]: https://github.com/SAP/ui5-server/compare/v4.0.12...v4.0.13
