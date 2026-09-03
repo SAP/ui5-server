@@ -115,6 +115,12 @@
 		"type": "git",
 		"url": "git@github.com:SAP/ui5-server.git"
 	},
+	"overrides": {
+		"qs": "^6.16.0",
+		"body-parser@1.20.6": {
+			"qs": "^6.16.0"
+		}
+	},
 	"dependencies": {
 		"@ui5/builder": "^4.3.1",
 		"@ui5/fs": "^4.0.6",
