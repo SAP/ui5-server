@@ -2,17 +2,8 @@ import test from "ava";
 import supertest from "supertest";
 import {serve} from "../../../lib/server.js";
 import http from "node:http";
-import portscanner from "portscanner";
-import sinonGlobal from "sinon";
+import esmock from "esmock";
 import {graphFromPackageDependencies} from "@ui5/project/graph";
-
-test.beforeEach((t) => {
-	t.context.sinon = sinonGlobal.createSandbox();
-});
-
-test.afterEach.always((t) => {
-	t.context.sinon.restore();
-});
 
 test.serial("Start server - Port is already taken and an error occurs", async (t) => {
 	t.plan(6);
@@ -99,30 +90,39 @@ test.serial("Start server together with node server - Port is already taken and 
 	server.close();
 });
 
-test.serial("Start server - Port can not be determined and an error occurs", async (t) => {
-	const {sinon} = t.context;
-
-	t.plan(2);
-	const portscannerFake = function(port, portMax, host, callback) {
-		return new Promise((resolve) => {
-			callback(new Error("testError"), false);
-			resolve();
-		});
-	};
-	const portScannerStub = sinon.stub(portscanner, "findAPortNotInUse").callsFake(portscannerFake);
+test.serial("Start server - Port scan fails with a generic error", async (t) => {
+	t.plan(3);
+	// Simulate a non-ECONNREFUSED socket error during the port probe (e.g. an unreachable host):
+	// it must be treated as a scan failure and propagate unchanged rather than be reported as "free".
+	class FakeSocket {
+		setTimeout() {}
+		once(event, cb) {
+			this._handlers = this._handlers || {};
+			this._handlers[event] = cb;
+		}
+		connect() {
+			const err = new Error("testError");
+			err.code = "EHOSTUNREACH";
+			queueMicrotask(() => this._handlers.error(err));
+		}
+		removeAllListeners() {}
+		destroy() {}
+	}
+	const {serve: serveMocked} = await esmock("../../../lib/server.js", {
+		"node:net": {default: {Socket: FakeSocket}, Socket: FakeSocket},
+	});
 
 	const graph = await graphFromPackageDependencies({
 		cwd: "./test/fixtures/application.a"
 	});
-	const startServer = serve(graph, {
+	const startServer = serveMocked(graph, {
 		port: 3990,
 		changePortIfInUse: true
 	});
 
 	const error = await t.throwsAsync(startServer);
-	t.is(error.message, "testError",
-		"Server could not start, port is already taken and no other port is used.");
-	portScannerStub.restore();
+	t.is(error.message, "testError", "Generic scan error is propagated unchanged");
+	t.is(error.code, "EHOSTUNREACH", "Original error code is preserved");
 });
 
 
