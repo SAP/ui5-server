@@ -33,3 +33,10 @@ updates:
     # eslint@10 requires node ^20.19.0 || ^22.13.0 || >=24
     - dependency-name: "eslint"
       update-types: ["version-update:semver-major"]
+    - dependency-name: "@eslint/js"
+      update-types: ["version-update:semver-major"]
+    # Express v5 and mime-types v3 are out of scope for ui5-server v4 (CPOUI5FOUNDATION-1313)
+    - dependency-name: "express"
+      update-types: ["version-update:semver-major"]
+    - dependency-name: "mime-types"
+      update-types: ["version-update:semver-major"]
