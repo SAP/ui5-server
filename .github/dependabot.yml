@@ -40,3 +40,5 @@ updates:
       update-types: ["version-update:semver-major"]
     - dependency-name: "mime-types"
       update-types: ["version-update:semver-major"]
+    - dependency-name: "esmock"
+      update-types: ["version-update:semver-major"]
