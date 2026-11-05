@@ -118,7 +118,7 @@
 	"dependencies": {
 		"@ui5/builder": "^4.3.3",
 		"@ui5/fs": "^4.0.7",
-		"@ui5/logger": "^4.0.2",
+		"@ui5/logger": "^4.0.3",
 		"body-parser": "^2.4.0",
 		"compression": "^1.8.2",
 		"cors": "^2.8.6",
